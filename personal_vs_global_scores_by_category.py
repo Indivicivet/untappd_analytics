@@ -1,17 +1,12 @@
-import json
-from pathlib import Path
 import random
 
 import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 
-data = json.loads(
-    sorted(
-        (Path("__file__").parent / "data_sources").glob("*.json"),
-        key = lambda x: x.stat().st_mtime, reverse=True,
-    )[0].read_text()
-)
+from untappd_shared import load_latest_json
+
+data = load_latest_json()
 
 df = pd.DataFrame(data)
 
