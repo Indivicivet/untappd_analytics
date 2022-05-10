@@ -15,14 +15,29 @@ data = sorted(
     key=lambda d: d["created_at"],
 )
 
+CUMULATIVE = False
+
 print("gathering data")
-spread = 400
-step = 20
+SPREAD = 400  # ignored for CUMULATIVE
+STEP = 20
 frames = []
-for start in range(0, len(data) - spread, step):
-    checkins = data[start:start + spread]
+slices = (
+    [
+        slice(0, pos)
+        for pos in range(STEP, len(data) - STEP, STEP)
+    ]
+    if CUMULATIVE else
+    [
+        slice(start, start + SPREAD)
+        for start in range(0, len(data) - SPREAD, STEP)
+    ]
+)
+    
+for i, ci_slice in enumerate(slices):
+    checkins = data[ci_slice]
     frames.append(
         {
+            "num_ratings": len(checkins),
             "ratings": Counter(
                 round(float(ci["rating_score"] or "0") * 4)
                 for ci in checkins
@@ -40,11 +55,11 @@ ln, = plt.plot(x_data, y_first_frame, 'ro')
 
 def init():
     ax.set_xlim(0, 5)
-    ax.set_ylim(0, spread / 2)
     return ln,
 
 def update(frame):
     ax.set_title(frame["start_date"] + " ~ " + frame["end_date"])
+    ax.set_ylim(0, frame["num_ratings"] * (0.3 if CUMULATIVE else 0.4))
     ln.set_data(
         x_data,
         [frame["ratings"].get(i) for i in range(1, 21)],
