@@ -45,6 +45,7 @@ def init():
 
 def update(frame):
     # todo :: include dates
+    ax.set_title(frame["start_date"] + " ~ " + frame["end_date"])
     ln.set_data(
         x_data,
         [frame["ratings"].get(i) for i in range(1, 21)],
@@ -57,7 +58,7 @@ ani = animation.FuncAnimation(
     func=update,
     frames=frames,
     init_func=init,
-    blit=True,
+    #blit=True,  # incompatible with ax.set_title()
     interval=100,
 )
 plt.show()
