@@ -44,7 +44,6 @@ def init():
     return ln,
 
 def update(frame):
-    # todo :: include dates
     ax.set_title(frame["start_date"] + " ~ " + frame["end_date"])
     ln.set_data(
         x_data,
