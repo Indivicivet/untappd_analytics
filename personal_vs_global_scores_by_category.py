@@ -4,27 +4,11 @@ import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 
-from untappd_shared import load_latest_json
+from untappd_shared import load_latest_json, categorize
 
 data = load_latest_json()
 
 df = pd.DataFrame(data)
-
-def categorize(checkin):
-    typestr = checkin["beer_type"].lower()
-    if "stout" in typestr:
-        return "stout"
-    #if "porter" in typestr:
-    #    return "porter"
-    if "sour" in typestr or "lambic" in typestr:
-        return "sour"
-    if "ipa" in typestr:
-        return "ipa"
-    if "lager" in typestr or "pilsner" in typestr:
-        return "lager"
-    if "ale" in typestr:
-        return "other ale"
-    return "other"
 
 
 def abv_categorize(checkin):
