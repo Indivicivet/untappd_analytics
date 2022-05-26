@@ -18,18 +18,19 @@ def load_latest_json(data_source=None):
     return json.loads(files[0].read_text())
 
 
+CATEGORY_KEYWORDS = {
+    "stout": ["stout"],
+    "sour": ["sour", "lambic"],
+    "ipa": ["ipa"],
+    "lager": ["lager", "pilsner"],
+    "other ale": ["ale"],
+    "other": [],
+}
+
+
 def categorize(checkin):
-    typestr = checkin["beer_type"].lower()
-    if "stout" in typestr:
-        return "stout"
-    #if "porter" in typestr:
-    #    return "porter"
-    if "sour" in typestr or "lambic" in typestr:
-        return "sour"
-    if "ipa" in typestr:
-        return "ipa"
-    if "lager" in typestr or "pilsner" in typestr:
-        return "lager"
-    if "ale" in typestr:
-        return "other ale"
+    type_str = checkin["beer_type"].lower()
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        if any(keyword in type_str for keyword in keywords):
+            return category
     return "other"
