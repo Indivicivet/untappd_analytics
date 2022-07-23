@@ -3,6 +3,7 @@ from pathlib import Path
 
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
+
 def load_latest_json(data_source=None):
     data_source = (
         DEFAULT_DATA_SOURCE
@@ -15,7 +16,13 @@ def load_latest_json(data_source=None):
     )
     if not files:
         raise Exception(f"Couldn't find any json files in {data_source}")
-    return json.loads(files[0].read_text())
+    data_unsorted = json.loads(files[0].read_text())
+    # I think this is redundant but just to be sure
+    # todo :: verify that :)
+    return sorted(
+        data_unsorted,
+        key=lambda d: d["created_at"],
+    )
 
 
 CATEGORY_KEYWORDS = {

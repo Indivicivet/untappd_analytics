@@ -8,13 +8,6 @@ from untappd_shared import load_latest_json
 print("loading")
 data = load_latest_json()
 
-# I think this is redundant but just to be sure
-print("sorting")
-data = sorted(
-    data,
-    key=lambda d: d["created_at"],
-)
-
 CUMULATIVE = False
 
 print("gathering data")
