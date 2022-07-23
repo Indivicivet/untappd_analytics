@@ -1,5 +1,6 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Any
 
@@ -45,15 +46,57 @@ def categorize(checkin_dict):
     return "other"
 
 
+@dataclass
+class Brewery:
+    name: str
+    url: Optional[str] = None
+    country: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    id: Optional[int] = None
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def from_checkin_dict(cls, d):
+        return cls(
+            name=d["brewery_name"],
+            url=d["brewery_url"],
+            country=d["brewery_country"],
+            city=d["brewery_city"],
+            state=d["brewery_state"],
+            id=int(d["brewery_id"]),
+        )
+
+
 # todo :: slots?
 @dataclass
 class Beer:
     name: str
-    brewery: str
+    brewery: Brewery
+    id: int
+    global_rating: float = 0.0
+    global_weighted_rating: float = 0.0
     type: str = ""
     abv: str = ""  # todo type ?
     ibu: str = ""  # todo type ?
     url: str = ""
+
+    @classmethod
+    def from_checkin_dict(cls, d):
+        return cls(
+            name=d["beer_name"],
+            # todo :: cache breweries? (and beers, ofc)
+            brewery=Brewery.from_checkin_dict(d),
+            id=int(d["bid"]),
+            global_rating=float(d["global_rating_score"]),
+            global_weighted_rating=float(d["global_weighted_rating_score"]),
+            type=d["beer_type"],
+            abv=d["beer_abv"],
+            ibu=d["beer_ibu"],
+            url=d["beer_url"],
+        )
 
 
 @dataclass
@@ -66,38 +109,58 @@ class Venue:
     lat: Optional[Any] = None
     long: Optional[Any] = None
 
+    @classmethod
+    def from_checkin_dict(cls, d):
+        return cls(
+            name=d["venue_name"],
+            city=d["venue_city"],
+            state=d["venue_state"],
+            country=d["venue_country"],
+            lat=d["venue_lat"],
+            long=d["venue_lng"],
+        )
+
 
 @dataclass
 class Checkin:
     beer: Beer
     comment: str
     url: str
+    rating: Optional[float] = None
+    datetime: Optional[datetime] = None
     venue: Optional[Venue] = None
+    flavour_profiles: list[str] = field(default_factory=list)
+    purchase_venue: Optional[str] = None
+    id: Optional[int] = None
+    photo_url: Optional[str] = None
+    tagged_friends: Optional[str] = None  # todo :: type?
+    total_toasts: Optional[int] = None
+    total_comments: Optional[int] = None
 
     @classmethod
     def from_dict(cls, d):
-        maybe_venue = {
-            "venue": Venue(
-                name=d["venue_name"],
-                city=d["venue_city"],
-                state=d["venue_state"],
-                country=d["venue_country"],
-                lat=d["venue_lat"],
-                long=d["venue_lng"],
-            )
-        } if d["venue_name"] is not None else {}
+        maybe_venue = (
+            {"venue": Venue.from_checkin_dict(d)}
+            if d["venue_name"] is not None
+            else {}
+        )
         return cls(
-            beer=Beer(
-                name=d["beer_name"],
-                brewery=d["brewery_name"],
-                type=d["beer_type"],
-                abv=d["beer_abv"],
-                ibu=d["beer_ibu"],
-                url=d["beer_url"],
-            ),
+            beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
-            **maybe_venue,
+            rating=float(d["rating_score"] or 0) or None,  # todo...
+            datetime=datetime.strptime(
+                d["created_at"],
+                "%Y-%m-%d %H:%M:%S"
+            ),
             url=d["checkin_url"],
+            flavour_profiles=[],  # todo :)
+            # todo purchase_venue, serving_type
+            id=int(d["checkin_id"]),
+            photo_url=d["photo_url"],
+            tagged_friends=d["tagged_friends"],
+            total_toasts=int(d["total_toasts"]),
+            total_comments=int(d["total_comments"]),
+            **maybe_venue,
         )
 
 
