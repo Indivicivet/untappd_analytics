@@ -3,7 +3,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from untappd_shared import load_latest_json
+from untappd import load_latest_json
 
 print("loading")
 data = load_latest_json()

@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 
-from untappd_shared import load_latest_json, categorize
+from untappd import load_latest_json, categorize
 
 data = load_latest_json()
 
