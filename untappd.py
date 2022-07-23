@@ -75,12 +75,12 @@ class Brewery:
 class Beer:
     name: str
     brewery: Brewery
+    abv: float
     id: int
     global_rating: float = 0.0
     global_weighted_rating: float = 0.0
     type: str = ""
-    abv: str = ""  # todo type ?
-    ibu: str = ""  # todo type ?
+    ibu: Optional[float] = None
     url: str = ""
 
     @classmethod
@@ -89,12 +89,12 @@ class Beer:
             name=d["beer_name"],
             # todo :: cache breweries? (and beers, ofc)
             brewery=Brewery.from_checkin_dict(d),
+            abv=float(d["beer_abv"]),
             id=int(d["bid"]),
             global_rating=float(d["global_rating_score"]),
             global_weighted_rating=float(d["global_weighted_rating_score"]),
             type=d["beer_type"],
-            abv=d["beer_abv"],
-            ibu=d["beer_ibu"],
+            ibu=float(d["beer_ibu"]),
             url=d["beer_url"],
         )
 
