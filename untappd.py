@@ -58,6 +58,9 @@ class Brewery:
     def __str__(self):
         return self.name
 
+    def __hash__(self):
+        return hash(self.name)
+
     @classmethod
     def from_checkin_dict(cls, d):
         return cls(
@@ -82,6 +85,9 @@ class Beer:
     type: str = ""
     ibu: Optional[float] = None
     url: str = ""
+
+    def __hash__(self):
+        return hash(self.name + self.brewery.name)
 
     @classmethod
     def from_checkin_dict(cls, d):
@@ -108,6 +114,9 @@ class Venue:
     # todo :: types for these :)
     lat: Optional[Any] = None
     long: Optional[Any] = None
+
+    def __hash__(self):
+        return hash(self.name + self.city)
 
     @classmethod
     def from_checkin_dict(cls, d):
