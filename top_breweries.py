@@ -20,15 +20,7 @@ def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
     dropoff_ratio indicates how much to scale weighting for subsequent beers
     """
     # todo :: beer averaging should be library functionality
-    beer_ratings = defaultdict(list)
-    for c in checkins:
-        if c.rating is None:
-            continue
-        beer_ratings[c.beer].append(c.rating)
-    ratings = [
-        sum(rating_list) / len(rating_list)
-        for rating_list in beer_ratings.values()
-    ]
+    ratings = untappd.average_rating_by_beer(checkins).values()
     return (
         average_score_weight * sum(ratings) / len(ratings)
         + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum

@@ -1,8 +1,9 @@
 import json
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional, Any, Sequence
 
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
@@ -181,3 +182,19 @@ def load_latest_checkins():
         Checkin.from_dict(d)
         for d in data_dicts
     ]
+
+
+def average_rating_by_beer(checkins: Sequence[Checkin]) -> dict[Beer, float]:
+    """
+    takes a sequence of checkins,
+    returns a map from Beer to average checkin rating
+    """
+    beer_ratings = defaultdict(list)
+    for c in checkins:
+        if c.rating is None:
+            continue
+        beer_ratings[c.beer].append(c.rating)
+    return {
+        beer: sum(rating_list) / len(rating_list)
+        for beer, rating_list in beer_ratings.items()
+    }
