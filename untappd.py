@@ -39,14 +39,6 @@ CATEGORY_KEYWORDS = {
 }
 
 
-def categorize(checkin_dict):
-    type_str = checkin_dict["beer_type"].lower()
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        if any(keyword in type_str for keyword in keywords):
-            return category
-    return "other"
-
-
 @dataclass
 class Brewery:
     name: str
@@ -104,6 +96,13 @@ class Beer:
             ibu=float(d["beer_ibu"]),
             url=d["beer_url"],
         )
+
+    def get_style_category(self):
+        type_str = self.type.lower()
+        for category, keywords in CATEGORY_KEYWORDS.items():
+            if any(keyword in type_str for keyword in keywords):
+                return category
+        return "other"
 
 
 @dataclass

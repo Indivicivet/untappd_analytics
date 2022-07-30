@@ -4,9 +4,9 @@ import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 
-from untappd import load_latest_json, categorize
+import untappd
 
-data = load_latest_json()
+data = untappd.load_latest_json()
 
 df = pd.DataFrame(data)
 
@@ -28,7 +28,10 @@ def abv_categorize(checkin):
 df = df[df["rating_score"] != ""]
 df["rating_score"] = df["rating_score"].astype(float)
 df["beer_abv_category"] = df.apply(abv_categorize, axis=1)
-df["category"] = df.apply(categorize, axis=1)
+df["category"] = df.apply(
+    lambda d: untappd.Beer.from_checkin_dict(d).get_style_category(),
+    axis=1,
+)
 
 JIGGLE = 0.18
 df["rating_score_1"] = df.apply(lambda x: x["rating_score"] + JIGGLE * (random.random() - 0.5), axis=1)

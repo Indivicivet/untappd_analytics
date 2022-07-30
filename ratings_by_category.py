@@ -1,16 +1,15 @@
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
-import numpy as np
 
-from untappd import load_latest_json, categorize
+import untappd
 
-data = load_latest_json()
+data = untappd.load_latest_checkins()
 
 category_data = defaultdict(lambda: [0] * 20)
 for checkin in data:
-    rating_n = round(float(checkin["rating_score"] or "0") * 4)
-    category_data[categorize(checkin)][rating_n - 1] += 1
+    rating_n = round((checkin.rating or 0) * 4)
+    category_data[checkin.beer.get_style_category()][rating_n - 1] += 1
 
 x_data = [i / 4 for i in range(1, 21)]
 for label, y_data in category_data.items():
