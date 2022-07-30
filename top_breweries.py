@@ -1,5 +1,6 @@
 """
-scores breweries based on their top beers :)
+scores breweries based on their top beers and average beers,
+depending on the average_score_weight :)
 """
 
 from collections import defaultdict
@@ -14,7 +15,7 @@ for c in CHECKINS:
     brewery_checkins[c.beer.brewery].append(c)
 
 
-def score_checkin_list(checkins, dropoff_ratio=0.8):
+def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
     """
@@ -28,9 +29,12 @@ def score_checkin_list(checkins, dropoff_ratio=0.8):
         sum(rating_list) / len(rating_list)
         for rating_list in beer_ratings.values()
     ]
-    return (1 - dropoff_ratio) * sum(  # geometric sum
-        r * dropoff_ratio ** i
-        for i, r in enumerate(sorted(ratings, reverse=True))
+    return (
+        average_score_weight * sum(ratings) / len(ratings)
+        + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum
+            r * dropoff_ratio ** i
+            for i, r in enumerate(sorted(ratings, reverse=True))
+        )
     )
 
 
