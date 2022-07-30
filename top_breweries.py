@@ -12,10 +12,10 @@ CHECKINS = untappd.load_latest_checkins()
 brewery_checkins = defaultdict(list)
 
 for c in CHECKINS:
-    brewery_checkins[c.beer.brewery].append(c)
+    brewery_checkins[c.beer.get_style_category()].append(c)
 
 
-def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
+def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=1):
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
     """
