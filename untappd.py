@@ -146,6 +146,12 @@ class Checkin:
     total_toasts: Optional[int] = None
     total_comments: Optional[int] = None
 
+    def __hash__(self):
+        # todo :: do we just want to always use one of these?
+        if self.id is None:
+            return hash(self.beer) + hash(self.comment) + hash(self.url)
+        return self.id
+
     @classmethod
     def from_dict(cls, d):
         maybe_venue = (
