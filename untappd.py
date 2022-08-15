@@ -158,6 +158,14 @@ class Checkin:
             return hash(self.beer) + hash(self.comment) + hash(self.url)
         return self.id
 
+    def _simple_str(self) -> str:
+        return (
+            f"Checkin of {self.beer.name} ({self.beer.brewery}), {self.beer.abv:.1f}%"
+            + (f" | Rating: {self.rating} / 5" if self.rating else "")
+            + (f" | At: {self.venue}" if self.venue else "")
+            + (f' | Comment: "{self.comment}"' if self.comment else "")
+        )
+
     @classmethod
     def from_dict(cls, d):
         maybe_venue = (
