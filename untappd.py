@@ -39,6 +39,11 @@ CATEGORY_KEYWORDS = {
 }
 
 
+BREWERY_BEERS = defaultdict(set)
+BEER_CHECKINS = defaultdict(set)
+VENUE_CHECKINS = defaultdict(set)
+
+
 @dataclass
 class Brewery:
     name: str
@@ -84,7 +89,7 @@ class Beer:
 
     @classmethod
     def from_checkin_dict(cls, d):
-        return cls(
+        result = cls(
             name=d["beer_name"],
             # todo :: cache breweries? (and beers, ofc)
             brewery=Brewery.from_checkin_dict(d),
@@ -96,6 +101,8 @@ class Beer:
             ibu=float(d["beer_ibu"]),
             url=d["beer_url"],
         )
+        BREWERY_BEERS[result.brewery].add(result)
+        return result
 
     def get_style_category(self):
         type_str = self.type.lower()
@@ -159,7 +166,7 @@ class Checkin:
             if d["venue_name"] is not None
             else {}
         )
-        return cls(
+        result = cls(
             beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
             rating=float(d["rating_score"] or 0) or None,  # todo...
@@ -177,6 +184,10 @@ class Checkin:
             total_comments=int(d["total_comments"]),
             **maybe_venue,
         )
+        if maybe_venue:
+            VENUE_CHECKINS[result.venue].add(result)
+        BEER_CHECKINS[result.beer].add(result)
+        return result
 
 
 def load_latest_checkins():
