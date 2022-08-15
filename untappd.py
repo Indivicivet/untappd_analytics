@@ -121,6 +121,9 @@ class Venue:
     def __hash__(self):
         return hash(self.name + self.city)
 
+    def __str__(self):
+        return f"{self.name} ({self.city})"
+
     @classmethod
     def from_checkin_dict(cls, d):
         return cls(
