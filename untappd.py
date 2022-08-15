@@ -1,3 +1,4 @@
+import csv
 import json
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -27,6 +28,28 @@ def load_latest_json(data_source=None):
         data_unsorted,
         key=lambda d: d["created_at"],
     )
+
+
+def load_latest_csv(data_source=None):
+    data_source = (
+        DEFAULT_DATA_SOURCE
+        if data_source is None
+        else Path(data_source)
+    )
+    files = sorted(
+        data_source.glob("*.csv"),
+        key=lambda x: x.stat().st_mtime, reverse=True,
+    )
+    if not files:
+        raise Exception(f"Couldn't find any csv files in {data_source}")
+    with open(files[0], encoding="utf-8") as f:
+        csv_lines = csv.reader(f)
+        headers = next(csv_lines)
+        headers[0] = "beer_name"
+        result = []
+        for row in csv_lines:
+            result.append(dict(zip(headers, row)))
+        return result
 
 
 CATEGORY_KEYWORDS = {
