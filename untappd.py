@@ -82,6 +82,9 @@ class Beer:
     def __hash__(self):
         return hash(self.name + self.brewery.name)
 
+    def __str__(self):
+        return f"{self.name} | {self.brewery} | {self.type} ({self.abv:.1f}%)"
+
     @classmethod
     def from_checkin_dict(cls, d):
         return cls(
