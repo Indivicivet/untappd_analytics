@@ -45,7 +45,7 @@ def load_latest_csv(data_source=None):
     with open(files[0], encoding="utf-8") as f:
         csv_lines = csv.reader(f)
         headers = next(csv_lines)
-        headers[0] = "beer_name"
+        headers[0] = "beer_name"  # todo :: why does it seem corrupted...?
         result = []
         for row in csv_lines:
             result.append(dict(zip(headers, row)))
