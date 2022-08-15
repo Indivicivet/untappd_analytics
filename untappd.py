@@ -9,47 +9,36 @@ from typing import Optional, Any, Sequence
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
 
-def load_latest_json(data_source=None):
+def load_latest_datafile(data_source=None):
     data_source = (
         DEFAULT_DATA_SOURCE
         if data_source is None
         else Path(data_source)
     )
     files = sorted(
-        data_source.glob("*.json"),
+        [*data_source.glob("*.json"), *data_source.glob("*.csv")],
         key=lambda x: x.stat().st_mtime, reverse=True,
     )
     if not files:
-        raise Exception(f"Couldn't find any json files in {data_source}")
-    data_unsorted = json.loads(files[0].read_text())
+        raise Exception(f"Couldn't find any .json or .csv files in {data_source}")
+    if files[0].suffix == ".json":
+        data_unsorted = json.loads(files[0].read_text())
+    elif files[0].suffix == ".csv":
+        with open(files[0], encoding="utf-8") as f:
+            csv_lines = csv.reader(f)
+            headers = next(csv_lines)
+            headers[0] = "beer_name"  # todo :: why does it seem corrupted...?
+            data_unsorted = []
+            for row in csv_lines:
+                data_unsorted.append(dict(zip(headers, row)))
+    else:
+        raise Exception(f"somehow found unknown file extension for file {files[0]}")
     # I think this is redundant but just to be sure
     # todo :: verify that :)
     return sorted(
         data_unsorted,
         key=lambda d: d["created_at"],
     )
-
-
-def load_latest_csv(data_source=None):
-    data_source = (
-        DEFAULT_DATA_SOURCE
-        if data_source is None
-        else Path(data_source)
-    )
-    files = sorted(
-        data_source.glob("*.csv"),
-        key=lambda x: x.stat().st_mtime, reverse=True,
-    )
-    if not files:
-        raise Exception(f"Couldn't find any csv files in {data_source}")
-    with open(files[0], encoding="utf-8") as f:
-        csv_lines = csv.reader(f)
-        headers = next(csv_lines)
-        headers[0] = "beer_name"  # todo :: why does it seem corrupted...?
-        result = []
-        for row in csv_lines:
-            result.append(dict(zip(headers, row)))
-        return result
 
 
 CATEGORY_KEYWORDS = {
@@ -219,7 +208,7 @@ class Checkin:
 def load_latest_checkins():
     # todo :: data source
     # todo :: csv option...? or warning about no csv :)
-    data_dicts = load_latest_json()
+    data_dicts = load_latest_datafile()
     return [
         Checkin.from_dict(d)
         for d in data_dicts
