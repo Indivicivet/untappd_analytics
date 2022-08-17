@@ -25,8 +25,7 @@ def show_average_rating_by_time(data, out_file=None):
     }
     x_data = range(24)
     ax1.plot(x_data, [y_data.get(x, 0) for x in x_data], label="average rating")
-    # handpicked n:
-    ax2.plot(x_data, [counts.get(x, 0) / 200 for x in x_data], label="checkins(/200)")
+    ax2.plot(x_data, [counts.get(x, 0) for x in x_data], label="checkins")
     fig.legend()
     if out_file is None:
         plt.show()
