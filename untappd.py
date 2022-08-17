@@ -118,7 +118,7 @@ class Beer:
             global_rating=d["global_rating_score"],
             global_weighted_rating=d["global_weighted_rating_score"],
             type=d["beer_type"],
-            ibu=float(d["beer_ibu"]),
+            ibu=int(d["beer_ibu"]),
             url=d["beer_url"],
         )
 
