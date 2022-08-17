@@ -75,7 +75,7 @@ class Brewery:
             country=d["brewery_country"],
             city=d["brewery_city"],
             state=d["brewery_state"],
-            id=int(d["brewery_id"]),
+            id=int(d["brewery_id"]) if d.get("brewery_id") else None,
         )
 
     def to_dict(self):
@@ -85,7 +85,7 @@ class Brewery:
             "brewery_country": self.country,
             "brewery_city": self.city,
             "brewery_state": self.state,
-            "brewery_id": str(self.id),
+            "brewery_id": str(self.id) if self.id is not None else None,
         }
 
 
@@ -224,25 +224,25 @@ class Checkin:
     def from_dict(cls, d):
         maybe_venue = (
             {"venue": Venue.from_checkin_dict(d)}
-            if d["venue_name"] is not None
+            if d.get("venue_name") is not None
             else {}
         )
         return cls(
             beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
-            rating=float(d["rating_score"] or 0) or None,  # todo...
+            rating=float(d.get("rating_score") or 0) or None,  # todo...
             datetime=datetime.strptime(
                 d["created_at"],
                 "%Y-%m-%d %H:%M:%S"
-            ),
+            ) if d.get("created_at") else None,
             url=d["checkin_url"],
             flavour_profiles=[],  # todo :)
             # todo purchase_venue, serving_type
-            id=int(d["checkin_id"]),
+            id=int(d["checkin_id"]) if d.get("checkin_id") else None,
             photo_url=d["photo_url"],
             tagged_friends=d["tagged_friends"],
-            total_toasts=int(d["total_toasts"]),
-            total_comments=int(d["total_comments"]),
+            total_toasts=int(d.get("total_toasts", 0) or 0),
+            total_comments=int(d.get("total_comments", 0) or 0),
             **maybe_venue,
         )
 
@@ -251,18 +251,19 @@ class Checkin:
             **self.beer.to_dict(),
             **(self.venue.to_dict() if self.venue is not None else {}),
             "comment": self.comment,
-            "rating_score": str(self.rating),
+            "rating_score": str(self.rating) if self.rating is not None else None,
             "created_at": datetime.strftime(
                 self.datetime,
                 "%Y-%m-%d %H:%M:%S",
-            ),
+            ) if self.datetime is not None else "",
             "checkin_url": self.url,
             # todo :: something to do with flavour profiles :)
-            "checkin_id": str(self.id),
+            "checkin_id": str(self.id) if self.id is not None else None,
             "photo_url": self.photo_url,
             "tagged_friends": self.tagged_friends,
-            "total_toasts": str(self.total_toasts),
-            "total_comments": str(self.total_comments),
+            # todo :: so much duplication of this pattern, consider reshuffle
+            "total_toasts": str(self.total_toasts) if self.total_toasts is not None else None,
+            "total_comments": str(self.total_comments) if self.total_comments is not None else None,
         }
 
 
