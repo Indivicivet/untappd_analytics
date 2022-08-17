@@ -203,8 +203,8 @@ class Checkin:
     id: Optional[int] = None
     photo_url: Optional[str] = None
     tagged_friends: Optional[str] = None  # todo :: type?
-    total_toasts: Optional[int] = None
-    total_comments: Optional[int] = None
+    total_toasts: int = 0
+    total_comments: int = 0
 
     def __hash__(self):
         # todo :: do we just want to always use one of these?
