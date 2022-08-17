@@ -45,7 +45,7 @@ def test_from_dict_runs():
     untappd.Checkin.from_dict(BASIC_JSON_SINGLE_BEER_EXAMPLE_1)
 
 
-def test_from_dict_to_dict_consistent():
+def test_Checkin_from_dict_to_dict_consistent():
     source_dict = BASIC_JSON_SINGLE_BEER_EXAMPLE_1
     checkin = untappd.Checkin.from_dict(source_dict)
     result = checkin.to_dict()
