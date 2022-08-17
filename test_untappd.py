@@ -55,4 +55,6 @@ def test_from_dict_to_dict_consistent():
             continue  # don't worry about missing fields
         if (got := result.get(field, "MISSING!!!!")) != expected:
             mismatches.append((field, expected, got))
-    assert not mismatches, str(mismatches)
+    assert not mismatches, f"""mismatches (field, expected, got):
+{mismatches}"""
+
