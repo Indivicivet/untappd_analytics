@@ -3,6 +3,10 @@ import json
 import untappd
 
 
+print("THIS FILE DOES NOT GIVE A SENSIBLE SAMPLE DATA SOURCE YET")
+print("SO DO NOT USE IT. (or modify it to add all needed fields...)")
+
+
 # todo :: all of the scripts /actually/ assume all data is present
 # so this isn't sufficient yet to generate suitable output
 
