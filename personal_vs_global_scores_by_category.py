@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 import untappd
 
-data = untappd.load_latest_json()
+data = untappd.load_latest_datafile()
 
 df = pd.DataFrame(data)
 
