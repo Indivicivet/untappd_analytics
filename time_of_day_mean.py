@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import untappd
 
 
-def show_histogram(data, func, out_file=None):
+def show_average_rating_by_time(data, out_file=None):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
-        category_data[func(checkin)][checkin.rating or 0] += 1
+        category_data[checkin.datetime.hour][checkin.rating or 0] += 1
 
     x_data = [i / 4 for i in range(1, 21)]
     for label, y_data in sorted(category_data.items()):
@@ -21,8 +21,4 @@ def show_histogram(data, func, out_file=None):
 
 
 DATA = untappd.load_latest_checkins()
-show_histogram(
-    DATA,
-    # func=lambda checkin: checkin.beer.get_style_category(),
-    func=lambda checkin: checkin.datetime.hour,
-)
+show_average_rating_by_time(DATA)
