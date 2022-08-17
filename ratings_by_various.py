@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 import untappd
 
 
-def show_histogram(data, func=None, out_file=None):
-    if func is None:
-        func = lambda checkin: checkin.beer.get_style_category()
+def show_histogram(data, func, out_file=None):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
         category_data[func(checkin)][checkin.rating or 0] += 1
@@ -25,5 +23,6 @@ def show_histogram(data, func=None, out_file=None):
 DATA = untappd.load_latest_checkins()
 show_histogram(
     DATA,
+    # func=lambda checkin: checkin.beer.get_style_category(),
     func=lambda checkin: checkin.datetime.hour,
 )
