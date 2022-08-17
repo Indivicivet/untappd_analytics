@@ -78,5 +78,5 @@ def test_Checkin_to_dict_from_dict_consistent_1():
         ),
     )
     resulting_dict = checkin.to_dict()
-    resulting_checkin = checkin.from_dict(resulting_dict)
+    resulting_checkin = untappd.Checkin.from_dict(resulting_dict)
     assert resulting_checkin == checkin
