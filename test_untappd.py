@@ -58,3 +58,19 @@ def test_Checkin_from_dict_to_dict_consistent():
     assert not mismatches, f"""mismatches (field, expected, got):
 {mismatches}"""
 
+
+def test_Checkin_to_dict_from_dict_consistent_1():
+    checkin = untappd.Checkin(
+        beer=untappd.Beer(
+            name="my beerly",
+            abv=3.5,
+            ibu=101,
+            id=99999,
+            brewery=untappd.Brewery(
+                name="excellent brewERY",
+            ),
+        ),
+    )
+    resulting_dict = checkin.to_dict()
+    resulting_checkin = checkin.from_dict(resulting_dict)
+    assert resulting_checkin == checkin
