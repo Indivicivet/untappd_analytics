@@ -46,6 +46,9 @@ def test_from_dict_runs():
 
 
 def test_Checkin_from_dict_to_dict_consistent():
+    """
+    dict -> Checkin -> dict
+    """
     source_dict = BASIC_JSON_SINGLE_BEER_EXAMPLE_1
     checkin = untappd.Checkin.from_dict(source_dict)
     result = checkin.to_dict()
@@ -60,6 +63,9 @@ def test_Checkin_from_dict_to_dict_consistent():
 
 
 def test_Checkin_to_dict_from_dict_consistent_1():
+    """
+    Checkin -> dict -> Checkin
+    """
     checkin = untappd.Checkin(
         beer=untappd.Beer(
             name="my beerly",
