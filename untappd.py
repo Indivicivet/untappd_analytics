@@ -1,5 +1,6 @@
 import csv
 import json
+import warnings
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -109,6 +110,14 @@ class Beer:
 
     @classmethod
     def from_checkin_dict(cls, d):
+        try:
+            ibu = int(d["beer_ibu"])
+        except ValueError:
+            ibu = float(d["beer_ibu"])
+            warnings.warn(
+                f"you have a beer with non-integer ibu {ibu}"
+                ", that may break some assumptions..."
+            )
         return cls(
             name=d["beer_name"],
             # todo :: cache breweries? (and beers, ofc)
@@ -118,7 +127,7 @@ class Beer:
             global_rating=d["global_rating_score"],
             global_weighted_rating=d["global_weighted_rating_score"],
             type=d["beer_type"],
-            ibu=int(d["beer_ibu"]),
+            ibu=ibu,
             url=d["beer_url"],
         )
 
