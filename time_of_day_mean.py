@@ -10,6 +10,8 @@ def show_average_rating_by_time(data, out_file=None):
     for checkin in data:
         category_data[checkin.datetime.hour][checkin.rating or 0] += 1
 
+    fig, ax1 = plt.subplots()
+    ax2 = ax1.twinx()
     counts = {
         cat: sum(rating_counts.values())
         for cat, rating_counts in category_data.items()
@@ -22,10 +24,10 @@ def show_average_rating_by_time(data, out_file=None):
         for cat, rating_counts in category_data.items()
     }
     x_data = range(24)
-    plt.plot(x_data, [y_data.get(x, 0) for x in x_data], label="average rating")
+    ax1.plot(x_data, [y_data.get(x, 0) for x in x_data], label="average rating")
     # handpicked n:
-    plt.plot(x_data, [counts.get(x, 0) / 200 for x in x_data], label="checkins(/200)")
-    plt.legend()
+    ax2.plot(x_data, [counts.get(x, 0) / 200 for x in x_data], label="checkins(/200)")
+    fig.legend()
     if out_file is None:
         plt.show()
     else:
