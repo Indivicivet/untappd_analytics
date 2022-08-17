@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt
 import untappd
 
 
-def show_category_histogram(data, out_file=None):
+def show_histogram(data, func=None, out_file=None):
+    if func is None:
+        func = lambda checkin: checkin.beer.get_style_category()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
-        category_data[checkin.beer.get_style_category()][checkin.rating or 0] += 1
+        category_data[func(checkin)][checkin.rating or 0] += 1
 
     x_data = [i / 4 for i in range(1, 21)]
     for label, y_data in category_data.items():
@@ -21,4 +23,4 @@ def show_category_histogram(data, out_file=None):
 
 
 DATA = untappd.load_latest_checkins()
-show_category_histogram(DATA)
+show_histogram(DATA)
