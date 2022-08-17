@@ -62,6 +62,24 @@ def test_Checkin_from_dict_to_dict_consistent():
 {mismatches}"""
 
 
+def test_Beer_to_dict_from_dict_consistent_1():
+    """
+    Beer -> dict -> Beer
+    """
+    beer = untappd.Beer(
+        name="my beerly",
+        abv=3.5,
+        ibu=101,
+        id=99999,
+        brewery=untappd.Brewery(
+            name="excellent brewERY",
+        ),
+    )
+    resulting_dict = beer.to_dict()
+    resulting_beer = untappd.Beer.from_checkin_dict(resulting_dict)
+    assert resulting_beer == beer
+
+
 def test_Checkin_to_dict_from_dict_consistent_1():
     """
     Checkin -> dict -> Checkin
