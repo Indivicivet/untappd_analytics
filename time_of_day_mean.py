@@ -10,10 +10,16 @@ def show_average_rating_by_time(data, out_file=None):
     for checkin in data:
         category_data[checkin.datetime.hour][checkin.rating or 0] += 1
 
-    x_data = [i / 4 for i in range(1, 21)]
-    for label, y_data in sorted(category_data.items()):
-        plt.plot(x_data, [y_data.get(x, 0) for x in x_data], label=label)
-    plt.legend()
+    y_data = {
+        cat: (
+            sum(rating * count for rating, count in rating_counts.items())
+            / sum(rating_counts.values())
+        )
+        for cat, rating_counts in category_data.items()
+    }
+    x_data = range(24)
+    plt.plot(x_data, [y_data.get(x, 0) for x in x_data])
+    #plt.legend()
     if out_file is None:
         plt.show()
     else:
