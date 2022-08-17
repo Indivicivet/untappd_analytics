@@ -94,8 +94,8 @@ class Brewery:
 class Beer:
     name: str
     brewery: Brewery
-    abv: float
-    id: int
+    abv: float  # todo :: would be nice if optional
+    id: Optional[int] = None
     global_rating: float = 0.0
     global_weighted_rating: float = 0.0
     type: str = ""
@@ -123,7 +123,7 @@ class Beer:
             # todo :: cache breweries? (and beers, ofc)
             brewery=Brewery.from_checkin_dict(d),
             abv=float(d["beer_abv"]),
-            id=int(d["bid"]),
+            id=int(d["bid"]) if d.get("bid") else None,
             global_rating=d["global_rating_score"],
             global_weighted_rating=d["global_weighted_rating_score"],
             type=d["beer_type"],
@@ -136,7 +136,7 @@ class Beer:
             "beer_name": self.name,
             **self.brewery.to_dict(),
             "beer_abv": str(self.abv),  # todo :: precision?
-            "bid": str(self.id),
+            "bid": str(self.id) if self.id is not None else None,
             "global_rating_score": self.global_rating,
             "global_weighted_rating_score": self.global_weighted_rating,
             "beer_type": self.type,
