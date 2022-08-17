@@ -193,8 +193,8 @@ class Venue:
 @dataclass
 class Checkin:
     beer: Beer
-    comment: str
-    url: str
+    comment: str = ""
+    url: Optional[str] = None
     rating: Optional[float] = None
     datetime: Optional[datetime] = None
     venue: Optional[Venue] = None
