@@ -115,8 +115,8 @@ class Beer:
             brewery=Brewery.from_checkin_dict(d),
             abv=float(d["beer_abv"]),
             id=int(d["bid"]),
-            global_rating=float(d["global_rating_score"]),
-            global_weighted_rating=float(d["global_weighted_rating_score"]),
+            global_rating=d["global_rating_score"],
+            global_weighted_rating=d["global_weighted_rating_score"],
             type=d["beer_type"],
             ibu=float(d["beer_ibu"]),
             url=d["beer_url"],
@@ -128,8 +128,8 @@ class Beer:
             **self.brewery.to_dict(),
             "beer_abv": str(self.abv),  # todo :: precision?
             "bid": str(self.id),
-            "global_rating_score": str(self.global_rating),  # todo :: precision?
-            "global_weighted_rating_score": str(self.global_weighted_rating),  # todo :: precision?
+            "global_rating_score": self.global_rating,
+            "global_weighted_rating_score": self.global_weighted_rating,
             "beer_type": self.type,
             "beer_ibu": str(self.ibu),
             "beer_url": str(self.url),
