@@ -6,5 +6,5 @@ Various scripts to make graphs and/or dump out data about a user's untappd beer 
 
 - generate fake untappd data so can run examples without being a subscriber
 - cache beers/venues/breweries
-- support CSV files
+- ~~support CSV files~~ this is done I think, although haven't tested properly
 - structure as actual package+examples rather than random collection of scripts
