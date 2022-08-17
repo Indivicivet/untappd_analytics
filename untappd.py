@@ -77,6 +77,16 @@ class Brewery:
             id=int(d["brewery_id"]),
         )
 
+    def to_dict(self):
+        return {
+            "brewery_name": self.name,
+            "brewery_url": self.url,
+            "brewery_country": self.country,
+            "brewery_city": self.city,
+            "brewery_state": self.state,
+            "brewery_id": str(self.id),
+        }
+
 
 # todo :: slots?
 @dataclass
@@ -112,6 +122,19 @@ class Beer:
             url=d["beer_url"],
         )
 
+    def to_dict(self):
+        return {
+            "beer_name": self.name,
+            **self.brewery.to_dict(),
+            "beer_abv": str(self.abv),  # todo :: precision?
+            "bid": str(self.id),
+            "global_rating_score": str(self.global_rating),  # todo :: precision?
+            "global_weighted_rating_score": str(self.global_weighted_rating),  # todo :: precision?
+            "beer_type": self.type,
+            "beer_ibu": str(self.ibu),
+            "beer_url": str(self.url),
+        }
+
     def get_style_category(self):
         type_str = self.type.lower()
         for category, keywords in CATEGORY_KEYWORDS.items():
@@ -146,6 +169,16 @@ class Venue:
             lat=d["venue_lat"],
             long=d["venue_lng"],
         )
+
+    def to_dict(self):
+        return {
+            "venue_name": self.name,
+            "venue_city": self.city,
+            "venue_state": self.state,
+            "venue_country": self.country,
+            "venue_lat": self.lat,
+            "venue_lng": self.long,
+        }
 
 
 @dataclass
@@ -203,6 +236,25 @@ class Checkin:
             total_comments=int(d["total_comments"]),
             **maybe_venue,
         )
+
+    def to_dict(self):
+        return {
+            **self.beer.to_dict(),
+            **(self.venue.to_dict() if self.venue is not None else {}),
+            "comment": self.comment,
+            "rating_score": str(self.rating),
+            "created_at": datetime.strftime(
+                self.datetime,
+                "%Y-%m-%d %H:%M:%S",
+            ),
+            "checkin_url": self.url,
+            # todo :: something to do with flavour profiles :)
+            "checkin_id": str(self.id),
+            "photo_url": self.photo_url,
+            "tagged_friends": self.tagged_friends,
+            "total_toasts": str(self.total_toasts),
+            "total_comments": str(self.total_comments),
+        }
 
 
 def load_latest_checkins():
