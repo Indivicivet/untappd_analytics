@@ -51,7 +51,7 @@ def test_from_dict_to_dict_consistent():
     result = checkin.to_dict()
     mismatches = []
     for field, expected in source_dict.items():
-        if expected is None:
+        if expected is None or expected == "":
             continue  # don't worry about missing fields
         if (got := result.get(field, "MISSING!!!!")) != expected:
             mismatches.append((field, expected, got))
