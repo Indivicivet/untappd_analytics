@@ -43,3 +43,8 @@ BASIC_JSON_SINGLE_BEER_EXAMPLE_1 = json.loads('''
 
 def test_from_dict_runs():
     untappd.Checkin.from_dict(BASIC_JSON_SINGLE_BEER_EXAMPLE_1)
+
+
+def test_to_dict_consistent():
+    checkin = untappd.Checkin.from_dict(BASIC_JSON_SINGLE_BEER_EXAMPLE_1)
+    result = checkin.to_dict()
