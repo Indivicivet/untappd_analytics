@@ -45,6 +45,14 @@ def test_from_dict_runs():
     untappd.Checkin.from_dict(BASIC_JSON_SINGLE_BEER_EXAMPLE_1)
 
 
-def test_to_dict_consistent():
-    checkin = untappd.Checkin.from_dict(BASIC_JSON_SINGLE_BEER_EXAMPLE_1)
+def test_from_dict_to_dict_consistent():
+    source_dict = BASIC_JSON_SINGLE_BEER_EXAMPLE_1
+    checkin = untappd.Checkin.from_dict(source_dict)
     result = checkin.to_dict()
+    mismatches = []
+    for field, expected in source_dict.items():
+        if expected is None:
+            continue  # don't worry about missing fields
+        if (got := result.get(field, "MISSING!!!!")) != expected:
+            mismatches.append((field, expected, got))
+    assert not mismatches, str(mismatches)
