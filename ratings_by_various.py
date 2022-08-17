@@ -23,4 +23,7 @@ def show_histogram(data, func=None, out_file=None):
 
 
 DATA = untappd.load_latest_checkins()
-show_histogram(DATA)
+show_histogram(
+    DATA,
+    func=lambda checkin: checkin.datetime.hour,
+)
