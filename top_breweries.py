@@ -43,9 +43,10 @@ scores_breweries = [
 
 scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
 
+SHOW_N_BREWERIES = 20
 SHOW_TOP_N = 5  # 0 for less detailed view :)
 
-for i, (score, top_beers, brewery) in enumerate(scores_sorted[:20]):
+for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
     print(f"{i+1: <3} {score:.2f}  {brewery}")
     if SHOW_TOP_N > 0:
         print(f"{brewery}'s top {SHOW_TOP_N} beers:")
