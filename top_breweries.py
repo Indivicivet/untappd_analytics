@@ -20,22 +20,35 @@ def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
     dropoff_ratio indicates how much to scale weighting for subsequent beers
     """
     # todo :: beer averaging should be library functionality
-    ratings = untappd.average_rating_by_beer(checkins).values()
+    arbb = untappd.average_rating_by_beer(checkins)
+    top_ratings = sorted(
+        arbb.items(),
+        reverse=True,
+        key = lambda t: t[1],
+    )
     return (
-        average_score_weight * sum(ratings) / len(ratings)
+        average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
         + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum
             r * dropoff_ratio ** i
-            for i, r in enumerate(sorted(ratings, reverse=True))
-        )
+            for i, (_, r) in enumerate(top_ratings)
+        ),
+        top_ratings,
     )
 
 
 scores_breweries = [
-    (score_checkin_list(checkins), brewery)
+    (*score_checkin_list(checkins), brewery)
     for brewery, checkins in brewery_checkins.items()
 ]
 
 scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
 
-for i, (score, brewery) in enumerate(scores_sorted[:20]):
+SHOW_TOP_N = 5  # 0 for less detailed view :)
+
+for i, (score, top_beers, brewery) in enumerate(scores_sorted[:20]):
     print(f"{i+1: <3} {score:.2f}  {brewery}")
+    if SHOW_TOP_N > 0:
+        print(f"{brewery}'s top {SHOW_TOP_N} beers:")
+        for beer, rating in top_beers[:SHOW_TOP_N]:
+            print(f"{rating:.2f} {beer}")
+        print()
