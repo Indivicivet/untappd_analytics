@@ -8,14 +8,11 @@ import untappd
 
 class SessionTracker:
     def __init__(self, cap=5):
-        self.session = []
+        self.session = [untappd.Checkin(beer=None, datetime=datetime.datetime.min)]
         self.cap = cap
 
     def session_n(self, checkin):
-        if (
-            self.session
-            and checkin.datetime > self.session[-1].datetime + datetime.timedelta(hours=1)
-        ):
+        if checkin.datetime > self.session[-1].datetime + datetime.timedelta(hours=1):
             self.session = []
         self.session.append(checkin)
         n = len(self.session)
