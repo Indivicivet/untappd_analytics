@@ -3,7 +3,7 @@ scores breweries based on their top beers and average beers,
 depending on the average_score_weight :)
 """
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 import untappd
 
@@ -36,6 +36,15 @@ def score_checkin_list(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
     )
 
 
+def get_style_ratios(checkins):
+    style_counts = Counter(c.beer.get_style_category() for c in checkins)
+    total = style_counts.total()
+    return [
+        (style, val / total)
+        for style, val in sorted(style_counts.items(), key=lambda t: t[1], reverse=True)
+    ]
+
+
 scores_breweries = [
     (*score_checkin_list(checkins), brewery)
     for brewery, checkins in brewery_checkins.items()
@@ -45,9 +54,18 @@ scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
 
 SHOW_N_BREWERIES = 20
 SHOW_TOP_N = 5  # 0 for less detailed view :)
+SHOW_STYLES = True
 
 for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
     print(f"{i+1: <3} {score:.2f}  {brewery}")
+    if SHOW_STYLES:
+        print(
+            "Styles:",
+            ", ".join(
+                f"{style.capitalize()} {100 * ratio:.1f}%"
+                for style, ratio in get_style_ratios(brewery_checkins[brewery])
+            )
+        )
     if SHOW_TOP_N > 0:
         print(f"{brewery}'s top {SHOW_TOP_N} beers:")
         for beer, rating in top_beers[:SHOW_TOP_N]:
