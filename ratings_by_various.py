@@ -40,5 +40,6 @@ DATA = untappd.load_latest_checkins()
 show_histogram(
     DATA,
     # func=lambda checkin: checkin.beer.get_style_category(),
-    func=lambda checkin: checkin.datetime.hour,
+    # func=lambda checkin: checkin.datetime.hour,
+    func=SessionTracker().session_n,
 )
