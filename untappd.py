@@ -10,7 +10,7 @@ from typing import Optional, Any, Sequence
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
 
-def load_latest_datafile(data_source=None):
+def load_latest_datafile(data_source=None, prefer_non_sample_data=True):
     data_source = (
         DEFAULT_DATA_SOURCE
         if data_source is None
@@ -20,9 +20,10 @@ def load_latest_datafile(data_source=None):
         [*data_source.glob("*.json"), *data_source.glob("*.csv")],
         key=lambda x: x.stat().st_mtime, reverse=True,
     )
-    non_sample_files = [file for file in files if "sample" not in file.name]
-    if any(non_sample_files):
-        files = non_sample_files
+    if prefer_non_sample_data:
+        non_sample_files = [file for file in files if "sample" not in file.name]
+        if any(non_sample_files):
+            files = non_sample_files
     if not files:
         raise Exception(f"Couldn't find any .json or .csv files in {data_source}")
     if files[0].suffix == ".json":
