@@ -18,16 +18,20 @@ print("SO DO NOT USE IT. (or modify it to add all needed fields...)")
 
 def make_random_brewery():
     return untappd.Brewery(
-        name="hello brewery",
+        name=(
+            random.choice("hello good London".split())
+            + random.choice("brewery beers brewers".split())
+        ),
     )
 
 
 def make_random_beer():
     return untappd.Beer(
-        name="its a beer",
-        abv=5,
-        ibu=50,
+        name=f"yummy beer #{random.randint(1, 99999999)}",
+        abv=random.random() * 15,
+        ibu=random.randint(0, 100),
         brewery=make_random_brewery(),
+        type=random.choice("IPA,Stout,Pale Ale".split(",")),
     )
 
 
