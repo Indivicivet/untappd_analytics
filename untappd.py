@@ -5,12 +5,15 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Any, Sequence
+from typing import Optional, Any, Sequence, Union
 
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
 
-def load_latest_datafile(data_source=None, prefer_non_sample_data=True):
+def load_latest_datafile(
+    data_source: Optional[Union[Path, str]] = None,
+    prefer_non_sample_data: bool = True
+):
     data_source = (
         DEFAULT_DATA_SOURCE
         if data_source is None
@@ -72,7 +75,7 @@ class Brewery:
         return hash(self.name)
 
     @classmethod
-    def from_checkin_dict(cls, d):
+    def from_checkin_dict(cls, d: dict):
         return cls(
             name=d["brewery_name"],
             url=d["brewery_url"],
@@ -82,7 +85,7 @@ class Brewery:
             id=int(d["brewery_id"]) if d.get("brewery_id") else None,
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "brewery_name": self.name,
             "brewery_url": self.url,
@@ -113,7 +116,7 @@ class Beer:
         return f"{self.name} | {self.brewery} | {self.type} ({self.abv:.1f}%)"
 
     @classmethod
-    def from_checkin_dict(cls, d):
+    def from_checkin_dict(cls, d: dict):
         try:
             ibu = int(d["beer_ibu"])
         except ValueError:
@@ -135,7 +138,7 @@ class Beer:
             url=d["beer_url"],
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "beer_name": self.name,
             **self.brewery.to_dict(),
@@ -148,7 +151,7 @@ class Beer:
             "beer_url": str(self.url),
         }
 
-    def get_style_category(self):
+    def get_style_category(self) -> str:
         type_str = self.type.lower()
         for category, keywords in CATEGORY_KEYWORDS.items():
             if any(keyword in type_str for keyword in keywords):
@@ -173,7 +176,7 @@ class Venue:
         return f"{self.name} ({self.city})"
 
     @classmethod
-    def from_checkin_dict(cls, d):
+    def from_checkin_dict(cls, d: dict):
         return cls(
             name=d["venue_name"],
             city=d["venue_city"],
@@ -183,7 +186,7 @@ class Venue:
             long=d["venue_lng"],
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "venue_name": self.name,
             "venue_city": self.city,
@@ -228,7 +231,7 @@ class Checkin:
         )
 
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, d: dict):
         maybe_venue = (
             {"venue": Venue.from_checkin_dict(d)}
             if d.get("venue_name") is not None
@@ -253,7 +256,7 @@ class Checkin:
             **maybe_venue,
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             **self.beer.to_dict(),
             **(self.venue.to_dict() if self.venue is not None else {}),
@@ -274,7 +277,7 @@ class Checkin:
         }
 
 
-def load_latest_checkins():
+def load_latest_checkins() -> list[Checkin]:
     # todo :: data source
     # todo :: csv option...? or warning about no csv :)
     data_dicts = load_latest_datafile()
