@@ -38,7 +38,7 @@ def make_random_beer():
 def make_random_checkin():
     return untappd.Checkin(
         beer=make_random_beer(),
-        rating=random.randint(1, 21) / 4,
+        rating=int(random.gauss(3.2, 1) * 4) / 4,
         datetime=datetime.datetime(
             2020,
             random.randint(1, 12),
