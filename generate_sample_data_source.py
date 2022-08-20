@@ -5,12 +5,9 @@ import random
 import untappd
 
 
-print("THIS FILE DOES NOT GIVE A SENSIBLE SAMPLE DATA SOURCE YET")
-print("SO DO NOT USE IT. (or modify it to add all needed fields...)")
+# todo :: scripts /actually/ assume lots of optional data is present
+# so this may not be sufficient yet to generate suitable output
 
-
-# todo :: all of the scripts /actually/ assume all data is present
-# so this isn't sufficient yet to generate suitable output
 
 # todo :: make untappd.load_latest_checkins() ignore samples
 # if other files are present
