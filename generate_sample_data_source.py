@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import untappd
@@ -32,6 +33,8 @@ def make_random_beer():
 def make_random_checkin():
     return untappd.Checkin(
         beer=make_random_beer(),
+        rating=3.5,
+        datetime=datetime.datetime(2020, 2, 2),
     )
 
 
