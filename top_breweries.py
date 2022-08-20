@@ -57,17 +57,17 @@ SHOW_TOP_N = 5  # 0 for less detailed view :)
 SHOW_STYLES = True
 
 for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
-    print(f"{i+1: <3} {score:.2f}  {brewery}")
+    print(f"#{i+1: <3} {brewery} (magic rating: {score:.2f})")
     if SHOW_STYLES:
         print(
-            "Styles:",
+            "Styles across all checkins:",
             ", ".join(
                 f"{style.capitalize()} {100 * ratio:.1f}%"
                 for style, ratio in get_style_ratios(brewery_checkins[brewery])
             )
         )
     if SHOW_TOP_N > 0:
-        print(f"{brewery}'s top {SHOW_TOP_N} beers:")
+        # print(f"{brewery}'s top {SHOW_TOP_N} beers:")
         for beer, rating in top_beers[:SHOW_TOP_N]:
-            print(f"{rating:.2f} {beer}")
+            print(f"{rating:.2f}  {beer}")
         print()
