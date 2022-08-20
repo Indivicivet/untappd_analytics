@@ -1,8 +1,24 @@
 from collections import defaultdict
+import datetime
 
 import matplotlib.pyplot as plt
 
 import untappd
+
+
+class SessionTracker:
+    def __init__(self, cap=5):
+        self.session = []
+        self.cap = cap
+
+    def session_n(self, checkin):
+        if (
+            self.session
+            and checkin.datetime > self.session[-1].datetime + datetime.timedelta(hours=1)
+        ):
+            self.session = []
+        self.session.append(checkin)
+        return min(len(self.session), self.cap)
 
 
 def show_histogram(data, func, out_file=None):
