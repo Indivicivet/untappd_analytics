@@ -1,5 +1,6 @@
 import datetime
 import json
+import random
 
 import untappd
 
@@ -33,16 +34,25 @@ def make_random_beer():
 def make_random_checkin():
     return untappd.Checkin(
         beer=make_random_beer(),
-        rating=3.5,
-        datetime=datetime.datetime(2020, 2, 2),
+        rating=random.randint(1, 21) / 4,
+        datetime=datetime.datetime(
+            2020,
+            random.randint(1, 12),
+            random.randint(1, 28),
+            random.randrange(24),
+            random.randrange(60),
+            random.randrange(60),
+        ),
     )
 
 
+seed = 123
+random.seed(seed)
 checkin_dicts = [
     make_random_checkin().to_dict()
     for _ in range(1000)
 ]
-target_file = untappd.DEFAULT_DATA_SOURCE / "sample_data_123.json"
 assert not target_file.exists()  # comment out if happy overwriting
+target_file = untappd.DEFAULT_DATA_SOURCE / f"sample_data_{seed=}.json"
 target_file.write_text(json.dumps(checkin_dicts))
 print(f"successfully wrote out to {target_file}")
