@@ -196,6 +196,9 @@ class Checkin:
     comment: str = ""
     url: Optional[str] = None
     rating: Optional[float] = None
+    # todo :: should actually make a decision about if these things are optional
+    # or not -- we probably prefer it if we can assume they are present,
+    # and they're present in the untappd data download
     datetime: Optional[datetime] = None
     venue: Optional[Venue] = None
     flavour_profiles: list[str] = field(default_factory=list)
