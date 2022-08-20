@@ -18,7 +18,10 @@ class SessionTracker:
         ):
             self.session = []
         self.session.append(checkin)
-        return min(len(self.session), self.cap)
+        n = len(self.session)
+        if n >= self.cap:
+            return f"{self.cap}+"
+        return str(n)
 
 
 def show_histogram(data, func, out_file=None):
