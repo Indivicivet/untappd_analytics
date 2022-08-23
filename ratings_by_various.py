@@ -43,5 +43,11 @@ show_histogram(
     DATA,
     # func=lambda checkin: checkin.beer.get_style_category(),
     # func=lambda checkin: checkin.datetime.hour,
-    func=SessionTracker().session_n,
+    # func=SessionTracker().session_n,
+    func=(lambda checkin:
+        0.5 if checkin.beer.abv < 5
+        else 5.75 if checkin.beer.abv < 7.5
+        else 7.510 if checkin.beer.abv < 10
+        else 10.999
+    ),
 )
