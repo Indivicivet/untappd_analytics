@@ -33,6 +33,8 @@ HOPS = [
 XS = [i / 4 for i in range(1, 21)]
 scores = []
 
+# todo :: definitely consolidate this with ratings_by_various :)
+
 for keyword in HOPS:
     # look for anywhere in checkin; probably simplest
     # (could just look in beer name and comment)
