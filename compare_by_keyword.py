@@ -8,7 +8,7 @@ import untappd_utils
 
 CHECKINS = untappd.load_latest_checkins()
 
-KEYWORDS = [
+FRUIT = [
     "cherry",
     "blueberry",
     "mango",
@@ -17,11 +17,18 @@ KEYWORDS = [
     "passion",
     # "guava",
 ]
+HOPS = [
+    "chinook",
+    "mosaic",
+    "simcoe",
+    "cascade",
+    "citra",
+]
     
 
 XS = [i / 4 for i in range(1, 21)]
 
-for keyword in KEYWORDS:
+for keyword in FRUIT:
     # look for anywhere in checkin; probably simplest
     # (could just look in beer name and comment)
     counts = Counter(c.rating for c in CHECKINS if keyword in str(c).lower())
