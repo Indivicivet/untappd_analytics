@@ -2,10 +2,13 @@ from collections import defaultdict
 import datetime
 
 import matplotlib.pyplot as plt
+import seaborn
 
 import untappd
 import untappd_utils
 
+
+seaborn.set()
 
 class SessionTracker:
     def __init__(self, cap=5):
