@@ -23,6 +23,7 @@ HOPS = [
     "simcoe",
     "cascade",
     "citra",
+    "centennial",
 ]
     
 
