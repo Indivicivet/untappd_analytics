@@ -14,7 +14,8 @@ FRUIT = [
     "cherry",
     "blueberry",
     "mango",
-    "apple",
+    # " apple",  # meh
+    "pineapple",
     "banana",
     "passion",
     # "guava",
