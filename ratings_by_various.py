@@ -22,14 +22,15 @@ class SessionTracker:
         return str(n)
 
 
-def show_histogram(data, func, out_file=None):
+def show_histogram(data, func, normalize=False, out_file=None):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
         category_data[func(checkin)][checkin.rating or 0] += 1
 
     x_data = [i / 4 for i in range(1, 21)]
     for label, counts in sorted(category_data.items()):
-        y_data = [counts.get(x, 0) for x in x_data]
+        scale_factor = 1 / sum(counts.values()) if normalize else 1
+        y_data = [counts.get(x, 0) * scale_factor for x in x_data]
         plt.plot(*untappd_utils.smooth_ratings(x_data, y_data), label=label)
     plt.legend()
     if out_file is None:
@@ -50,4 +51,5 @@ show_histogram(
         else 7.510 if checkin.beer.abv < 10
         else 10.999
     ),
+    normalize=True,
 )
