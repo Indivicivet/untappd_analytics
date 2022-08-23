@@ -1,10 +1,12 @@
 from collections import Counter
 
 import matplotlib.pyplot as plt
+import seaborn
 
 import untappd
 import untappd_utils
 
+seaborn.set()
 
 CHECKINS = untappd.load_latest_checkins()
 
