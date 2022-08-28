@@ -10,6 +10,7 @@ import untappd_utils
 
 seaborn.set()
 
+
 class SessionTracker:
     def __init__(self, cap=5):
         self.session = [untappd.Checkin(beer=None, datetime=datetime.datetime.min)]
