@@ -58,6 +58,11 @@ show_histogram(
     # func=lambda checkin: checkin.beer.get_style_category(),
     # func=lambda checkin: checkin.datetime.hour,
     # func=SessionTracker().session_n,
-    func=strength_class,
+    # func=strength_class,
+    func=(lambda checkin:
+          "Pre-Singapore" if checkin.datetime < datetime.datetime(2022, 6, 14, 20)
+          else "Singapore" if checkin.datetime < datetime.datetime(2022, 7, 7)
+          else "Post-Singapore"
+    ),
     normalize=True,
 )
