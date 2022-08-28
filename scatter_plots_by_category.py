@@ -10,6 +10,8 @@ data = untappd.load_latest_datafile()
 
 df = pd.DataFrame(data)
 
+seaborn.set()
+
 
 def abv_categorize(checkin):
     abv = checkin["beer_abv"]
