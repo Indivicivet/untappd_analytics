@@ -54,17 +54,34 @@ def strength_class(checkin):
     return "10%+"
 
 
-DATA = untappd.load_latest_checkins()
-show_histogram(
-    DATA,
-    # func=lambda checkin: checkin.beer.get_style_category(),
-    # func=lambda checkin: checkin.datetime.hour,
-    # func=SessionTracker().session_n,
-    # func=strength_class,
-    func=(lambda checkin:
-          "Pre-Singapore" if checkin.datetime < datetime.datetime(2022, 6, 14, 20)
-          else "Singapore" if checkin.datetime < datetime.datetime(2022, 7, 7)
-          else "Post-Singapore"
-    ),
-    normalize=True,
-)
+def date_segment(checkin):
+    if checkin.datetime < datetime.datetime(2022, 6, 14, 20):
+        return "Pre-Singapore"
+    if checkin.datetime < datetime.datetime(2022, 7, 7):
+        return "Singapore"
+    return "Post-Singapore"
+
+
+def save_various_plots(checkins, out_dir=None):
+    if out_dir is None:
+        out_dir = Path(__file__).parent / "out"
+    for tag, func in {
+        "style_category": lambda checkin: checkin.beer.get_style_category(),
+        "hour": lambda checkin: checkin.datetime.hour,
+        "session_n": SessionTracker().session_n,
+        "strength": strength_class,
+        "singapore": date_segment,
+    }.items():
+        out_file = out_dir / f"ratings_by_{tag}.png"
+        show_histogram(
+            checkins,
+            func=func,
+            normalize=True,
+            out_file=out_file,
+        )
+        print(f"saved ratings by {tag} to {out_file}")
+
+
+CHECKINS = untappd.load_latest_checkins()
+save_various_plots(CHECKINS)
+# show_histogram(CHECKINS, func=strength_class, normalize=True)
