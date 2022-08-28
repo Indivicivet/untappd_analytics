@@ -42,17 +42,22 @@ def show_histogram(data, func, normalize=False, out_file=None):
         plt.savefig(out_file)
 
 
+def strength_class(checkin):
+    if checkin.beer.abv < 5:
+        return "5%"
+    if checkin.beer.abv < 7.5:
+        return "< 7.5%"
+    if checkin.beer.abv < 10:
+        return "< 10%"
+    return "10%+"
+
+
 DATA = untappd.load_latest_checkins()
 show_histogram(
     DATA,
     # func=lambda checkin: checkin.beer.get_style_category(),
     # func=lambda checkin: checkin.datetime.hour,
     # func=SessionTracker().session_n,
-    func=(lambda checkin:
-        "< 5%" if checkin.beer.abv < 5
-        else "< 7.5%" if checkin.beer.abv < 7.5
-        else "< 10%" if checkin.beer.abv < 10
-        else "10%+"
-    ),
+    func=strength_class,
     normalize=True,
 )
