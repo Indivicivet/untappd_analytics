@@ -38,6 +38,8 @@ def show_histogram(data, func, normalize=False, out_file=None):
     if out_file is None:
         plt.show()
     else:
+        out_file = Path(out_file)
+        out_file.parent.mkdir(exist_ok=True, parents=True)
         plt.savefig(out_file)
 
 
