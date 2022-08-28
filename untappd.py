@@ -277,13 +277,16 @@ class Checkin:
         }
 
 
-def load_latest_checkins() -> list[Checkin]:
+def load_latest_checkins(
+    ignore_unrated: bool = True,
+) -> list[Checkin]:
     # todo :: data source
     # todo :: csv option...? or warning about no csv :)
     data_dicts = load_latest_datafile()
     return [
         Checkin.from_dict(d)
         for d in data_dicts
+        if not (ignore_unrated and d["rating_score"] == "")
     ]
 
 
