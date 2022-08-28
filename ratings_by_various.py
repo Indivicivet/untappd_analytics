@@ -3,6 +3,7 @@ from pathlib import Path
 import datetime
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import seaborn
 
 import untappd
@@ -34,16 +35,20 @@ def show_histogram(data, func, normalize=False, out_file=None):
     x_data = [i / 4 for i in range(1, 21)]
     plt.figure(figsize=(12.8, 7.2))
     for label, counts in sorted(category_data.items()):
-        scale_factor = 1 / sum(counts.values()) if normalize else 1
+        scale_factor = 100 / sum(counts.values()) if normalize else 1
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
         plt.plot(*untappd_utils.smooth_ratings(x_data, y_data), label=label)
     plt.legend()
     plt.xlabel("rating")
     plt.ylabel(
-        "ratio of checkins\n(normalized per category)"
+        "percentage of checkins\n(normalized per category)"
         if normalize
         else "number of checkins"
     )
+    if normalize:
+        plt.gca().yaxis.set_major_formatter(
+            mtick.PercentFormatter(decimals=0),
+        )
     if out_file is None:
         plt.show()
     else:
