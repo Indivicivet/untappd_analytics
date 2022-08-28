@@ -83,7 +83,7 @@ def save_various_plots(checkins, out_dir=None):
         show_histogram(
             checkins,
             func=func,
-            normalize=True,
+            normalize=tag not in ["hour"],
             out_file=out_file,
         )
         print(f"saved ratings by {tag} to {out_file}")
