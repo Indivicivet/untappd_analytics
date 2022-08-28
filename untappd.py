@@ -12,7 +12,7 @@ DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
 def load_latest_datafile(
     data_source: Optional[Union[Path, str]] = None,
-    prefer_non_sample_data: bool = True
+    prefer_non_sample_data: bool = True,
 ):
     data_source = (
         DEFAULT_DATA_SOURCE
