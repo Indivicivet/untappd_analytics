@@ -240,7 +240,11 @@ class Checkin:
         return cls(
             beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
-            rating=float(d.get("rating_score") or 0) or None,  # todo...
+            rating=(
+                float(d["rating_score"])
+                if d["rating_score"] != ""
+                else None
+            ),
             datetime=datetime.strptime(
                 d["created_at"],
                 "%Y-%m-%d %H:%M:%S"
