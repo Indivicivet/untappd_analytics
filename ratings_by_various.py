@@ -38,6 +38,7 @@ def show_histogram(data, func, normalize=False, out_file=None):
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
         plt.plot(*untappd_utils.smooth_ratings(x_data, y_data), label=label)
     plt.legend()
+    plt.xlabel("rating")
     plt.ylabel(
         "ratio of checkins\n(normalized per category)"
         if normalize
