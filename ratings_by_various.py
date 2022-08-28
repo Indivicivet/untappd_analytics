@@ -24,6 +24,7 @@ class SessionTracker:
         return str(n)
 
 
+# todo :: move to untappd?
 def show_histogram(data, func, normalize=False, out_file=None):
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
