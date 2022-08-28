@@ -8,9 +8,6 @@ import untappd
 import untappd_utils
 
 
-seaborn.set()
-
-
 class SessionTracker:
     def __init__(self, cap=5):
         self.session = [untappd.Checkin(beer=None, datetime=datetime.datetime.min)]
@@ -27,6 +24,7 @@ class SessionTracker:
 
 
 def show_histogram(data, func, normalize=False, out_file=None):
+    seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
         category_data[func(checkin)][checkin.rating or 0] += 1
