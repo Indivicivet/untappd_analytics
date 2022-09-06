@@ -3,6 +3,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+import seaborn
 
 import untappd
 import untappd_utils
@@ -44,6 +45,7 @@ for i, ci_slice in enumerate(slices):
     )
 
 print("setting up plots")
+seaborn.set()
 fig, ax = plt.subplots(figsize=(12.8, 7.2))
 x_data = [i / 4 for i in range(1, 21)]
 y_first_frame = [0 for i in range(1, 21)]
