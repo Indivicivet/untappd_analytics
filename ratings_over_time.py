@@ -2,6 +2,7 @@ from collections import Counter
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import numpy as np
 
 import untappd
 import untappd_utils
@@ -52,8 +53,8 @@ data_queue = [
     for _ in range(NUM_ONION_SKINS)
 ]
 plot_lines = [
-    plt.plot(*data)[0]
-    for data in data_queue
+    plt.plot(*data, c=(c0, c0, c0))[0]
+    for data, c0 in zip(data_queue, np.linspace(1, 0, len(data_queue)))
 ]
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
