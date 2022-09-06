@@ -10,7 +10,7 @@ import untappd
 CHECKINS = untappd.load_latest_checkins()
 
 START_TIME = datetime.datetime(2022, 9, 3, 16, 0, 0)
-END_TIME = datetime.datetime(2022, 9, 6, 2, 0, 0)
+END_TIME = datetime.datetime(2022, 9, 6, 6, 0, 0)
 
 relevant_checkins = [c for c in CHECKINS if START_TIME < c.datetime < END_TIME]
 
