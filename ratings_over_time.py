@@ -55,7 +55,7 @@ y_first_frame = [0 for i in range(1, 21)]
 
 data_queue = [
     (x_data, y_first_frame)
-    for _ in range(NUM_ONION_SKINS)
+    for _ in range(NUM_ONION_SKINS + 1)
 ]
 plot_lines = [
     plt.plot(*data, c=(c0, c0, c0))[0]
