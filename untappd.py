@@ -55,6 +55,7 @@ CATEGORY_KEYWORDS = {
     "ipa": ["ipa"],
     "lager": ["lager", "pilsner"],
     "other ale": ["ale"],
+    "wheat": ["wheat"],
     "other": [],
 }
 
