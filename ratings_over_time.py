@@ -42,7 +42,7 @@ for i, ci_slice in enumerate(slices):
     )
 
 print("setting up plots")
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(12.8, 7.2))
 x_data = [i / 4 for i in range(1, 21)]
 y_first_frame = [0 for i in range(1, 21)]
 ln, = plt.plot(x_data, y_first_frame)
