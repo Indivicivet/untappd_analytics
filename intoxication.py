@@ -21,6 +21,7 @@ ASSUMED_BEER_VOLUME = 0.15  # * % gives volume!
 TASTER_VOLUME = 0.05
 
 time_offsets = np.linspace(0, (END_TIME - START_TIME).seconds, TIME_STEPS)
+total_consumption = 0
 intox = 0
 intoxes = [intox]
 
@@ -28,11 +29,13 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
     # could make it O(n) assuming sorting but... shrug
     for ci in relevant_checkins:
         if t1 <= (ci.datetime - START_TIME).seconds < t2:
-            intox += ci.beer.abv * (
+            consumed_units = ci.beer.abv * (
                 TASTER_VOLUME
                 if ci.serving_type and ci.serving_type.lower() == "taster"  # todo :: attr?
                 else ASSUMED_BEER_VOLUME
             )
+            total_consumption += consumed_units
+            intox += consumed_units
     if intox > 0:
         intox -= DETOX_PER_SECOND * (t2 - t1)
         intox = max(intox, 0)
