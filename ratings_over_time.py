@@ -14,6 +14,7 @@ CUMULATIVE = False
 print("gathering data")
 SPREAD = 400  # ignored for CUMULATIVE
 STEP = 20
+NUM_ONION_SKINS = 10
 frames = []
 slices = (
     [
@@ -45,24 +46,35 @@ print("setting up plots")
 fig, ax = plt.subplots(figsize=(12.8, 7.2))
 x_data = [i / 4 for i in range(1, 21)]
 y_first_frame = [0 for i in range(1, 21)]
-ln, = plt.plot(x_data, y_first_frame)
+
+data_queue = [
+    (x_data, y_first_frame)
+    for _ in range(NUM_ONION_SKINS)
+]
+plot_lines = [
+    plt.plot(*data)[0]
+    for data in data_queue
+]
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
 
 def init():
     ax.set_xlim(0, 5)
-    return ln,
+    return plot_lines
 
 def update(frame):
     ax.set_title(f'{frame["start_date"]} ~ {frame["end_date"]}')
     ax.set_ylim(0, frame["num_ratings"] * (0.3 if CUMULATIVE else 0.4))
-    ln.set_data(
+    data_queue.pop(0)
+    data_queue.append(
         untappd_utils.smooth_ratings(
             x_data,
             [frame["ratings"].get(i, 0) for i in range(1, 21)],
         ),
     )
-    return ln,
+    for line, data in zip(plot_lines, data_queue):
+        line.set_data(*data)
+    return plot_lines
 
 print("animating")
 ani = animation.FuncAnimation(
