@@ -14,7 +14,7 @@ CUMULATIVE = False
 
 print("gathering data")
 SPREAD = 400  # ignored for CUMULATIVE
-STEP = 20
+STEP = 40
 NUM_ONION_SKINS = 10
 frames = []
 slices = (
