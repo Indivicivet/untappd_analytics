@@ -9,8 +9,8 @@ import untappd
 
 CHECKINS = untappd.load_latest_checkins()
 
-START_TIME = datetime.datetime(2022, 9, 3, 16, 0, 0)
-END_TIME = datetime.datetime(2022, 9, 6, 6, 0, 0)
+START_TIME = datetime.datetime(2022, 8, 13, 12, 30, 0)
+END_TIME = datetime.datetime(2022, 8, 13, 20, 0, 0)
 
 relevant_checkins = [c for c in CHECKINS if START_TIME < c.datetime < END_TIME]
 
@@ -18,7 +18,7 @@ relevant_checkins = [c for c in CHECKINS if START_TIME < c.datetime < END_TIME]
 TIME_STEPS = 1000
 DETOX_PER_HOUR = 1.0
 DETOX_PER_SECOND = DETOX_PER_HOUR / 3600
-ASSUMED_BEER_VOLUME = 0.15  # * % gives volume!
+ASSUMED_BEER_VOLUME = 0.10  # * % gives volume!
 TASTER_VOLUME = 0.05
 PURCHASED_BEER_VOLUME = 0.33  # bottles
 
