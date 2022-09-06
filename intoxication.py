@@ -50,23 +50,24 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
     intoxes.append(intox)
 
 
-seaborn.set()
-fig, ax1 = plt.subplots(figsize=(12.8, 7.2))
-ax1.plot(time_offsets, intoxes, label="intoxication")
+if not SHOW_RATINGS:
+    seaborn.set()  # todo :: default seaborn.set() makes 2 axes a bit gross
+fig, axes_intox = plt.subplots(figsize=(12.8, 7.2))
+axes_intox.plot(time_offsets, intoxes, label="intoxication")
 plt.title(
     f"total consumption = {total_consumption:.2f} units"
     f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
 )
 plt.xlabel("seconds elapsed (todo: better!)")
-ax1.set_ylabel("units in body")
+axes_intox.set_ylabel("units in body")
 if SHOW_RATINGS:
-    ax2 = ax1.twinx()
-    ax2.plot(
+    axes_ratings = axes_intox.twinx()
+    axes_ratings.plot(
         [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
         [ci.rating for ci in relevant_checkins],
         "ro",
         label="checkin rating",
     )
-    ax2.set_ylabel("rating")
+    axes_ratings.set_ylabel("rating")
     fig.legend()  # no point with just the line graph
 plt.show()
