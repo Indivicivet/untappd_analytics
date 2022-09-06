@@ -22,7 +22,7 @@ ASSUMED_BEER_VOLUME = 0.15  # * % gives volume!
 TASTER_VOLUME = 0.05
 PURCHASED_BEER_VOLUME = 0.33  # bottles
 
-SHOW_RATINGS = True
+SHOW_RATINGS = False
 
 time_offsets = np.linspace(0, (END_TIME - START_TIME).total_seconds(), TIME_STEPS)
 total_consumption = 0
