@@ -11,12 +11,13 @@ import untappd_utils
 print("loading")
 CHECKINS = untappd.load_latest_checkins()
 
-CUMULATIVE = False
-
 print("gathering data")
+CUMULATIVE = False
 SPREAD = 400  # ignored for CUMULATIVE
 STEP = 40
 NUM_ONION_SKINS = 10
+
+
 frames = []
 slices = (
     [
@@ -29,6 +30,7 @@ slices = (
         for start in range(0, len(CHECKINS) - SPREAD, STEP)
     ]
 )
+    
     
 for i, ci_slice in enumerate(slices):
     checkins = CHECKINS[ci_slice]
@@ -43,6 +45,7 @@ for i, ci_slice in enumerate(slices):
             "end_date": checkins[-1].datetime.date(),
         }
     )
+
 
 print("setting up plots")
 seaborn.set()
@@ -61,9 +64,11 @@ plot_lines = [
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
 
+
 def init():
     ax.set_xlim(0, 5)
     return plot_lines
+
 
 def update(frame):
     ax.set_title(f'{frame["start_date"]} ~ {frame["end_date"]}')
@@ -78,6 +83,7 @@ def update(frame):
     for line, data in zip(plot_lines, data_queue):
         line.set_data(*data)
     return plot_lines
+
 
 print("animating")
 ani = animation.FuncAnimation(
