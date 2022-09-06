@@ -22,6 +22,8 @@ ASSUMED_BEER_VOLUME = 0.15  # * % gives volume!
 TASTER_VOLUME = 0.05
 PURCHASED_BEER_VOLUME = 0.33  # bottles
 
+SHOW_RATINGS = True
+
 time_offsets = np.linspace(0, (END_TIME - START_TIME).total_seconds(), TIME_STEPS)
 total_consumption = 0
 intox = 0
@@ -57,13 +59,14 @@ plt.title(
 )
 plt.xlabel("seconds elapsed (todo: better!)")
 ax1.set_ylabel("units in body")
-ax2 = ax1.twinx()
-ax2.plot(
-    [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
-    [ci.rating for ci in relevant_checkins],
-    "ro",
-    label="checkin rating",
-)
-ax2.set_ylabel("rating")
-fig.legend()
+if SHOW_RATINGS:
+    ax2 = ax1.twinx()
+    ax2.plot(
+        [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
+        [ci.rating for ci in relevant_checkins],
+        "ro",
+        label="checkin rating",
+    )
+    ax2.set_ylabel("rating")
+    fig.legend()  # no point with just the line graph
 plt.show()
