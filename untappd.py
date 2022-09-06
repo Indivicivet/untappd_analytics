@@ -210,7 +210,8 @@ class Checkin:
     datetime: Optional[datetime] = None
     venue: Optional[Venue] = None
     flavour_profiles: list[str] = field(default_factory=list)
-    purchase_venue: Optional[str] = None
+    purchase_venue: Optional[str] = None  # todo :: type? Venue?
+    serving_type: Optional[str] = None  # todo :: type? (enum for servings)
     id: Optional[int] = None
     photo_url: Optional[str] = None
     tagged_friends: Optional[str] = None  # todo :: type?
@@ -252,7 +253,8 @@ class Checkin:
             ) if d.get("created_at") else None,
             url=d["checkin_url"],
             flavour_profiles=[],  # todo :)
-            # todo purchase_venue, serving_type
+            purchase_venue=d["purchase_venue"] or None,  # todo :: make actual Venue?
+            serving_type=d["serving_type"] or None,
             id=int(d["checkin_id"]) if d.get("checkin_id") else None,
             photo_url=d["photo_url"],
             tagged_friends=d["tagged_friends"],
@@ -272,6 +274,8 @@ class Checkin:
                 "%Y-%m-%d %H:%M:%S",
             ) if self.datetime is not None else "",
             "checkin_url": self.url,
+            "purchase_venue": self.purchase_venue,
+            "serving_type": self.serving_type,
             # todo :: something to do with flavour profiles :)
             "checkin_id": str(self.id) if self.id is not None else None,
             "photo_url": self.photo_url,
