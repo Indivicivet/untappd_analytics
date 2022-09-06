@@ -43,7 +43,7 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
     intoxes.append(intox)
 
 
-plt.title(f"total consumption = {total_consumption} units, over {END_TIME - START_TIME} minutes")
+plt.title(f"total consumption = {total_consumption:.2f} units, over {END_TIME - START_TIME} minutes")
 plt.xlabel("seconds elapsed (todo: better!)")
 plt.ylabel("units in body")
 plt.plot(time_offsets, intoxes)
