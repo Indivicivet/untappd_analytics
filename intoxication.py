@@ -20,6 +20,7 @@ DETOX_PER_HOUR = 1.0
 DETOX_PER_SECOND = DETOX_PER_HOUR / 3600
 ASSUMED_BEER_VOLUME = 0.15  # * % gives volume!
 TASTER_VOLUME = 0.05
+PURCHASED_BEER_VOLUME = 0.33  # bottles
 
 time_offsets = np.linspace(0, (END_TIME - START_TIME).total_seconds(), TIME_STEPS)
 total_consumption = 0
@@ -34,6 +35,8 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
             consumed_units = ci.beer.abv * (
                 TASTER_VOLUME
                 if ci.serving_type and ci.serving_type.lower() == "taster"  # todo :: attr?
+                else PURCHASED_BEER_VOLUME
+                if ci.purchase_venue
                 else ASSUMED_BEER_VOLUME
             )
             total_consumption += consumed_units
