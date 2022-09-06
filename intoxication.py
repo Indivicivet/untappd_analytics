@@ -49,19 +49,21 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
 
 
 seaborn.set()
-plt.figure(figsize=(12.8, 7.2))
-plt.plot(time_offsets, intoxes, label="intoxication")
-plt.plot(
+fig, ax1 = plt.subplots(figsize=(12.8, 7.2))
+ax1.plot(time_offsets, intoxes, label="intoxication")
+plt.title(
+    f"total consumption = {total_consumption:.2f} units"
+    f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
+)
+plt.xlabel("seconds elapsed (todo: better!)")
+ax1.set_ylabel("units in body")
+ax2 = ax1.twinx()
+ax2.plot(
     [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
     [ci.rating for ci in relevant_checkins],
     "ro",
     label="checkin rating",
 )
-plt.title(
-    f"total consumption = {total_consumption:.2f} units"
-    f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
-)
-plt.legend()
-plt.xlabel("seconds elapsed (todo: better!)")
-plt.ylabel("units in body")
+ax2.set_ylabel("rating")
+fig.legend()
 plt.show()
