@@ -51,6 +51,11 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
 seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 plt.plot(time_offsets, intoxes)
+plt.plot(
+    [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
+    [ci.rating for ci in relevant_checkins],
+    "ro",
+)
 plt.title(
     f"total consumption = {total_consumption:.2f} units"
     f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
