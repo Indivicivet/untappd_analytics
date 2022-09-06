@@ -35,6 +35,7 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
             )
     if intox > 0:
         intox -= DETOX_PER_SECOND * (t2 - t1)
+        intox = max(intox, 0)
     intoxes.append(intox)
 
 
