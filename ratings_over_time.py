@@ -55,7 +55,7 @@ def update(frame):
     ax.set_ylim(0, frame["num_ratings"] * (0.3 if CUMULATIVE else 0.4))
     ln.set_data(
         x_data,
-        [frame["ratings"].get(i) for i in range(1, 21)],
+        [frame["ratings"].get(i, 0) for i in range(1, 21)],
     )
     return ln,
 
