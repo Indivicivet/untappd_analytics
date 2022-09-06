@@ -67,12 +67,22 @@ def strength_class(checkin):
     return "10%+"
 
 
-def date_segment(checkin):
+def date_segment_sg(checkin):
     if checkin.datetime < datetime.datetime(2022, 6, 14, 20):
         return "Pre-Singapore"
     if checkin.datetime < datetime.datetime(2022, 7, 7):
         return "Singapore"
     return "Post-Singapore"
+
+
+def date_segment_nl(checkin):
+    if (
+        datetime.datetime(2022, 9, 3)
+        <= checkin.datetime
+        <= datetime.datetime(2022, 9, 5)
+    ):
+        return "Netherlands"
+    return "Otherwise"
 
 
 def save_various_plots(checkins, out_dir=None):
@@ -83,7 +93,8 @@ def save_various_plots(checkins, out_dir=None):
         "hour": lambda checkin: checkin.datetime.hour,
         "session_n": SessionTracker().session_n,
         "strength": strength_class,
-        "singapore": date_segment,
+        "singapore": date_segment_sg,
+        "nederlands": date_segment_nl,
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
         show_histogram(
