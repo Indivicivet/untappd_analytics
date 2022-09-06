@@ -56,6 +56,9 @@ SHOW_N_BREWERIES = 20
 SHOW_TOP_N = 5  # 0 for less detailed view :)
 SHOW_STYLES = True
 
+
+all_beer_score, _ = score_checkin_list(CHECKINS)
+
 for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
     print(f"#{i+1: <3} {brewery} (magic rating: {score:.2f})")
     if SHOW_STYLES:
@@ -71,3 +74,5 @@ for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]
         for beer, rating in top_beers[:SHOW_TOP_N]:
             print(f"{rating:.2f}  {beer}")
         print()
+
+print(f"(magic rating across all beers: {all_beer_score:.2f})")
