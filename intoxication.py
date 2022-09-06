@@ -32,6 +32,7 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
     for ci in relevant_checkins:
         # todo :: could be more robust at only hitting a beer once
         if t1 <= (ci.datetime - START_TIME).total_seconds() < t2:
+            print(f"{ci.datetime}, {ci.beer}, {ci.rating}")
             consumed_units = ci.beer.abv * (
                 TASTER_VOLUME
                 if ci.serving_type and ci.serving_type.lower() == "taster"  # todo :: attr?
