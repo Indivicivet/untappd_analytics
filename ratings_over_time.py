@@ -54,7 +54,7 @@ data_queue = [
 ]
 plot_lines = [
     plt.plot(*data, c=(c0, c0, c0))[0]
-    for data, c0 in zip(data_queue, np.linspace(1, 0, len(data_queue)))
+    for data, c0 in zip(data_queue, [*np.linspace(0.9, 0.5, len(data_queue)-1), 0])
 ]
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
