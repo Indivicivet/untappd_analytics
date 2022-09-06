@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 import untappd
+import untappd_utils
 
 print("loading")
 CHECKINS = untappd.load_latest_checkins()
@@ -54,8 +55,10 @@ def update(frame):
     ax.set_title(f'{frame["start_date"]} ~ {frame["end_date"]}')
     ax.set_ylim(0, frame["num_ratings"] * (0.3 if CUMULATIVE else 0.4))
     ln.set_data(
-        x_data,
-        [frame["ratings"].get(i, 0) for i in range(1, 21)],
+        untappd_utils.smooth_ratings(
+            x_data,
+            [frame["ratings"].get(i, 0) for i in range(1, 21)],
+        ),
     )
     return ln,
 
