@@ -26,7 +26,7 @@ intoxes = [intox]
 for t1, t2 in zip(time_offsets, time_offsets[1:]):
     # could make it O(n) assuming sorting but... shrug
     for ci in relevant_checkins:
-        if t1 < (ci.datetime - START_TIME).seconds < t2:
+        if t1 <= (ci.datetime - START_TIME).seconds < t2:
             # todo :: tasters
             intox += ci.beer.abv * ASSUMED_BEER_VOLUME
     if intox > 0:
