@@ -2,6 +2,7 @@ import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn
 
 import untappd
 
@@ -43,6 +44,7 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
     intoxes.append(intox)
 
 
+seaborn.set()
 plt.title(
     f"total consumption = {total_consumption:.2f} units"
     f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
