@@ -26,6 +26,7 @@ def show_average_rating_by_time(data, out_file=None):
     x_data = range(24)
     ax1.plot(x_data, [y_data.get(x, 0) for x in x_data], label="average rating")
     ax1.set_ylabel("rating")
+    ax1.set_xlabel("time of day")
     ax2.plot(x_data, [counts.get(x, 0) for x in x_data], label="checkins", color="orange")
     ax2.set_ylabel("checkins")
     fig.legend()
