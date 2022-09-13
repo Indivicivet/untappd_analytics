@@ -85,6 +85,24 @@ def date_segment_nl(checkin):
     return "Otherwise"
 
 
+def by_brewery_popular_only(checkin):
+    name = checkin.beer.brewery.name
+    if any(x in name.lower() for x in [
+        "amundsen",
+        "vault city",
+        "vocation",
+        "siren",
+        "wild beer",
+        "nerdbrewing",
+        # "moersleutel",
+        # "brew york",
+        # "northern monk",
+        # "brouwerij kees",
+    ]):
+        return name
+    return "other"
+
+
 def save_various_plots(checkins, out_dir=None):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
@@ -95,6 +113,7 @@ def save_various_plots(checkins, out_dir=None):
         "strength": strength_class,
         "singapore": date_segment_sg,
         "nederlands": date_segment_nl,
+        "brewery": by_brewery_popular_only,
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
         show_histogram(
