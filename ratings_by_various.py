@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 import datetime
+from typing import Optional, Any, Callable, Sequence
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -26,7 +27,12 @@ class SessionTracker:
 
 
 # todo :: move to untappd?
-def show_histogram(data, func, normalize=False, out_file=None):
+def show_histogram(
+    data: Sequence[untappd.Checkin],
+    func: Callable[[untappd.Checkin], Any],  # todo :: its really "sortable"
+    normalize: bool = False,
+    out_file: Optional[Path] = None,
+):
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
