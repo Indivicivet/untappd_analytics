@@ -11,4 +11,6 @@ seaborn.set()
 
 plt.figure(figsize=(12.8, 7.2))
 plt.plot(times, range(len(times)))
+plt.xlabel("date")
+plt.ylabel("total checkins")
 plt.show()
