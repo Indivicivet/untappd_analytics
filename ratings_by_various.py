@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 from pathlib import Path
 import datetime
 from typing import Optional, Any, Callable, Sequence
@@ -24,6 +24,19 @@ class SessionTracker:
         if n >= self.cap:
             return f"{self.cap}+"
         return str(n)
+
+
+class BeerNthTimeTracker:
+    def __init__(self, max_n=4):
+        self.beer_checkins = Counter()
+        self.max_n = max_n
+
+    def beer_n(self, checkin):
+        self.beer_checkins[checkin.beer] += 1
+        n = self.beer_checkins[checkin.beer]
+        if n < self.max_n:
+            return str(n)
+        return f"{self.max_n}+"
 
 
 # todo :: move to untappd?
@@ -120,6 +133,7 @@ def save_various_plots(checkins, out_dir=None):
         "singapore": date_segment_sg,
         "nederlands": date_segment_nl,
         "brewery": by_brewery_popular_only,
+        "nth_time_having": BeerNthTimeTracker().beer_n,
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
         show_histogram(
