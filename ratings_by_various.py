@@ -27,11 +27,14 @@ class SessionTracker:
 
 
 class BeerNthTimeTracker:
-    def __init__(self, max_n=4):
+    def __init__(self, max_n=4, separate_lager=False):
         self.beer_checkins = Counter()
         self.max_n = max_n
+        self.separate_lager = separate_lager
 
     def beer_n(self, checkin):
+        if separate_lager and checkin.beer.get_style_category() == "lager":
+            return "lager"
         self.beer_checkins[checkin.beer] += 1
         n = self.beer_checkins[checkin.beer]
         if n < self.max_n:
