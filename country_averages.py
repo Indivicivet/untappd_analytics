@@ -35,7 +35,7 @@ def get_new_latlong(country):
 
 get_latlong = filecached.Function(
     func=get_new_latlong,
-    file=Path("out/latlongs.json"),
+    file=Path("out/world_latlongs.json"),
 )
 
 for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
