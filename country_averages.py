@@ -41,4 +41,6 @@ for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
     ).add_to(markers)
 
 world.render()
-world.save("out/world.html")
+OUT_FILE = "out/world.html"
+world.save(OUT_FILE)
+print(f"saved to {OUT_FILE}")
