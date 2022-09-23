@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 
+import numpy as np
 import colour
 import folium
 import geopy.geocoders
@@ -46,7 +47,7 @@ for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
     print(country_rank_str)
     red_rating = 2.5
     green_rating = 4.25
-    hue = 0.333 * min(max((average_rating - red_rating) / (green_rating - red_rating), 0), 1)
+    hue = np.interp(average_rating, (red_rating, green_rating), (0, 1 / 3))
     folium.Circle(
         location=get_latlong(country),
         radius=30_000 * n_ratings ** 0.3,  # meters
