@@ -46,11 +46,11 @@ for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
     )
     print(country_rank_str)
     red_rating = 2.5
-    green_rating = 4.25
+    green_rating = 4
     hue = np.interp(average_rating, (red_rating, green_rating), (0, 1 / 3))
     folium.Circle(
         location=get_latlong(country),
-        radius=30_000 * n_ratings ** 0.3,  # meters
+        radius=20_000 * n_ratings ** 0.4,  # meters
         # stroke=False,
         color=colour.Color(hsl=(hue, 1, 0.3)).hex_l,
         fill=True,
