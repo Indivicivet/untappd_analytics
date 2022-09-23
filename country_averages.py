@@ -39,7 +39,11 @@ get_latlong = filecached.Function(
 )
 
 for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
-    print(f"{i+1}: {country} - average {average_rating:.2f} over {n_ratings} ratings")
+    country_rank_str = (
+        f"{country} (rank {i+1})"
+        f" - average {average_rating:.2f} over {n_ratings} ratings"
+    )
+    print(country_rank_str)
     red_rating = 2.5
     green_rating = 4.25
     hue = 0.333 * min(max((average_rating - red_rating) / (green_rating - red_rating), 0), 1)
@@ -50,6 +54,7 @@ for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
         color=colour.Color(hsl=(hue, 1, 0.3)).hex_l,
         fill=True,
         fill_color=colour.Color(hsl=(hue, 1, 0.5)).hex_l,
+        tooltip=country_rank_str,
     ).add_to(markers)
 
 world.render()
