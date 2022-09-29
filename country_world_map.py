@@ -12,6 +12,9 @@ import filecached
 CHECKINS = untappd.load_latest_checkins()
 country_ratings = defaultdict(list)
 
+
+# todo :: might want to use a slightly different set of
+# magic_rating params for country-based?
 MAGIC_RATING = False
 
 for ci in CHECKINS:
