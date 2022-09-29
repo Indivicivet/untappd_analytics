@@ -12,13 +12,23 @@ import filecached
 CHECKINS = untappd.load_latest_checkins()
 country_ratings = defaultdict(list)
 
-for ci in CHECKINS:
-    country_ratings[ci.beer.brewery.country].append(ci.rating)
+MAGIC_RATING = False
 
-country_avg_and_count = sorted(
+for ci in CHECKINS:
+    country_ratings[ci.beer.brewery.country].append(ci)
+
+country_rating_and_count = sorted(
     (
-        (sum(ratings) / len(ratings), len(ratings), country)
-        for country, ratings in country_ratings.items()
+        (
+            (
+                untappd.magic_rating(cis)[0]
+                if MAGIC_RATING
+                else sum(ci.rating for ci in cis) / len(cis)
+            ),
+            len(cis),
+            country,
+        )
+        for country, cis in country_ratings.items()
     ),
     reverse=True,
 )
@@ -39,15 +49,19 @@ get_latlong = filecached.Function(
     file=Path("out/world_latlongs.json"),
 )
 
-for i, (average_rating, n_ratings, country) in enumerate(country_avg_and_count):
+for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     country_rank_str = (
         f"{country} (rank {i+1})"
-        f" - average {average_rating:.2f} over {n_ratings} ratings"
+        f" - {'magic' if MAGIC_RATING else 'average'} rating"
+        f" {rating:.2f} over {n_ratings} ratings"
     )
     print(country_rank_str)
-    red_rating = 2.5
-    green_rating = 4
-    hue = np.interp(average_rating, (red_rating, green_rating), (0, 1 / 3))
+    rating_colour_range = (
+        (2, 4)
+        if MAGIC_RATING
+        else (2.5, 4)
+    )
+    hue = np.interp(rating, rating_colour_range, (0, 1 / 3))
     folium.Circle(
         location=get_latlong(country),
         radius=20_000 * n_ratings ** 0.4,  # meters
