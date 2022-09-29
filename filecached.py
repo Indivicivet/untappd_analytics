@@ -1,7 +1,7 @@
 """
 Basic caching of json-friendly function calls to a file
 
-used for caching of geolocations in country_averages.py
+used for caching of geolocations in country_world_map.py
 
 loads file on creation of Function() object, saves file
 every time an unknown key is queried; i.e. is quite naive,
