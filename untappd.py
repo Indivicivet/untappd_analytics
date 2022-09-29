@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Any, Sequence, Union
+from typing import Optional, Any, Sequence, Union, Tuple
 
 DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
 
@@ -319,9 +319,11 @@ def magic_rating(
     checkins: Sequence[Checkin],
     dropoff_ratio: float = 0.8,
     average_score_weight: float = 0.5,
-):
+) -> Tuple[float, list[Beer]]:
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
+
+    returns (magic score, list of beers by average rating)
     """
     top_ratings = sorted(
         average_rating_by_beer(checkins).items(),
@@ -329,10 +331,12 @@ def magic_rating(
         key=lambda t: t[1],
     )
     return (
+        # magic score
         average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
         + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum
             r * dropoff_ratio ** i
             for i, (_, r) in enumerate(top_ratings)
         ),
+        # list of beers by top rating
         top_ratings,
     )
