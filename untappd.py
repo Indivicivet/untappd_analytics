@@ -315,7 +315,11 @@ def average_rating_by_beer(checkins: Sequence[Checkin]) -> dict[Beer, float]:
     }
 
 
-def magic_rating(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
+def magic_rating(
+    checkins: Sequence[Checkin],
+    dropoff_ratio: float = 0.8,
+    average_score_weight: float = 0.5,
+):
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
     """
