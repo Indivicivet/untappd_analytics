@@ -322,7 +322,7 @@ def magic_rating(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
     top_ratings = sorted(
         average_rating_by_beer(checkins).items(),
         reverse=True,
-        key = lambda t: t[1],
+        key=lambda t: t[1],
     )
     return (
         average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
