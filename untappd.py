@@ -313,3 +313,22 @@ def average_rating_by_beer(checkins: Sequence[Checkin]) -> dict[Beer, float]:
         beer: sum(rating_list) / len(rating_list)
         for beer, rating_list in beer_ratings.items()
     }
+
+
+def magic_rating(checkins, dropoff_ratio=0.8, average_score_weight=0.5):
+    """
+    dropoff_ratio indicates how much to scale weighting for subsequent beers
+    """
+    top_ratings = sorted(
+        average_rating_by_beer(checkins).items(),
+        reverse=True,
+        key = lambda t: t[1],
+    )
+    return (
+        average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
+        + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum
+            r * dropoff_ratio ** i
+            for i, (_, r) in enumerate(top_ratings)
+        ),
+        top_ratings,
+    )
