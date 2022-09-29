@@ -3,3 +3,7 @@ seaborn
 numpy
 scipy
 pandas
+
+colour
+folium
+geopy
