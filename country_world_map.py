@@ -15,7 +15,8 @@ country_ratings = defaultdict(list)
 
 # todo :: might want to use a slightly different set of
 # magic_rating params for country-based?
-MAGIC_RATING = False
+MAGIC_RATING = True
+rating_type_str = "magic" if MAGIC_RATING else "average"
 
 for ci in CHECKINS:
     country_ratings[ci.beer.brewery.country].append(ci)
@@ -55,7 +56,7 @@ get_latlong = filecached.Function(
 for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     country_rank_str = (
         f"{country} (rank {i+1})"
-        f" - {'magic' if MAGIC_RATING else 'average'} rating"
+        f" - {rating_type_str} rating"
         f" {rating:.2f} over {n_ratings} ratings"
     )
     print(country_rank_str)
@@ -76,6 +77,6 @@ for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     ).add_to(markers)
 
 world.render()
-MAP_OUT_FILE = "out/world_map.html"
+MAP_OUT_FILE = f"out/world_map_{rating_type_str}.html"
 world.save(MAP_OUT_FILE)
 print(f"saved map to {MAP_OUT_FILE}")
