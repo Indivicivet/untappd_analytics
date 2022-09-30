@@ -60,7 +60,7 @@ for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     )
     print(country_rank_str)
     rating_colour_range = (
-        (2, 4)
+        (2, 4.1)
         if MAGIC_RATING
         else (2.5, 4)
     )
