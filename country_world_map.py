@@ -65,7 +65,7 @@ for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
         if MAGIC_RATING
         else (2.5, 4)
     )
-    hue = np.interp(rating, rating_colour_range, (0, 1 / 3))
+    hue = np.interp(rating, rating_colour_range, (0, 0.3))
     folium.Circle(
         location=get_latlong(country),
         radius=20_000 * n_ratings ** 0.4,  # meters
