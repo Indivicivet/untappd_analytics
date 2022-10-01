@@ -33,7 +33,7 @@ class BeerNthTimeTracker:
         self.separate_lager = separate_lager
 
     def beer_n(self, checkin):
-        if separate_lager and checkin.beer.get_style_category() == "lager":
+        if self.separate_lager and checkin.beer.get_style_category() == "lager":
             return "lager"
         self.beer_checkins[checkin.beer] += 1
         n = self.beer_checkins[checkin.beer]
