@@ -53,17 +53,17 @@ for t1, t2 in zip(time_offsets, time_offsets[1:]):
 if not SHOW_RATINGS:
     seaborn.set()  # todo :: default seaborn.set() makes 2 axes a bit gross
 fig, axes_intox = plt.subplots(figsize=(12.8, 7.2))
-axes_intox.plot(time_offsets, intoxes, label="intoxication")
+axes_intox.plot(time_offsets / 3600, intoxes, label="intoxication")
 plt.title(
     f"total consumption = {total_consumption:.2f} units"
     f", over {(END_TIME - START_TIME) / datetime.timedelta(hours=1):.2f} hours"
 )
-plt.xlabel("seconds elapsed (todo: better!)")
+plt.xlabel("hours elapsed (todo: better!)")
 axes_intox.set_ylabel("units in body")
 if SHOW_RATINGS:
     axes_ratings = axes_intox.twinx()
     axes_ratings.plot(
-        [(ci.datetime - START_TIME).total_seconds() for ci in relevant_checkins],
+        [(ci.datetime - START_TIME).total_seconds() / 3600 for ci in relevant_checkins],
         [ci.rating for ci in relevant_checkins],
         "ro",
         label="checkin rating",
