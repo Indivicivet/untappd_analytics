@@ -50,6 +50,7 @@ def show_histogram(
     normalize: bool = False,
     # when `show_n_checkins` is not specified, show iff `normalize`
     show_n_checkins: Optional[bool] = None,
+    title: Optional[str] = None,
     out_file: Optional[Path] = None,
 ):
     if show_n_checkins is None:
@@ -74,6 +75,7 @@ def show_histogram(
             )
         )
     plt.legend()
+    plt.title(title)
     plt.xlabel("rating")
     plt.ylabel(
         "percentage of checkins\n(normalized per category)"
