@@ -160,6 +160,7 @@ def save_various_plots(checkins, out_dir=None):
             checkins,
             func=func,
             normalize=tag not in ["hour"],
+            title=f"ratings by {tag}",
             out_file=out_file,
         )
         print(f"saved ratings by {tag} to {out_file}")
