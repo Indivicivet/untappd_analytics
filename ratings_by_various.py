@@ -47,8 +47,13 @@ def show_histogram(
     data: Sequence[untappd.Checkin],
     func: Callable[[untappd.Checkin], Any],  # todo :: its really "sortable"
     normalize: bool = False,
+    # when `show_n_checkins` is not specified, show iff `normalize`
+    show_n_checkins: Optional[bool] = None,
     out_file: Optional[Path] = None,
 ):
+    if show_n_checkins is None:
+        show_n_checkins = normalize
+
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
@@ -59,7 +64,14 @@ def show_histogram(
     for label, counts in sorted(category_data.items()):
         scale_factor = 100 / sum(counts.values()) if normalize else 1
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
-        plt.plot(*untappd_utils.smooth_ratings(x_data, y_data), label=label)
+        plt.plot(
+            *untappd_utils.smooth_ratings(x_data, y_data),
+            label=(
+                f"{label} ({sum(counts.values())} checkins)"
+                if show_n_checkins
+                else label
+            )
+        )
     plt.legend()
     plt.xlabel("rating")
     plt.ylabel(
