@@ -67,6 +67,8 @@ def show_histogram(
         if normalize
         else "number of checkins"
     )
+    plt.gca().xaxis.set_minor_locator(mtick.MultipleLocator(0.25))
+    plt.gca().grid(which="minor", color="w", linewidth=0.5)
     if normalize:
         plt.gca().yaxis.set_major_formatter(
             mtick.PercentFormatter(decimals=0),
