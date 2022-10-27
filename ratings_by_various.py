@@ -12,12 +12,13 @@ import untappd_utils
 
 
 class SessionTracker:
-    def __init__(self, cap=5):
+    def __init__(self, cap=5, max_gap=datetime.timedelta(hours=1)):
         self.session = [untappd.Checkin(beer=None, datetime=datetime.datetime.min)]
         self.cap = cap
+        self.max_gap = max_gap
 
     def session_n(self, checkin):
-        if checkin.datetime > self.session[-1].datetime + datetime.timedelta(hours=1):
+        if checkin.datetime > self.session[-1].datetime + self.max_gap:
             self.session = []
         self.session.append(checkin)
         n = len(self.session)
