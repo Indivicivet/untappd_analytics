@@ -143,6 +143,19 @@ def by_brewery_popular_only(checkin):
     return "other"
 
 
+# todo :: there are better (non-lineplot) visualizations for this
+def weak_strong_main_categories(checkin, threshold=7):
+    style = checkin.beer.get_style_category()
+    if style in ["stout", "sour", "ipa"]:
+        strength = (
+            f"{threshold}%+"
+            if checkin.beer.abv >= threshold
+            else f"<{threshold}%"
+        )
+        return f"{style}, {strength}"
+    return None
+
+
 def save_various_plots(checkins, out_dir=None):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
@@ -156,6 +169,7 @@ def save_various_plots(checkins, out_dir=None):
         "brewery": by_brewery_popular_only,
         "nth_time_having": BeerNthTimeTracker().beer_n,
         "taster_or_not": lambda checkin: checkin.serving_type == "Taster",
+        "weak_strong_main_categories": weak_strong_main_categories,
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
         show_histogram(
