@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn
 
 import untappd
+import untappd_utils
 
 CHECKINS = untappd.load_latest_checkins()
 
-GROUP_TIMESPAN = datetime.timedelta(days=31 * 4)
+GROUP_TIMESPAN = datetime.timedelta(days=31)
 start_date = min(c.datetime for c in CHECKINS)
 end_date = max(c.datetime for c in CHECKINS) - GROUP_TIMESPAN
 day_starts = [
@@ -29,8 +30,12 @@ seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for category in untappd.CATEGORY_KEYWORDS:
     plt.plot(
-        day_starts,
-        [counts[category] for counts in category_counts],
+        *untappd_utils.smooth_ratings(
+            range(len(day_starts)),
+            [counts[category] for counts in category_counts],
+            samples=3000,
+            amount=20,
+        ),
         label=category,
     )
 plt.xlabel("date")
