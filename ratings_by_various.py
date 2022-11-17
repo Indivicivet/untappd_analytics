@@ -59,7 +59,8 @@ def show_histogram(
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
-        category_data[func(checkin)][checkin.rating or 0] += 1
+        if (category := func(checkin)) is not None:
+            category_data[category][checkin.rating or 0] += 1
 
     x_data = [i / 4 for i in range(1, 21)]
     plt.figure(figsize=(12.8, 7.2))
