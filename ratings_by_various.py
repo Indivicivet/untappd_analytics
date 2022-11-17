@@ -170,3 +170,12 @@ def save_various_plots(checkins, out_dir=None):
 CHECKINS = untappd.load_latest_checkins()
 save_various_plots(CHECKINS)
 # show_histogram(CHECKINS, func=strength_class, normalize=True)
+
+for category in untappd.CATEGORY_KEYWORDS:
+    show_histogram(
+        [c for c in CHECKINS if c.beer.get_style_category() == category],
+        func=strength_class,
+        normalize=True,
+        title=f"ratings by abv, {category} only",
+        out_file=Path(__file__).parent / "out" / f"rating_by_abv_only_{category}.png",
+    )
