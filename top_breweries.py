@@ -4,6 +4,7 @@ depending on the average_score_weight :)
 """
 
 from collections import defaultdict, Counter
+from pathlib import Path
 
 import untappd
 
@@ -38,12 +39,13 @@ SHOW_STYLES = True
 
 all_beer_score, _ = untappd.magic_rating(CHECKINS)
 
+out_lines = []
 for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
-    print(f"#{i+1: <3} {brewery} (magic rating: {score:.2f})")
+    out_lines.append(f"#{i+1: <3} {brewery} (magic rating: {score:.2f})")
     if SHOW_STYLES:
-        print(
-            "Styles across all checkins:",
-            ", ".join(
+        out_lines.append(
+            "Styles across all checkins "
+            + ", ".join(
                 f"{style.capitalize()} {ratio:.1%}"
                 for style, ratio in get_style_ratios(brewery_checkins[brewery])
             )
@@ -51,7 +53,14 @@ for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]
     if SHOW_TOP_N > 0:
         # print(f"{brewery}'s top {SHOW_TOP_N} beers:")
         for beer, rating in top_beers[:SHOW_TOP_N]:
-            print(f"{rating:.2f}  {beer}")
-        print()
+            out_lines.append(f"{rating:.2f}  {beer}")
+        out_lines.append("")
 
-print(f"(magic rating across all beers: {all_beer_score:.2f})")
+out_lines.append(f"(magic rating across all beers: {all_beer_score:.2f})")
+out = "\n".join(out_lines)
+
+print(out)
+(Path(__file__).parent / "out" / "top_breweries.txt").write_text(
+    out,
+    encoding="UTF-8",
+)
