@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 
 import untappd
 
@@ -15,6 +16,10 @@ plt.scatter(
     alpha=0.3,
     s=200,
 )
+ax = plt.gca()
+ax.set_xscale("log")
+ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
 plt.xlabel("abv")
 plt.ylabel("rating")
 plt.show()
