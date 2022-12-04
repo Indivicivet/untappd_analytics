@@ -11,6 +11,13 @@ times_non_taster = [
     for checkin in CHECKINS
     if checkin.serving_type != "Taster"
 ]
+times_unique = []
+hit_beers = set()
+for checkin in CHECKINS:
+    if checkin.beer in hit_beers:
+        continue
+    times_unique.append(checkin.datetime)
+    hit_beers.add(checkin.beer)
 
 seaborn.set()
 
@@ -22,6 +29,12 @@ plt.plot(
     linestyle="dashed"
 )
 plt.plot(times, range(len(times)), label="total checkins")
+plt.plot(
+    times_unique,
+    range(len(times_unique)),
+    label="unique",
+    linestyle="dashed"
+)
 plt.xlabel("date")
 plt.ylabel("checkins")
 plt.legend()
