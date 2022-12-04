@@ -8,7 +8,7 @@ CHECKINS = untappd.load_latest_checkins()
 
 MIN_ABV = 12
 
-cis_high_abv = [c for c in CHECKINS if c.beer.abv > MIN_ABV]
+cis_high_abv = [c for c in CHECKINS if c.beer.abv >= MIN_ABV]
 
 seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
