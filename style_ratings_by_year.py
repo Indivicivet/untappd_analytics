@@ -1,6 +1,7 @@
 import statistics
 
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import seaborn
 
 import untappd
@@ -32,5 +33,6 @@ plt.xticks(rotation=-45)
 
 all_vals = [v for year in by_year.values() for v in year.values()]
 plt.ylim([min(all_vals) - 0.25, max(all_vals)])
+plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(0.1))
 plt.ylabel("average rating")
 plt.show()
