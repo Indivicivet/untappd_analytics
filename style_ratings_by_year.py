@@ -27,4 +27,7 @@ for year, checkins_by_cat in by_year.items():
         checkins_by_cat.values(),
     )
 plt.xticks(rotation=-45)
+
+all_vals = [v for year in by_year.values() for v in year.values()]
+plt.ylim([min(all_vals) - 0.25, max(all_vals)])
 plt.show()
