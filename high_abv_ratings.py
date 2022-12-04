@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import ticker
+import seaborn
 
 import untappd
 
@@ -9,6 +10,7 @@ MIN_ABV = 12
 
 cis_high_abv = [c for c in CHECKINS if c.beer.abv > MIN_ABV]
 
+seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 plt.scatter(
     [c.beer.abv for c in cis_high_abv],
