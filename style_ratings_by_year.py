@@ -1,6 +1,7 @@
 import statistics
 
 import matplotlib.pyplot as plt
+import seaborn
 
 import untappd
 
@@ -20,6 +21,7 @@ by_year = {
     for cat in untappd.CATEGORY_KEYWORDS
 }
 
+seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for year, checkins_by_cat in by_year.items():
     plt.bar(
@@ -30,4 +32,5 @@ plt.xticks(rotation=-45)
 
 all_vals = [v for year in by_year.values() for v in year.values()]
 plt.ylim([min(all_vals) - 0.25, max(all_vals)])
+plt.ylabel("average rating")
 plt.show()
