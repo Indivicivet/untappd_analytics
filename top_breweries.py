@@ -41,7 +41,10 @@ all_beer_score, _ = untappd.magic_rating(CHECKINS)
 
 out_lines = []
 for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]):
-    out_lines.append(f"#{i+1: <3} {brewery} (magic rating: {score:.2f})")
+    out_lines.append(
+        f"#{i+1: <3} {brewery} (magic rating: {score:.2f}"
+        f" over {len(brewery_checkins[brewery])} checkins)"
+    )
     if SHOW_STYLES:
         out_lines.append(
             "Styles across all checkins "
