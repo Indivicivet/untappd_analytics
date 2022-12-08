@@ -47,7 +47,7 @@ for i, (score, top_beers, brewery) in enumerate(scores_sorted[:SHOW_N_BREWERIES]
     )
     if SHOW_STYLES:
         out_lines.append(
-            "Styles across all checkins "
+            "Styles across all checkins: "
             + ", ".join(
                 f"{style.capitalize()} {ratio:.1%}"
                 for style, ratio in get_style_ratios(brewery_checkins[brewery])
