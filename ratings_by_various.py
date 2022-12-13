@@ -198,6 +198,10 @@ def save_various_plots(checkins, out_dir=None):
         "singapore": date_segment_sg,
         "nederlands": date_segment_nl,
         "brewery": by_brewery_popular_only,
+        "venue": ByFuncSpecificValuesOnly.top_n(
+            func=lambda ci: ci.venue.name if ci.venue is not None else None,
+            all_checkins=checkins,
+        ),
         "nth_time_having": BeerNthTimeTracker().beer_n,
         "taster_or_not": lambda checkin: checkin.serving_type == "Taster",
         "weak_strong_main_categories": weak_strong_main_categories,
