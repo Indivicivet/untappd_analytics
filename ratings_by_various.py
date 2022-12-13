@@ -156,24 +156,6 @@ def date_segment_nl(checkin):
     return "Otherwise"
 
 
-def by_brewery_popular_only(checkin):
-    name = checkin.beer.brewery.name
-    if any(x in name.lower() for x in [
-        "amundsen",
-        "vault city",
-        "vocation",
-        "siren",
-        "wild beer",
-        "nerdbrewing",
-        # "moersleutel",
-        # "brew york",
-        # "northern monk",
-        # "brouwerij kees",
-    ]):
-        return name
-    return "other"
-
-
 # todo :: there are better (non-lineplot) visualizations for this
 def weak_strong_main_categories(checkin, threshold=7):
     style = checkin.beer.get_style_category()
