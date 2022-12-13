@@ -1,4 +1,5 @@
 from collections import defaultdict, Counter
+from dataclasses import dataclass
 from pathlib import Path
 import datetime
 from typing import Optional, Any, Callable, Sequence
@@ -41,6 +42,36 @@ class BeerNthTimeTracker:
         if n < self.max_n:
             return str(n)
         return f"{self.max_n}+"
+
+
+@dataclass
+class ByFuncSpecificValuesOnly:
+    func: Callable[[untappd.Checkin], str]
+    included_values: Sequence[str]
+    allow_other: bool = False
+
+    def __call__(self, checkin):
+        f_result = self.func(checkin)  # category, etc
+        if f_result in self.included_values:
+            return f_result
+        if self.allow_other:
+            return "other"
+        return None
+
+    @classmethod
+    def top_n(cls, func, all_checkins, n=5, allow_other=False):
+        return cls(
+            func=func,
+            included_values=[
+                category
+                for category, _ in Counter(
+                    func(checkin)
+                    for checkin in all_checkins
+                    if func(checkin) is not None
+                ).most_common(n)
+            ],
+            allow_other=allow_other,
+        )
 
 
 # todo :: move to untappd?
