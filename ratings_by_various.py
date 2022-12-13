@@ -197,7 +197,16 @@ def save_various_plots(checkins, out_dir=None):
         "strength": strength_class,
         "singapore": date_segment_sg,
         "nederlands": date_segment_nl,
-        "brewery": by_brewery_popular_only,
+        "brewery": ByFuncSpecificValuesOnly.top_n(
+            func=(
+                lambda ci:
+                    ci.beer.brewery.name
+                    if ci.beer.brewery
+                       is not None else None
+            ),
+            all_checkins=checkins,
+            n=6,
+        ),
         "venue": ByFuncSpecificValuesOnly.top_n(
             func=lambda ci: ci.venue.name if ci.venue is not None else None,
             all_checkins=checkins,
