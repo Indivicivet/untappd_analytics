@@ -2,4 +2,6 @@ __pycache__/
 .idea/
 
 data_sources/
-out/
+scripts/out/
+
+untappd.egg-info/
