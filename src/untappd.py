@@ -244,7 +244,7 @@ class Checkin:
             comment=d["comment"],
             rating=(
                 float(d["rating_score"])
-                if d["rating_score"] != ""
+                if d["rating_score"]
                 else None
             ),
             datetime=datetime.strptime(
