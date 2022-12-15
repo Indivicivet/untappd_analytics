@@ -1,6 +1,8 @@
 Various scripts to make graphs and/or dump out data about a user's untappd beer checkins. These are written for personal interest only so to-do list may never get ticked off. You will need an untappd data file, which requires being an untappd subscriber (or finding a friend with one).
 
-`untappd.py` contains core functionality to load check-in data from a json file. The other python files make graphs or prints some data.
+    pip install -e .
+
+`untappd.py` contains core functionality to load check-in data from a json file. The other python files in scripts/ make graphs or print some data.
 
 # todos
 
