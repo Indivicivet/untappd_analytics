@@ -3,3 +3,5 @@ __pycache__/
 
 data_sources/
 out/
+
+untappd.egg-info/
