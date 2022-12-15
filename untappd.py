@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Any, Sequence, Union, Tuple
 
-DEFAULT_DATA_SOURCE = Path("__file__").parent / "data_sources"
+DEFAULT_DATA_SOURCE = Path(__file__).parent / "data_sources"
 
 
 def load_latest_datafile(
