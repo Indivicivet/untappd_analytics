@@ -183,8 +183,8 @@ def save_various_plots(checkins, out_dir=None):
             func=(
                 lambda ci:
                     ci.beer.brewery.name
-                    if ci.beer.brewery
-                       is not None else None
+                    if ci.beer.brewery is not None
+                    else None
             ),
             all_checkins=checkins,
             n=6,
