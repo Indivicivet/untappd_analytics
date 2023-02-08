@@ -27,6 +27,7 @@ abvs = [
         ci.beer.abv
         for ci in CHECKINS
         if start <= ci.datetime < start + GROUP_TIMESPAN
+        # todo :: don't do this loop every time :P
     ])
     for start in day_starts
 ]
