@@ -1,5 +1,6 @@
 import datetime
 import statistics
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import seaborn
@@ -15,22 +16,40 @@ CHECKINS = untappd.load_latest_checkins()
 SHOW_IBUS = False
 
 GROUP_TIMESPAN = datetime.timedelta(days=31 * 3)
-start_date = min(c.datetime for c in CHECKINS)
-end_date = max(c.datetime for c in CHECKINS) - GROUP_TIMESPAN
-day_starts = [
-    datetime.datetime.fromordinal(n)
-    for n in range(start_date.toordinal(), end_date.toordinal())
-]
 
-abvs = [
-    statistics.mean([
-        ci.beer.abv
-        for ci in CHECKINS
-        if start <= ci.datetime < start + GROUP_TIMESPAN
-        # todo :: don't do this loop every time :P
-    ])
-    for start in day_starts
-]
+
+def evaluate_over_time_periods(
+    checkins: list[untappd.Checkin],
+    map_func: Callable,
+    combine_func: Callable,
+    timespan: datetime.timedelta,
+) -> tuple[list[datetime.datetime], list]:
+    start_date = min(c.datetime for c in checkins)
+    end_date = max(c.datetime for c in checkins) - timespan
+    day_starts = [
+        datetime.datetime.fromordinal(n)
+        for n in range(start_date.toordinal(), end_date.toordinal())
+    ]
+    return (
+        day_starts,
+        [
+            combine_func([
+                map_func(ci)
+                for ci in CHECKINS
+                if start <= ci.datetime < start + timespan
+                # todo :: don't do this loop every time :P
+            ])
+            for start in day_starts
+        ],
+    )
+
+
+day_starts, abvs = evaluate_over_time_periods(
+    checkins=CHECKINS,
+    map_func=lambda ci: ci.beer.abv,
+    combine_func=statistics.mean,
+    timespan=GROUP_TIMESPAN,
+)
 
 seaborn.set()
 
