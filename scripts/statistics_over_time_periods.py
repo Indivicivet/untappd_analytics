@@ -91,7 +91,7 @@ def plot_statistics_over_time_periods(
 if __name__ == "__main__":
     for tag, func in {
         "abv": lambda ci: ci.beer.abv,
-        "ibu": lambda ci: ci.beer.ibu,
+        "ibu": lambda ci: ci.beer.ibu if ci.beer.ibu > 0 else None,
         "rating": lambda ci: ci.rating,
     }.items():
         plot_statistics_over_time_periods(
