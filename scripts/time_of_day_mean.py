@@ -3,8 +3,10 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 import untappd
+import untappd_utils
 
 
+@untappd_utils.plot_or_save_to_out_file
 def show_average_rating_by_time(data, out_file=None):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
@@ -30,10 +32,6 @@ def show_average_rating_by_time(data, out_file=None):
     ax2.plot(x_data, [counts.get(x, 0) for x in x_data], label="checkins", color="orange")
     ax2.set_ylabel("checkins")
     fig.legend()
-    if out_file is None:
-        plt.show()
-    else:
-        plt.savefig(out_file)
 
 
 DATA = untappd.load_latest_checkins()
