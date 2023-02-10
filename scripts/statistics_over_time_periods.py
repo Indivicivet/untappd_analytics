@@ -88,9 +88,14 @@ def plot_statistics_over_time_periods(
 
 
 if __name__ == "__main__":
-    plot_statistics_over_time_periods(
-        checkins=CHECKINS,
-        map_func=lambda ci: ci.beer.abv,
-        y_label="abv",
-        out_file=Path(__file__).parent / "out" / "statistics_over_time_abv.png",
-    )
+    for tag, func in {
+        "abv": lambda ci: ci.beer.abv,
+        "ibu": lambda ci: ci.beer.ibu,
+        "rating": lambda ci: ci.rating,
+    }.items():
+        plot_statistics_over_time_periods(
+            checkins=CHECKINS,
+            map_func=func,
+            y_label=tag,
+            out_file=Path(__file__).parent / "out" / f"statistics_over_time_{tag}.png",
+        )
