@@ -1,6 +1,6 @@
 import datetime
 import statistics
-from typing import Callable
+from typing import Callable, Optional
 
 import matplotlib.pyplot as plt
 import seaborn
@@ -52,22 +52,39 @@ def mean_plus_minus_std(values) -> tuple[float, float, float]:
 
 
 
-day_starts, various_stats = evaluate_over_time_periods(
-    checkins=CHECKINS,
-    map_func=lambda ci: ci.beer.abv,
-    combine_func=mean_plus_minus_std,
-)
+def plot_statistics_over_time_periods(
+    checkins: list[untappd.Checkin],
+    map_func: Callable,
+    y_label: Optional[str] = None,
+    combine_func: Callable = mean_plus_minus_std,
+    value_labels: Optional[list[str]] = None,
+):
+    day_starts, various_stats = evaluate_over_time_periods(
+        checkins=checkins,
+        map_func=map_func,
+        combine_func=combine_func,
+    )
+    seaborn.set()
+    plt.figure(figsize=(12.8, 7.2))
+    plt.plot(
+        day_starts,
+        various_stats,
+        label=(
+            value_labels
+            if value_labels is not None
+            else [None for _ in various_stats[0]]
+        ),
+    )
+    plt.legend()
+    plt.xlabel("start date")
+    if y_label is not None:
+        plt.ylabel(y_label)
+    plt.show()
 
-seaborn.set()
 
-plt.figure(figsize=(12.8, 7.2))
-plt.plot(
-    day_starts,
-    various_stats,
-    label=["mean minus 1 std", "mean", "mean plus 1 std"],
-)
-plt.legend()
-
-plt.xlabel("start date")
-plt.ylabel(SHOW)
-plt.show()
+if __name__ == "__main__":
+    plot_statistics_over_time_periods(
+        checkins=CHECKINS,
+        map_func=lambda ci: ci.beer.abv,
+        y_label="abv",
+    )
