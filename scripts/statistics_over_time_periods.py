@@ -15,14 +15,12 @@ CHECKINS = untappd.load_latest_checkins()
 
 SHOW_IBUS = False
 
-GROUP_TIMESPAN = datetime.timedelta(days=31 * 3)
-
 
 def evaluate_over_time_periods(
     checkins: list[untappd.Checkin],
     map_func: Callable,
     combine_func: Callable,
-    timespan: datetime.timedelta,
+    timespan: datetime.timedelta = datetime.timedelta(days=31 * 3),
 ) -> tuple[list[datetime.datetime], list]:
     start_date = min(c.datetime for c in checkins)
     end_date = max(c.datetime for c in checkins) - timespan
@@ -51,7 +49,6 @@ day_starts, abvs = evaluate_over_time_periods(
     checkins=CHECKINS,
     map_func=lambda ci: ci.beer.abv,
     combine_func=statistics.mean,
-    timespan=GROUP_TIMESPAN,
 )
 
 seaborn.set()
@@ -66,7 +63,6 @@ if SHOW_IBUS:
         checkins=CHECKINS,
         map_func=lambda ci: ci.beer.ibu * 0.1 if ci.beer.ibu > 0 else None,
         combine_func=statistics.mean,
-        timespan=GROUP_TIMESPAN,
     )
     plt.plot(day_starts, ibus)
 
