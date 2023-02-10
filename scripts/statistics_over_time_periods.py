@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn
 
 import untappd
+import untappd_utils
 
 CHECKINS = untappd.load_latest_checkins()
 
@@ -50,6 +51,7 @@ def mean_plus_minus_std(values) -> tuple[float, float, float]:
 
 
 # todo :: definitely very much speed optimisation possible ^^
+@untappd_utils.plot_or_save_to_out_file
 def plot_statistics_over_time_periods(
     checkins: list[untappd.Checkin],
     map_func: Callable,
@@ -81,12 +83,6 @@ def plot_statistics_over_time_periods(
     plt.xlabel("start date")
     if y_label is not None:
         plt.ylabel(y_label)
-    if out_file is None:
-        plt.show()
-    else:
-        out_file = Path(out_file)
-        out_file.parent.mkdir(exist_ok=True, parents=True)
-        plt.savefig(out_file)
 
 
 if __name__ == "__main__":
