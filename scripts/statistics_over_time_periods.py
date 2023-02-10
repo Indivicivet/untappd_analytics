@@ -77,6 +77,7 @@ def plot_statistics_over_time_periods(
         ),
     )
     plt.legend()
+    plt.title(f"statistics of {y_label} over time periods")
     plt.xlabel("start date")
     if y_label is not None:
         plt.ylabel(y_label)
