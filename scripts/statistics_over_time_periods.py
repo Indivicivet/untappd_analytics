@@ -61,7 +61,8 @@ day_starts, abvs_etc = evaluate_over_time_periods(
 seaborn.set()
 
 plt.figure(figsize=(12.8, 7.2))
-plt.plot(day_starts, abvs_etc)
+plt.plot(day_starts, abvs_etc, label=["mean minus 1 std", "mean", "mean plus 1 std"])
+plt.legend()
 
 if SHOW_IBUS:
     # todo :: should have separate axes + legend
@@ -74,5 +75,5 @@ if SHOW_IBUS:
     plt.plot(day_starts, ibus)
 
 plt.xlabel("start date")
-plt.ylabel("average abv")
+plt.ylabel("abv")
 plt.show()
