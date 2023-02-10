@@ -45,16 +45,23 @@ def evaluate_over_time_periods(
     )
 
 
-day_starts, abvs = evaluate_over_time_periods(
+def mean_plus_minus_std(values) -> tuple[float, float, float]:
+    mean = statistics.mean(values)
+    std = statistics.stdev(values)
+    return mean - std, mean, mean + std
+
+
+
+day_starts, abvs_etc = evaluate_over_time_periods(
     checkins=CHECKINS,
     map_func=lambda ci: ci.beer.abv,
-    combine_func=statistics.mean,
+    combine_func=mean_plus_minus_std,
 )
 
 seaborn.set()
 
 plt.figure(figsize=(12.8, 7.2))
-plt.plot(day_starts, abvs)
+plt.plot(day_starts, abvs_etc)
 
 if SHOW_IBUS:
     # todo :: should have separate axes + legend
