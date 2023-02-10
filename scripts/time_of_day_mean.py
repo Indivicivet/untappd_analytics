@@ -34,5 +34,6 @@ def show_average_rating_by_time(data):
     fig.legend()
 
 
-DATA = untappd.load_latest_checkins()
-show_average_rating_by_time(DATA)
+if __name__ == "__main__":
+    DATA = untappd.load_latest_checkins()
+    show_average_rating_by_time(DATA)
