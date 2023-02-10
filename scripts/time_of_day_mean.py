@@ -12,7 +12,7 @@ def show_average_rating_by_time(data, out_file=None):
     for checkin in data:
         category_data[checkin.datetime.hour][checkin.rating or 0] += 1
 
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(figsize=(12.8, 7.2))
     ax2 = ax1.twinx()
     counts = {
         cat: sum(rating_counts.values())
