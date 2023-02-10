@@ -9,13 +9,10 @@ import untappd
 
 CHECKINS = untappd.load_latest_checkins()
 
+
 # todo :: much of this code is copied from category_by_date
 # once I have nice smoother plots, ideally move functionality
 # into a shared file
-
-SHOW = "abv"
-
-
 def evaluate_over_time_periods(
     checkins: list[untappd.Checkin],
     map_func: Callable,
