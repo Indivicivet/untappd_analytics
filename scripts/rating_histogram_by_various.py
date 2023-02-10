@@ -201,6 +201,7 @@ def save_various_plots(checkins, out_dir=None):
         )
 
 
-CHECKINS = untappd.load_latest_checkins()
-save_various_plots(CHECKINS)
-# show_histogram(CHECKINS, func=strength_class, normalize=True)
+if __name__ == "__main__":
+    CHECKINS = untappd.load_latest_checkins()
+    save_various_plots(CHECKINS)
+    # show_histogram(CHECKINS, func=strength_class, normalize=True)
