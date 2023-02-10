@@ -1,5 +1,6 @@
 import datetime
 import statistics
+from pathlib import Path
 from typing import Callable, Optional
 
 import matplotlib.pyplot as plt
@@ -54,6 +55,7 @@ def plot_statistics_over_time_periods(
     y_label: Optional[str] = None,
     combine_func: Callable = mean_plus_minus_std,
     value_labels: Optional[list[str]] = None,
+    out_file: Optional[Path] = None,
 ):
     if value_labels is None and combine_func == mean_plus_minus_std:
         value_labels = ["mean minus 1 std", "mean", "mean plus 1 std"]
@@ -77,7 +79,12 @@ def plot_statistics_over_time_periods(
     plt.xlabel("start date")
     if y_label is not None:
         plt.ylabel(y_label)
-    plt.show()
+    if out_file is None:
+        plt.show()
+    else:
+        out_file = Path(out_file)
+        out_file.parent.mkdir(exist_ok=True, parents=True)
+        plt.savefig(out_file)
 
 
 if __name__ == "__main__":
@@ -85,4 +92,5 @@ if __name__ == "__main__":
         checkins=CHECKINS,
         map_func=lambda ci: ci.beer.abv,
         y_label="abv",
+        out_file=Path(__file__).parent / "out" / "statistics_over_time_abv.png",
     )
