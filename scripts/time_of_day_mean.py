@@ -6,7 +6,7 @@ import untappd
 import untappd_utils
 
 
-@untappd_utils.plot_or_save_to_out_file
+@untappd_utils.show_or_save_to_out_file
 def show_average_rating_by_time(data, out_file=None):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:

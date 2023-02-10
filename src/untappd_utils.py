@@ -17,7 +17,7 @@ def smooth_ratings(x0, y0, samples=200, amount=0.1):
     return x_smooth, y_smooth
 
 
-def plot_or_save_to_out_file(func):
+def show_or_save_to_out_file(func):
     @functools.wraps(func)
     def wrapped(
         *args,

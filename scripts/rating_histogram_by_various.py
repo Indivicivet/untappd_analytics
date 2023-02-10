@@ -75,7 +75,7 @@ class ByFuncSpecificValuesOnly:
 
 
 # todo :: move to untappd?
-@untappd_utils.plot_or_save_to_out_file
+@untappd_utils.show_or_save_to_out_file
 def show_histogram(
     data: Sequence[untappd.Checkin],
     func: Callable[[untappd.Checkin], Any],  # todo :: its really "sortable"
