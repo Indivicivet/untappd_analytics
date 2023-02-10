@@ -7,7 +7,7 @@ import untappd_utils
 
 
 @untappd_utils.show_or_save_to_out_file
-def show_average_rating_by_time(data, out_file=None):
+def show_average_rating_by_time(data):
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
         category_data[checkin.datetime.hour][checkin.rating or 0] += 1
