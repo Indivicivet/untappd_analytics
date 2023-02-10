@@ -49,6 +49,7 @@ def mean_plus_minus_std(values) -> tuple[float, float, float]:
     return mean - std, mean, mean + std
 
 
+# todo :: definitely very much speed optimisation possible ^^
 def plot_statistics_over_time_periods(
     checkins: list[untappd.Checkin],
     map_func: Callable,
