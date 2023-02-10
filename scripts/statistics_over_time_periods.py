@@ -62,18 +62,12 @@ plt.plot(day_starts, abvs)
 if SHOW_IBUS:
     # todo :: should have separate axes + legend
     # (then probably don't need a flag :D)
-    ibus = [
-        0.1  # hacky :)
-        * statistics.mean([
-            ci.beer.ibu
-            for ci in CHECKINS
-            if (
-                    start <= ci.datetime < start + GROUP_TIMESPAN
-                    and ci.beer.ibu > 0
-            )
-        ])
-        for start in day_starts
-    ]
+    day_starts, ibus = evaluate_over_time_periods(
+        checkins=CHECKINS,
+        map_func=lambda ci: ci.beer.ibu * 0.1 if ci.beer.ibu > 0 else None,
+        combine_func=statistics.mean,
+        timespan=GROUP_TIMESPAN,
+    )
     plt.plot(day_starts, ibus)
 
 plt.xlabel("start date")
