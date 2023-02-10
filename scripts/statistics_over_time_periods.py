@@ -59,6 +59,8 @@ def plot_statistics_over_time_periods(
     combine_func: Callable = mean_plus_minus_std,
     value_labels: Optional[list[str]] = None,
 ):
+    if value_labels is None and combine_func == mean_plus_minus_std:
+        value_labels = ["mean minus 1 std", "mean", "mean plus 1 std"]
     day_starts, various_stats = evaluate_over_time_periods(
         checkins=checkins,
         map_func=map_func,
