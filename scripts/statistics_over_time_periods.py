@@ -13,7 +13,7 @@ CHECKINS = untappd.load_latest_checkins()
 # once I have nice smoother plots, ideally move functionality
 # into a shared file
 
-SHOW_IBUS = False
+SHOW = "abv"
 
 
 def evaluate_over_time_periods(
@@ -52,7 +52,7 @@ def mean_plus_minus_std(values) -> tuple[float, float, float]:
 
 
 
-day_starts, abvs_etc = evaluate_over_time_periods(
+day_starts, various_stats = evaluate_over_time_periods(
     checkins=CHECKINS,
     map_func=lambda ci: ci.beer.abv,
     combine_func=mean_plus_minus_std,
@@ -61,19 +61,13 @@ day_starts, abvs_etc = evaluate_over_time_periods(
 seaborn.set()
 
 plt.figure(figsize=(12.8, 7.2))
-plt.plot(day_starts, abvs_etc, label=["mean minus 1 std", "mean", "mean plus 1 std"])
+plt.plot(
+    day_starts,
+    various_stats,
+    label=["mean minus 1 std", "mean", "mean plus 1 std"],
+)
 plt.legend()
 
-if SHOW_IBUS:
-    # todo :: should have separate axes + legend
-    # (then probably don't need a flag :D)
-    day_starts, ibus = evaluate_over_time_periods(
-        checkins=CHECKINS,
-        map_func=lambda ci: ci.beer.ibu * 0.1 if ci.beer.ibu > 0 else None,
-        combine_func=statistics.mean,
-    )
-    plt.plot(day_starts, ibus)
-
 plt.xlabel("start date")
-plt.ylabel("abv")
+plt.ylabel(SHOW)
 plt.show()
