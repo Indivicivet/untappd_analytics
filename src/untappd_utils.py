@@ -30,6 +30,7 @@ def show_or_save_to_out_file(func):
         else:
             out_file = Path(out_file)
             out_file.parent.mkdir(exist_ok=True, parents=True)
+            print(f"saved to {out_file}")
             plt.savefig(out_file)
         return result  # probably None, if it's just plotting things.
     return wrapped
