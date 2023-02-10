@@ -75,6 +75,7 @@ class ByFuncSpecificValuesOnly:
 
 
 # todo :: move to untappd?
+@untappd_utils.plot_or_save_to_out_file
 def show_histogram(
     data: Sequence[untappd.Checkin],
     func: Callable[[untappd.Checkin], Any],  # todo :: its really "sortable"
@@ -82,7 +83,6 @@ def show_histogram(
     # when `show_n_checkins` is not specified, show iff `normalize`
     show_n_checkins: Optional[bool] = None,
     title: Optional[str] = None,
-    out_file: Optional[Path] = None,
 ):
     if show_n_checkins is None:
         show_n_checkins = normalize
@@ -120,12 +120,6 @@ def show_histogram(
         plt.gca().yaxis.set_major_formatter(
             mtick.PercentFormatter(decimals=0),
         )
-    if out_file is None:
-        plt.show()
-    else:
-        out_file = Path(out_file)
-        out_file.parent.mkdir(exist_ok=True, parents=True)
-        plt.savefig(out_file)
 
 
 def strength_class(checkin):
