@@ -50,6 +50,17 @@ def mean_plus_minus_std(values) -> tuple[float, float, float]:
     return mean - std, mean, mean + std
 
 
+def percentiles(
+    values,
+    take_ratios=(0.1, 0.25, 0.5, 0.75, 0.9),
+):
+    sorted_values = sorted(values)
+    return tuple(
+        sorted_values[int(ratio * len(values))]
+        for ratio in take_ratios
+    )
+
+
 # todo :: definitely very much speed optimisation possible ^^
 @untappd_utils.show_or_save_to_out_file
 def plot_statistics_over_time_periods(
