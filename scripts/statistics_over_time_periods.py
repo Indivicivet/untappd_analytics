@@ -106,5 +106,7 @@ if __name__ == "__main__":
             checkins=CHECKINS,
             map_func=func,
             y_label=tag,
+            # combine_func=percentiles,
+            # value_labels=["10%", "25%", "median", "75%", "90%"],
             out_file=Path(__file__).parent / "out" / f"statistics_over_time_{tag}.png",
         )
