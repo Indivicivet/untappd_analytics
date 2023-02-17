@@ -11,6 +11,7 @@ from collections import defaultdict
 import untappd
 
 CHECKINS = untappd.load_latest_checkins()
+SKIP_OTHER = True
 
 
 # todo :: --> untappd.py? or untappd_utils?
@@ -36,7 +37,11 @@ stats_by_cats = {
 
 
 for beer, rating in ratings_by_beer.items():
-    style_mean, style_std = stats_by_cats[beer.get_style_category()]
+    cat = beer.get_style_category()
+    if SKIP_OTHER and "other" in cat:
+        beer._normalized_rating = -1
+        continue
+    style_mean, style_std = stats_by_cats[cat]
     beer._normalized_rating = (
         all_mean + all_std * (rating - style_mean) / style_std
     )
