@@ -32,6 +32,7 @@ for ci, (block_mean, block_std) in zip(CHECKINS, per_block_stats):
     )
 
 print(f"beers normalized by ratings from the nearest {CHECKIN_COUNT_WINDOW} checkins")
+print("i.e. 4.5 ratings at the times I was least likely to... :)")
 print()
 cis_sorted = sorted(CHECKINS, key=lambda ci: ci._normalized_rating, reverse=True)
 for i, ci in enumerate(cis_sorted[:20]):
