@@ -169,6 +169,14 @@ def weak_strong_main_categories(checkin, threshold=7):
     return None
 
 
+def by_keyword(keywords):
+    return lambda ci: [
+        kw
+        for kw in keywords
+        if kw.lower() in str(ci).lower()
+    ]
+
+
 def save_various_plots(checkins, out_dir=None):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
