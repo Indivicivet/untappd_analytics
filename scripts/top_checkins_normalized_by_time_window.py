@@ -1,6 +1,7 @@
 import statistics
 
 import untappd
+import untappd_utils
 
 CHECKINS = untappd.load_latest_checkins()
 
@@ -8,20 +9,18 @@ CHECKIN_COUNT_WINDOW = 300
 assert CHECKIN_COUNT_WINDOW % 2 == 0  # laziness :)
 
 
-def mean_and_std(checkins: list[untappd.Checkin]) -> tuple[float, float]:
-    all_ratings = [ci.rating for ci in checkins]
-    return statistics.mean(all_ratings), statistics.stdev(all_ratings)
-
-
-all_mean, all_std = mean_and_std(CHECKINS)
+all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)
 
 # calculate statistics to normalize against
 checkins_this_block = CHECKINS[:CHECKIN_COUNT_WINDOW]
-per_block_stats = [mean_and_std(checkins_this_block)] * (CHECKIN_COUNT_WINDOW // 2)
+per_block_stats = (
+    [untappd_utils.mean_and_std(checkins_this_block)]
+    * (CHECKIN_COUNT_WINDOW // 2)
+)
 for ci_new in CHECKINS[CHECKIN_COUNT_WINDOW:]:
     checkins_this_block.pop(0)
     checkins_this_block.append(ci_new)
-    per_block_stats.append(mean_and_std(checkins_this_block))
+    per_block_stats.append(untappd_utils.mean_and_std(checkins_this_block))
 per_block_stats += [per_block_stats[-1]] * (CHECKIN_COUNT_WINDOW // 2)
 
 assert len(per_block_stats) == len(CHECKINS)

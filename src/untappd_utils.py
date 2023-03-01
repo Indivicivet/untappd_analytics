@@ -1,10 +1,13 @@
 import functools
+import statistics
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import interpolate, ndimage
+
+import untappd
 
 
 def smooth_ratings(x0, y0, samples=200, amount=0.1):
@@ -34,3 +37,8 @@ def show_or_save_to_out_file(func):
             plt.savefig(out_file)
         return result  # probably None, if it's just plotting things.
     return wrapped
+
+
+def mean_and_std(checkins: list[untappd.Checkin]) -> tuple[float, float]:
+    all_ratings = [ci.rating for ci in checkins]
+    return statistics.mean(all_ratings), statistics.stdev(all_ratings)

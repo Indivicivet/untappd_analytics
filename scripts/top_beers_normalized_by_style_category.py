@@ -9,18 +9,13 @@ import statistics
 from collections import defaultdict
 
 import untappd
+import untappd_utils
 
 CHECKINS = untappd.load_latest_checkins()
 SKIP_OTHER = True
 
 
-# todo :: --> untappd.py? or untappd_utils?
-def mean_and_std(checkins: list[untappd.Checkin]) -> tuple[float, float]:
-    all_ratings = [ci.rating for ci in checkins]
-    return statistics.mean(all_ratings), statistics.stdev(all_ratings)
-
-
-all_mean, all_std = mean_and_std(CHECKINS)
+all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)
 
 # calculate statistics to normalize against
 # note: compared to normalized by time, here we go by beer (not by checkin)
