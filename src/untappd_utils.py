@@ -1,7 +1,7 @@
 import functools
 import statistics
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -39,6 +39,12 @@ def show_or_save_to_out_file(func):
     return wrapped
 
 
-def mean_and_std(checkins: list[untappd.Checkin]) -> tuple[float, float]:
-    all_ratings = [ci.rating for ci in checkins]
+def mean_and_std(
+    checkins_or_values: list[Union[untappd.Checkin, float]]
+) -> tuple[float, float]:
+    all_ratings = (
+        [ci.rating for ci in checkins_or_values]
+        if isinstance(checkins_or_values[0], untappd.Checkin)
+        else checkins_or_values
+    )
     return statistics.mean(all_ratings), statistics.stdev(all_ratings)
