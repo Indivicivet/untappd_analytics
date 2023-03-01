@@ -105,10 +105,12 @@ def show_histogram(
     for label, counts in sorted(category_data.items()):
         scale_factor = 100 / sum(counts.values()) if normalize else 1
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
+        total_checkins = sum(counts.values())
+        average = sum(x * counts.get(x, 0) for x in x_data) / total_checkins
         plt.plot(
             *untappd_utils.smooth_ratings(x_data, y_data),
             label=(
-                f"{label} ({sum(counts.values())} checkins)"
+                f"{label} ({total_checkins} checkins, {average:.3f} average)"
                 if show_n_checkins
                 else label
             )
