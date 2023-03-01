@@ -48,3 +48,10 @@ def mean_and_std(
         else checkins_or_values
     )
     return statistics.mean(all_ratings), statistics.stdev(all_ratings)
+
+
+def mean_plus_minus_std(
+    checkins_or_values: list[Union[untappd.Checkin, float]]
+) -> tuple[float, float, float]:
+    mean, std = mean_and_std(checkins_or_values)
+    return mean - std, mean, mean + std

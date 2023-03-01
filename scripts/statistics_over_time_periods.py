@@ -1,5 +1,4 @@
 import datetime
-import statistics
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -44,12 +43,6 @@ def evaluate_over_time_periods(
     )
 
 
-def mean_plus_minus_std(values) -> tuple[float, float, float]:
-    mean = statistics.mean(values)
-    std = statistics.stdev(values)
-    return mean - std, mean, mean + std
-
-
 def percentiles(
     values,
     take_ratios=(0.1, 0.25, 0.5, 0.75, 0.9),
@@ -67,11 +60,11 @@ def plot_statistics_over_time_periods(
     checkins: list[untappd.Checkin],
     map_func: Callable,
     y_label: Optional[str] = None,
-    combine_func: Callable = mean_plus_minus_std,
+    combine_func: Callable = untappd_utils.mean_plus_minus_std,
     value_labels: Optional[list[str]] = None,
     out_file: Optional[Path] = None,
 ):
-    if value_labels is None and combine_func == mean_plus_minus_std:
+    if value_labels is None and combine_func == untappd_utils.mean_plus_minus_std:
         value_labels = ["mean minus 1 std", "mean", "mean plus 1 std"]
     day_starts, various_stats = evaluate_over_time_periods(
         checkins=checkins,
