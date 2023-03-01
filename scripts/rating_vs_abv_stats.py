@@ -31,7 +31,6 @@ things_to_plot = zip(*[
 seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-    print(thing)
     plt.plot(ratings_by_bucket.keys(), thing, label=label)
 plt.legend()
 plt.show()
