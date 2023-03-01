@@ -204,6 +204,24 @@ def save_various_plots(checkins, out_dir=None):
         "nth_time_having": BeerNthTimeTracker().beer_n,
         "taster_or_not": lambda checkin: checkin.serving_type == "Taster",
         "weak_strong_main_categories": weak_strong_main_categories,
+        "fruit": by_keyword([
+            "cherry",
+            "blueberry",
+            "mango",
+            # " apple",  # meh
+            "pineapple",
+            "banana",
+            "passion",
+            # "guava",
+        ]),
+        "hop": by_keyword([
+            "chinook",
+            "mosaic",
+            "simcoe",
+            "cascade",
+            "citra",
+            "centennial",
+        ]),
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
         show_histogram(
