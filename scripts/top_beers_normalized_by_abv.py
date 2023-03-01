@@ -23,10 +23,7 @@ CHECKINS = untappd.load_latest_checkins()
 UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 def round_abv(abv):
-    try:
-        return next(x for x in UPPER_BOUNDS if x >= abv)
-    except StopIteration:
-        return UPPER_BOUNDS[-1]
+    return next((x for x in UPPER_BOUNDS if x >= abv), UPPER_BOUNDS[-1])
 
 
 all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)

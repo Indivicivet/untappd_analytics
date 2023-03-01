@@ -17,11 +17,11 @@ ratings_by_bucket = {
     for x in UPPER_BOUNDS
 }
 for ci in CHECKINS:
-    try:
-        lower_bound = next(x for x in UPPER_BOUNDS if x >= ci.beer.abv)
-    except StopIteration:
-        lower_bound = UPPER_BOUNDS[-1]
-    ratings_by_bucket[lower_bound].append(ci)
+    upper_bound = next(
+        (x for x in UPPER_BOUNDS if x >= ci.beer.abv),
+        UPPER_BOUNDS[-1],
+    )
+    ratings_by_bucket[upper_bound].append(ci)
 
 
 things_to_plot = list(zip(*[
