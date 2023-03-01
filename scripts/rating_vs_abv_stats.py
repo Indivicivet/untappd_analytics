@@ -2,6 +2,7 @@ import statistics
 from collections import defaultdict
 
 import numpy as np
+import seaborn
 from matplotlib import pyplot as plt
 
 import untappd
@@ -27,6 +28,7 @@ things_to_plot = zip(*[
     untappd_utils.mean_plus_minus_std(cis)
     for cis in ratings_by_bucket.values()
 ])
+seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
     print(thing)
