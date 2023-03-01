@@ -12,10 +12,7 @@ UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 CHECKINS = untappd.load_latest_checkins()
 
-ratings_by_bucket = {
-    x: []
-    for x in UPPER_BOUNDS
-}
+ratings_by_bucket = {x: [] for x in UPPER_BOUNDS}
 for ci in CHECKINS:
     upper_bound = next(
         (x for x in UPPER_BOUNDS if x >= ci.beer.abv),
