@@ -90,8 +90,14 @@ def show_histogram(
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
-        if (category := func(checkin)) is not None:
-            category_data[category][checkin.rating or 0] += 1
+        if (result := func(checkin)) is not None:
+            rating = checkin.rating or 0
+            if isinstance(result, (list, tuple)):
+                # can't check iterable because strings are iterable
+                for category in result:
+                    category_data[category][rating] += 1
+            else:
+                category_data[result][rating] += 1
 
     x_data = [i / 4 for i in range(1, 21)]
     plt.figure(figsize=(12.8, 7.2))
