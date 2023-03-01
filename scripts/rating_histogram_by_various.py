@@ -81,13 +81,9 @@ def show_histogram(
     # todo :: its really "sortable":
     func: Callable[[untappd.Checkin], Union[Any, list[Any], tuple[Any]]],
     normalize: bool = False,
-    # when `show_n_checkins` is not specified, show iff `normalize`
-    show_n_checkins: Optional[bool] = None,
+    show_n_checkins: bool = True,
     title: Optional[str] = None,
 ):
-    if show_n_checkins is None:
-        show_n_checkins = normalize
-
     seaborn.set()
     category_data = defaultdict(lambda: defaultdict(int))
     for checkin in data:
