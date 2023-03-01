@@ -20,13 +20,13 @@ CHECKINS = untappd.load_latest_checkins()
 
 # LOWER_BOUNDS + rounding copied from rating_vs_abv_stats.py;
 # todo :: think how to consolidate
-LOWER_BOUNDS = np.linspace(0, 14.5, 21)
+UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 def round_abv(abv):
     try:
-        return next(x for x in LOWER_BOUNDS if x >= abv)
+        return next(x for x in UPPER_BOUNDS if x >= abv)
     except StopIteration:
-        return LOWER_BOUNDS[-1]
+        return UPPER_BOUNDS[-1]
 
 
 all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)
@@ -35,7 +35,7 @@ all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)
 # note: compared to normalized by time, here we go by beer (not by checkin)
 # making it different just for fun :) (and here I think it's slightly better)
 ratings_by_beer = untappd.average_rating_by_beer(CHECKINS)
-ratings_by_abv = {x: [] for x in LOWER_BOUNDS}
+ratings_by_abv = {x: [] for x in UPPER_BOUNDS}
 for beer, rating in ratings_by_beer.items():
     ratings_by_abv[round_abv(beer.abv)].append(rating)
 

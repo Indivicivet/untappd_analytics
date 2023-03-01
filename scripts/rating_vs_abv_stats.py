@@ -8,19 +8,19 @@ from matplotlib import pyplot as plt
 import untappd
 import untappd_utils
 
-LOWER_BOUNDS = np.linspace(0, 14.5, 21)
+UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 CHECKINS = untappd.load_latest_checkins()
 
 ratings_by_bucket = {
     x: []
-    for x in LOWER_BOUNDS
+    for x in UPPER_BOUNDS
 }
 for ci in CHECKINS:
     try:
-        lower_bound = next(x for x in LOWER_BOUNDS if x >= ci.beer.abv)
+        lower_bound = next(x for x in UPPER_BOUNDS if x >= ci.beer.abv)
     except StopIteration:
-        lower_bound = LOWER_BOUNDS[-1]
+        lower_bound = UPPER_BOUNDS[-1]
     ratings_by_bucket[lower_bound].append(ci)
 
 
@@ -30,22 +30,22 @@ things_to_plot = list(zip(*[
 ]))
 
 slope, offset = np.polyfit(
-    LOWER_BOUNDS,
+    UPPER_BOUNDS,
     things_to_plot[1],
     1,
     w=[
         1 if 4 <= x <= 12 else 0.5
-        for x in LOWER_BOUNDS
+        for x in UPPER_BOUNDS
     ],
 )
-best_fit_means = [x * slope + offset for x in LOWER_BOUNDS]
+best_fit_means = [x * slope + offset for x in UPPER_BOUNDS]
 
 seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-    plt.plot(LOWER_BOUNDS, thing, label=label)
+    plt.plot(UPPER_BOUNDS, thing, label=label)
 plt.plot(
-    LOWER_BOUNDS,
+    UPPER_BOUNDS,
     best_fit_means,
     label=f"weighted linear fit mean {slope=:.3f} {offset=:.3f}",
 )
