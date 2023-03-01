@@ -2,7 +2,7 @@ from collections import defaultdict, Counter
 from dataclasses import dataclass
 from pathlib import Path
 import datetime
-from typing import Optional, Any, Callable, Sequence
+from typing import Optional, Any, Callable, Sequence, Union
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -78,7 +78,8 @@ class ByFuncSpecificValuesOnly:
 @untappd_utils.show_or_save_to_out_file
 def show_histogram(
     data: Sequence[untappd.Checkin],
-    func: Callable[[untappd.Checkin], Any],  # todo :: its really "sortable"
+    # todo :: its really "sortable":
+    func: Callable[[untappd.Checkin], Union[Any, list[Any], tuple[Any]]],
     normalize: bool = False,
     # when `show_n_checkins` is not specified, show iff `normalize`
     show_n_checkins: Optional[bool] = None,
