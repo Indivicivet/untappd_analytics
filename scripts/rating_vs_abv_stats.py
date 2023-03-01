@@ -29,7 +29,15 @@ things_to_plot = list(zip(*[
     for cis in ratings_by_bucket.values()
 ]))
 
-slope, offset = np.polyfit(LOWER_BOUNDS, things_to_plot[1], 1)
+slope, offset = np.polyfit(
+    LOWER_BOUNDS,
+    things_to_plot[1],
+    1,
+    w=[
+        1 if 4 <= x <= 12 else 0.5
+        for x in LOWER_BOUNDS
+    ],
+)
 best_fit_means = [x * slope + offset for x in LOWER_BOUNDS]
 
 seaborn.set()
@@ -39,7 +47,7 @@ for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
 plt.plot(
     LOWER_BOUNDS,
     best_fit_means,
-    label=f"linear best fit mean {slope=:.3f} {offset=:.3f}",
+    label=f"weighted linear fit mean {slope=:.3f} {offset=:.3f}",
 )
 plt.legend()
 plt.show()
