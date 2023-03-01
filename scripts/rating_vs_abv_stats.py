@@ -24,13 +24,22 @@ for ci in CHECKINS:
     ratings_by_bucket[lower_bound].append(ci)
 
 
-things_to_plot = zip(*[
+things_to_plot = list(zip(*[
     untappd_utils.mean_plus_minus_std(cis)
     for cis in ratings_by_bucket.values()
-])
+]))
+
+slope, offset = np.polyfit(LOWER_BOUNDS, things_to_plot[1], 1)
+best_fit_means = [x * slope + offset for x in LOWER_BOUNDS]
+
 seaborn.set()
 plt.figure(figsize=(12.8, 7.2))
 for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-    plt.plot(ratings_by_bucket.keys(), thing, label=label)
+    plt.plot(LOWER_BOUNDS, thing, label=label)
+plt.plot(
+    LOWER_BOUNDS,
+    best_fit_means,
+    label=f"linear best fit mean {slope=:.3f} {offset=:.3f}",
+)
 plt.legend()
 plt.show()
