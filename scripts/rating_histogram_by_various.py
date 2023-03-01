@@ -214,12 +214,13 @@ def save_various_plots(checkins, out_dir=None):
             # "guava",
         ]),
         "hop": by_keyword([
-            "chinook",
+            # "chinook",
             "mosaic",
             "simcoe",
             "cascade",
             "citra",
             "centennial",
+            "motueka",
         ]),
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
