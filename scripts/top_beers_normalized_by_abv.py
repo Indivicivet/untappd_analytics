@@ -62,7 +62,7 @@ for i, beer in enumerate(beers_sorted[:20]):
     rating = ratings_by_beer[beer]
     print(
         f"#{i + 1}, rating {rating:.3f} normalized {beer._normalized_rating:.3f}"
-        f" with abv {beer.abv}% (in bracket {round_abv(beer.abv):.3f}%+)"
+        f" with abv {beer.abv}% (in bracket <={round_abv(beer.abv):.3f}%)"
     )
     print(beer)
     print()
