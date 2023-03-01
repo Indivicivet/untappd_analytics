@@ -1,12 +1,13 @@
 import statistics
 from collections import defaultdict
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 import untappd
 import untappd_utils
 
-LOWER_BOUNDS = list(range(15))
+LOWER_BOUNDS = np.linspace(0, 15, 20)
 
 CHECKINS = untappd.load_latest_checkins()
 
