@@ -221,6 +221,7 @@ def save_various_plots(checkins, out_dir=None):
             "citra",
             "centennial",
             "motueka",
+            "galaxy",  # beware: other beers may sneak in...
         ]),
     }.items():
         out_file = out_dir / f"ratings_by_{tag}.png"
