@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import untappd
 import untappd_utils
 
-LOWER_BOUNDS = np.linspace(0, 15, 20)
+LOWER_BOUNDS = np.linspace(0, 14.5, 21)
 
 CHECKINS = untappd.load_latest_checkins()
 
