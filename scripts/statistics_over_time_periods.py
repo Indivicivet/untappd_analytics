@@ -11,7 +11,7 @@ import untappd_utils
 CHECKINS = untappd.load_latest_checkins()
 
 
-# todo :: much of this code is copied from category_by_date
+# todo :: much of this code is copied from style_frequency_over_time_periods
 # once I have nice smoother plots, ideally move functionality
 # into a shared file
 def evaluate_over_time_periods(
