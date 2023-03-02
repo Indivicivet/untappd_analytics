@@ -11,6 +11,7 @@ CHECKINS = untappd.load_latest_checkins()
 GROUP_TIMESPAN = datetime.timedelta(days=31 * 4)
 
 PERCENTAGES = False
+SKIP_OTHER = True
 
 start_date = min(c.datetime for c in CHECKINS)
 end_date = max(c.datetime for c in CHECKINS) - GROUP_TIMESPAN
@@ -32,6 +33,8 @@ seaborn.set()
 
 plt.figure(figsize=(12.8, 7.2))
 for category in untappd.CATEGORY_KEYWORDS:
+    if SKIP_OTHER and "other" in category:
+        continue
     plt.plot(
         day_starts,
         [
