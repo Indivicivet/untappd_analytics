@@ -33,7 +33,7 @@ for category in untappd.CATEGORY_KEYWORDS:
         [counts[category] for counts in category_counts],
         label=category,
     )
-plt.title(f"checkins by style (over {GROUP_TIMESPAN.days} after date)")
+plt.title(f"checkins by style ({GROUP_TIMESPAN.days} days following date)")
 plt.xlabel("date")
 plt.ylabel("checkins")
 plt.legend()
