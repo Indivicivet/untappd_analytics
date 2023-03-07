@@ -5,8 +5,6 @@ SHOW_N = 20
 CHECKINS = untappd.load_latest_checkins()
 BEER_RATINGS = untappd.average_rating_by_beer(CHECKINS)
 
-# todo :: normalize for population statistics?
-# could even just use ranking comparison :)
 
 sorted_beers = sorted(
     filter(
