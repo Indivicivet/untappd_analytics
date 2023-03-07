@@ -288,6 +288,7 @@ class Checkin:
 
 def load_latest_checkins(
     ignore_unrated: bool = True,
+    ignore_tasters: bool = False,
 ) -> list[Checkin]:
     # todo :: data source
     # todo :: csv option...? or warning about no csv :)
@@ -295,7 +296,10 @@ def load_latest_checkins(
     return [
         Checkin.from_dict(d)
         for d in data_dicts
-        if not (ignore_unrated and d["rating_score"] == "")
+        if (
+            not (ignore_unrated and d["rating_score"] == "")
+            and not (ignore_tasters and d["serving_type"] == "Taster")
+        )
     ]
 
 
