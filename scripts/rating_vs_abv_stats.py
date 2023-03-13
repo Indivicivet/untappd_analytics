@@ -11,7 +11,7 @@ import untappd_utils
 UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 
-def plot_rating_vs_abv(checkins):
+def plot_rating_vs_abv(checkins, tag=""):
     ratings_by_bucket = {x: [] for x in UPPER_BOUNDS}
     for ci in checkins:
         upper_bound = next(
@@ -38,11 +38,15 @@ def plot_rating_vs_abv(checkins):
     best_fit_means = [x * slope + offset for x in UPPER_BOUNDS]
 
     for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-        plt.plot(present_upper_bounds, thing, label=label)
+        plt.plot(
+            present_upper_bounds,
+            thing,
+            label=f"{tag}{label}"
+        )
     plt.plot(
         UPPER_BOUNDS,
         best_fit_means,
-        label=f"weighted linear fit mean {slope=:.3f} {offset=:.3f}",
+        label=f"{tag}weighted linear fit mean {slope=:.3f} {offset=:.3f}",
     )
 
 
@@ -59,6 +63,8 @@ if __name__ == "__main__":
     else:
         for style in STYLES:
             plot_rating_vs_abv(
-                [c for c in CHECKINS if c.beer.get_style_category() == style]
+                [c for c in CHECKINS if c.beer.get_style_category() == style],
+                tag=f"[{style}] "
+            )
     plt.legend()
     plt.show()
