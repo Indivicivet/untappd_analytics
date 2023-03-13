@@ -13,7 +13,7 @@ UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 def plot_rating_vs_abv(checkins):
     ratings_by_bucket = {x: [] for x in UPPER_BOUNDS}
-    for ci in CHECKINS:
+    for ci in checkins:
         upper_bound = next(
             (x for x in UPPER_BOUNDS if x >= ci.beer.abv),
             UPPER_BOUNDS[-1],
