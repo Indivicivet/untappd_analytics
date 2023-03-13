@@ -48,9 +48,17 @@ def plot_rating_vs_abv(checkins):
 
 if __name__ == "__main__":
     CHECKINS = untappd.load_latest_checkins()
+    # STYLES = None
+    # STYLES = ["stout", "sour", "ipa"]
+    STYLES = ["stout"]
 
     seaborn.set()
     plt.figure(figsize=(12.8, 7.2))
-    plot_rating_vs_abv(CHECKINS)
+    if STYLES is None:
+        plot_rating_vs_abv(CHECKINS)
+    else:
+        for style in STYLES:
+            plot_rating_vs_abv(
+                [c for c in CHECKINS if c.beer.get_style_category() == style]
     plt.legend()
     plt.show()
