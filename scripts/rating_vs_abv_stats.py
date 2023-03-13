@@ -20,24 +20,25 @@ def plot_rating_vs_abv(checkins):
         )
         ratings_by_bucket[upper_bound].append(ci)
 
-    things_to_plot = list(zip(*[
-        untappd_utils.mean_plus_minus_std(cis)
-        for cis in ratings_by_bucket.values()
+    present_upper_bounds, *things_to_plot = list(zip(*[
+        (bound, *untappd_utils.mean_plus_minus_std(cis))
+        for bound, cis in ratings_by_bucket.items()
+        if len(cis) >= 2
     ]))
 
     slope, offset = np.polyfit(
-        UPPER_BOUNDS,
+        present_upper_bounds,
         things_to_plot[1],
         1,
         w=[
             1 if 4 <= x <= 12 else 0.5
-            for x in UPPER_BOUNDS
+            for x in present_upper_bounds
         ],
     )
     best_fit_means = [x * slope + offset for x in UPPER_BOUNDS]
 
     for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-        plt.plot(UPPER_BOUNDS, thing, label=label)
+        plt.plot(present_upper_bounds, thing, label=label)
     plt.plot(
         UPPER_BOUNDS,
         best_fit_means,
