@@ -47,6 +47,7 @@ def plot_rating_vs_abv(checkins, tag=""):
         UPPER_BOUNDS,
         best_fit_means,
         label=f"{tag}weighted linear fit mean {slope=:.3f} {offset=:.3f}",
+        linestyle="dashed",
     )
 
 
