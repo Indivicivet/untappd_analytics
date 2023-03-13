@@ -11,7 +11,7 @@ import untappd_utils
 UPPER_BOUNDS = np.linspace(0, 14.5, 21)
 
 
-def plot_rating_vs_abv(checkins, tag=""):
+def plot_rating_vs_abv(checkins, tag="", unify_color=False):
     ratings_by_bucket = {x: [] for x in UPPER_BOUNDS}
     for ci in checkins:
         upper_bound = next(
@@ -37,17 +37,27 @@ def plot_rating_vs_abv(checkins, tag=""):
     )
     best_fit_means = [x * slope + offset for x in UPPER_BOUNDS]
 
-    for thing, label in zip(things_to_plot, ["mean - 1std", "mean", "mean + 1std"]):
-        plt.plot(
+    color = None
+    for thing, label, alpha in zip(
+        things_to_plot,
+        ["mean - 1std", "mean", "mean + 1std"],
+        [0.5, 1, 0.5],
+    ):
+        lines = plt.plot(
             present_upper_bounds,
             thing,
-            label=f"{tag}{label}"
+            label=f"{tag}{label}",
+            alpha=alpha,
+            color=color,
         )
+        if unify_color and color is None:
+            color = lines[0].get_color()
     plt.plot(
         UPPER_BOUNDS,
         best_fit_means,
         label=f"{tag}weighted linear fit mean {slope=:.3f} {offset=:.3f}",
         linestyle="dashed",
+        color=color,
     )
 
 
@@ -65,7 +75,8 @@ if __name__ == "__main__":
         for style in STYLES:
             plot_rating_vs_abv(
                 [c for c in CHECKINS if c.beer.get_style_category() == style],
-                tag=f"[{style}] "
+                tag=f"[{style}] ",
+                unify_color=True,
             )
     plt.legend()
     plt.show()
