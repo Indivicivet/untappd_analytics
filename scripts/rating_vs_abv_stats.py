@@ -64,8 +64,7 @@ def plot_rating_vs_abv(checkins, tag="", unify_color=False):
 if __name__ == "__main__":
     CHECKINS = untappd.load_latest_checkins()
     # STYLES = None
-    # STYLES = ["stout", "sour", "ipa"]
-    STYLES = ["stout"]
+    STYLES = ["stout", "sour", "ipa"]
 
     seaborn.set()
     plt.figure(figsize=(12.8, 7.2))
