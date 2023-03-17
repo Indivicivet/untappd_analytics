@@ -60,6 +60,7 @@ df = df[df["category"] != "other"]
 
 plt.figure(figsize=(12.8, 7.2))
 # personal vs global by category:
+# df = df[df["global_rating_score"].astype(float) > 0]
 # seaborn.scatterplot(
 #     data=df, x="global_rating_score", y="rating_score_1", hue="category",
 #     alpha=0.7, sizes=10,
