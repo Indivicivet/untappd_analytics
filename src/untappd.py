@@ -171,6 +171,8 @@ class Venue:
     long: Optional[Any] = None
 
     def __hash__(self):
+        if self.city is None:
+            return hash(f"VENUE {self.name} VENUE")
         return hash(self.name + self.city)
 
     def __str__(self):
