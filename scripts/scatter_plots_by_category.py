@@ -49,7 +49,8 @@ df = df[df["rating_score"] != ""]
 df["rating_score"] = df["rating_score"].astype(float)
 df["beer_abv_category"] = df.apply(abv_categorize, axis=1)
 df["category"] = df.apply(
-    lambda d: untappd.Beer.from_checkin_dict(d).get_style_category(),
+    # lambda d: untappd.Beer.from_checkin_dict(d).get_style_category(),
+    by_top_venue,
     axis=1,
 )
 
@@ -81,6 +82,6 @@ def score_vs_abv():
 # seaborn.regplot(data=df, x="global_rating_score", y="rating_score")
 
 plt.figure(figsize=(12.8, 7.2))
-# personal_vs_global()
-score_vs_abv()
+personal_vs_global()
+# score_vs_abv()
 plt.show()
