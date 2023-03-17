@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 import pandas as pd
 import seaborn
@@ -25,6 +26,23 @@ def abv_categorize(checkin):
         return "standard"
     #if abv <= 9.5:
     return "strong"
+
+
+TOP_VENUES = [
+    venue
+    for venue, _ in Counter(
+        untappd.Checkin.from_dict(d).venue
+        for d in data
+        if d.get("venue_name")
+    ).most_common(2)
+]
+
+
+def by_top_venue(d):
+    v = untappd.Checkin.from_dict(d).venue
+    if v in TOP_VENUES:
+        return v.name
+    return "other"
 
 
 df = df[df["rating_score"] != ""]
