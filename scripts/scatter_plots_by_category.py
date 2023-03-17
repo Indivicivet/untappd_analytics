@@ -81,7 +81,7 @@ def score_vs_abv():
 
 # seaborn.regplot(data=df, x="global_rating_score", y="rating_score")
 
-plt.figure(figsize=(12.8, 7.2))
+plt.figure(figsize=(10, 10))
 personal_vs_global()
 # score_vs_abv()
 plt.show()
