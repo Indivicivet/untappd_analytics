@@ -58,20 +58,29 @@ df["rating_score_1"] = df.apply(lambda x: x["rating_score"] + JIGGLE * (random.r
 
 df = df[df["category"] != "other"]
 
-plt.figure(figsize=(12.8, 7.2))
-# personal vs global by category:
-# df = df[df["global_rating_score"].astype(float) > 0]
-# seaborn.scatterplot(
-#     data=df, x="global_rating_score", y="rating_score_1", hue="category",
-#     alpha=0.7, sizes=10,
-# )
 
-# score vs ABV by category:
-df["beer_abv"] = df["beer_abv"].astype(float)
-df = df.sort_values("beer_abv")
-seaborn.scatterplot(
-    data=df, x="beer_abv", y="rating_score_1", hue="category",
-    alpha=0.2, sizes=10,
-)
+def personal_vs_global():  # globals yay!!
+    global df
+    df = df[df["global_rating_score"].astype(float) > 0]
+    seaborn.scatterplot(
+        data=df, x="global_rating_score", y="rating_score_1", hue="category",
+        alpha=0.7, sizes=10,
+    )
+
+
+def score_vs_abv():
+    global df
+    df["beer_abv"] = df["beer_abv"].astype(float)
+    df = df.sort_values("beer_abv")
+    seaborn.scatterplot(
+        data=df, x="beer_abv", y="rating_score_1", hue="category",
+        alpha=0.2, sizes=10,
+    )
+
+
 # seaborn.regplot(data=df, x="global_rating_score", y="rating_score")
+
+plt.figure(figsize=(12.8, 7.2))
+# personal_vs_global()
+score_vs_abv()
 plt.show()
