@@ -40,6 +40,7 @@ df["rating_score_1"] = df.apply(lambda x: x["rating_score"] + JIGGLE * (random.r
 
 df = df[df["category"] != "other"]
 
+plt.figure(figsize=(12.8, 7.2))
 # personal vs global by category:
 # seaborn.scatterplot(
 #     data=df, x="global_rating_score", y="rating_score_1", hue="category",
