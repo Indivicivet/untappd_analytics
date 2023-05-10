@@ -58,6 +58,7 @@ JIGGLE = 0.18
 df["rating_score_1"] = df.apply(lambda x: x["rating_score"] + JIGGLE * (random.random() - 0.5), axis=1)
 
 df = df[df["category"] != "other"]
+df = df[df["brewery_name"] == "Vault City Brewing"]
 
 
 def personal_vs_global():  # globals yay!!
@@ -74,14 +75,14 @@ def score_vs_abv():
     df["beer_abv"] = df["beer_abv"].astype(float)
     df = df.sort_values("beer_abv")
     seaborn.scatterplot(
-        data=df, x="beer_abv", y="rating_score_1", hue="category",
-        alpha=0.2, sizes=10,
+        data=df, x="beer_abv", y="global_rating_score",# hue="category",
+        alpha=0.5, sizes=10,
     )
 
 
 # seaborn.regplot(data=df, x="global_rating_score", y="rating_score")
 
 plt.figure(figsize=(10, 10))
-personal_vs_global()
-# score_vs_abv()
+# personal_vs_global()
+score_vs_abv()
 plt.show()
