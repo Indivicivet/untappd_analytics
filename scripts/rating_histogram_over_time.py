@@ -58,8 +58,12 @@ data_queue = [
     for _ in range(NUM_ONION_SKINS + 1)
 ]
 plot_lines = [
-    plt.plot(*data, c=(c0, c0, c0))[0]
-    for data, c0 in zip(data_queue, [*np.linspace(0.9, 0.5, len(data_queue)-1), 0])
+    plt.plot(*data, c=c0)[0]
+    for data, c0 in zip(
+        data_queue,
+        [(v, v, v) for v in np.linspace(0.9, 0.5, len(data_queue)-1)]
+        + [(0, 0, 0)],
+    )
 ]
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
