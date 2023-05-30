@@ -168,6 +168,17 @@ def weak_strong_main_categories(checkin, threshold=7):
     return None
 
 
+def festival_with_year(checkin, include_non_festival=True):
+    if (
+        checkin.venue is not None
+        and "beer festival" in checkin.venue.name.lower()
+    ):
+        return f"{checkin.venue.name} ({checkin.datetime.year})"
+    if include_non_festival:
+        return "Non-festival"
+    return None
+
+
 def by_keyword(keywords):
     return lambda ci: [
         kw
@@ -186,6 +197,7 @@ def save_various_plots(checkins, out_dir=None):
         "strength": strength_class,
         "singapore": date_segment_sg,
         "nederlands": date_segment_nl,
+        "festival": festival_with_year,
         "brewery": ByFuncSpecificValuesOnly.top_n(
             func=(
                 lambda ci:
