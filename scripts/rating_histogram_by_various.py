@@ -180,7 +180,9 @@ def save_various_plots(checkins, out_dir=None):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
     for tag, func in {
-        "style_category": lambda checkin: checkin.beer.get_style_category(),
+        "style_category": lambda checkin: checkin.beer.get_style_category()
+            if datetime.datetime(2023, 3, 24) <= checkin.datetime <= datetime.datetime(2023, 5, 1, 23, 59, 59)
+            else None,
         "hour": lambda checkin: checkin.datetime.hour,
         "session_n": SessionTracker().session_n,
         "strength": strength_class,
@@ -191,6 +193,7 @@ def save_various_plots(checkins, out_dir=None):
                 lambda ci:
                     ci.beer.brewery.name
                     if ci.beer.brewery is not None
+                       and datetime.datetime(2023, 3, 24) <= ci.datetime <= datetime.datetime(2023, 5, 1, 23, 59, 59)
                     else None
             ),
             all_checkins=checkins,
