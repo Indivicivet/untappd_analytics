@@ -10,16 +10,6 @@ brewery_checkins = defaultdict(list)
 for c in CHECKINS:
     brewery_checkins[c.beer.brewery].append(c)
 
-
-def get_style_ratios(checkins):
-    style_counts = Counter(c.beer.get_style_category() for c in checkins)
-    total = style_counts.total()
-    return [
-        (style, val / total)
-        for style, val in sorted(style_counts.items(), key=lambda t: t[1], reverse=True)
-    ]
-
-
 SHOW_N = 10
 MIN_CHECKINS = 5
 
