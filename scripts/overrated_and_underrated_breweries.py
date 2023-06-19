@@ -35,14 +35,16 @@ scores_sorted = sorted(scores_personal_global, key=lambda t: t[0] - t[1])
 print("most overrated breweries (in my opinion):")
 for my_rating, global_rating, brewery in scores_sorted[:SHOW_N]:
     print(
-        f"{brewery} || my rating: {my_rating}, global_rating: {global_rating}"
-        f", delta = {global_rating - my_rating}"
+        f"{brewery} || my rating: {my_rating:.2f}"
+        f", global_rating: {global_rating:.2f}"
+        f", delta = {global_rating - my_rating:.2f}"
     )
 
 print()
 print("most underrated breweries (in my opinion):")
 for my_rating, global_rating, brewery in scores_sorted[-SHOW_N:][::-1]:
     print(
-        f"{brewery} || my rating: {my_rating}, global_rating: {global_rating}"
-        f", delta = {my_rating - global_rating}"
+        f"{brewery} || my rating: {my_rating:.2f}"
+        f", global_rating: {global_rating:.2f}"
+        f", delta = {my_rating - global_rating:.2f}"
     )
