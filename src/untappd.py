@@ -305,7 +305,10 @@ def load_latest_checkins(
     ]
 
 
-def average_rating_by_beer(checkins: Sequence[Checkin]) -> dict[Beer, float]:
+def average_rating_by_beer(
+    checkins: Sequence[Checkin],
+    use_global: bool = False,
+) -> dict[Beer, float]:
     """
     takes a sequence of checkins,
     returns a map from Beer to average checkin rating
@@ -314,7 +317,7 @@ def average_rating_by_beer(checkins: Sequence[Checkin]) -> dict[Beer, float]:
     for c in checkins:
         if c.rating is None:
             continue
-        beer_ratings[c.beer].append(c.rating)
+        beer_ratings[c.beer].append(c.beer.global_rating if use_global else c.rating)
     return {
         beer: sum(rating_list) / len(rating_list)
         for beer, rating_list in beer_ratings.items()
@@ -325,6 +328,7 @@ def magic_rating(
     checkins: Sequence[Checkin],
     dropoff_ratio: float = 0.8,
     average_score_weight: float = 0.5,
+    use_global: bool = False,
 ) -> Tuple[float, list[Beer]]:
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
@@ -332,7 +336,7 @@ def magic_rating(
     returns (magic score, list of beers by average rating)
     """
     top_ratings = sorted(
-        average_rating_by_beer(checkins).items(),
+        average_rating_by_beer(checkins, use_global=use_global).items(),
         reverse=True,
         key=lambda t: t[1],
     )
