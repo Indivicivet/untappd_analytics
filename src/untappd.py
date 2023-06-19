@@ -347,6 +347,8 @@ def magic_rating(
         reverse=True,
         key=lambda t: t[1],
     )
+    if not top_ratings:
+        return 0, []
     return (
         # magic score
         average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
