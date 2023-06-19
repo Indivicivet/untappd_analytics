@@ -15,12 +15,16 @@ MIN_CHECKINS = 5
 
 scores_personal_global = [
     (
-        untappd.magic_rating(checkins)[0],
+        untappd.magic_rating(checkins, average_score_weight=1)[0],
         global_rating,
         brewery,
     )
     for brewery, checkins in brewery_checkins.items()
-    if (global_rating := untappd.magic_rating(checkins, use_global=True)[0]) != 0
+    if (
+        global_rating := untappd.magic_rating(
+            checkins, use_global=True, average_score_weight=1
+        )[0]
+    ) != 0
         and len(checkins) > MIN_CHECKINS
 ]
 
