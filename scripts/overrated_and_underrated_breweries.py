@@ -20,6 +20,9 @@ def get_style_ratios(checkins):
     ]
 
 
+SHOW_N = 10
+MIN_CHECKINS = 5
+
 scores_personal_global = [
     (
         untappd.magic_rating(checkins)[0],
@@ -28,9 +31,8 @@ scores_personal_global = [
     )
     for brewery, checkins in brewery_checkins.items()
     if (global_rating := untappd.magic_rating(checkins, use_global=True)[0]) != 0
+        and len(checkins) > MIN_CHECKINS
 ]
-
-SHOW_N = 10
 
 scores_sorted = sorted(scores_personal_global, key=lambda t: t[0] - t[1])
 print("most overrated breweries (in my opinion):")
