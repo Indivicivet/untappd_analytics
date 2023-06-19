@@ -10,7 +10,7 @@ brewery_checkins = defaultdict(list)
 for c in CHECKINS:
     brewery_checkins[c.beer.brewery].append(c)
 
-SHOW_N = 10
+SHOW_N = 20
 MIN_CHECKINS = 5
 
 scores_personal_global = [
