@@ -317,10 +317,13 @@ def average_rating_by_beer(
     for c in checkins:
         if c.rating is None:
             continue
-        beer_ratings[c.beer].append(c.beer.global_rating if use_global else c.rating)
+        rating = c.beer.global_rating if use_global else c.rating
+        if rating != 0:
+            beer_ratings[c.beer].append(rating)
     return {
         beer: sum(rating_list) / len(rating_list)
         for beer, rating_list in beer_ratings.items()
+        if rating_list
     }
 
 
