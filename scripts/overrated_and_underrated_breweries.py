@@ -22,11 +22,12 @@ def get_style_ratios(checkins):
 
 scores_personal_global = [
     (
-        my_rating := untappd.magic_rating(checkins)[0],
-        global_rating := untappd.magic_rating(checkins, use_global=True)[0],
+        untappd.magic_rating(checkins)[0],
+        global_rating,
         brewery,
     )
     for brewery, checkins in brewery_checkins.items()
+    if (global_rating := untappd.magic_rating(checkins, use_global=True)[0]) != 0
 ]
 
 SHOW_N = 10
