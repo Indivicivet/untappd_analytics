@@ -333,6 +333,10 @@ def magic_rating(
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
 
+    using either dropoff_ratio=1 or average_score_weight=1 should give
+    a pure average rating
+    todo :: unit test for this!
+
     returns (magic score, list of beers by average rating)
     """
     top_ratings = sorted(
