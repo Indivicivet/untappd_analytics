@@ -24,6 +24,8 @@ scores_personal_global = [
         and len(checkins) > MIN_CHECKINS
 ]
 
+print(f"using {MIN_CHECKINS=}")
+
 scores_sorted = sorted(scores_personal_global, key=lambda t: t[0] - t[1])
 print("most overrated breweries (in my opinion):")
 for my_rating, global_rating, brewery in scores_sorted[:SHOW_N]:
