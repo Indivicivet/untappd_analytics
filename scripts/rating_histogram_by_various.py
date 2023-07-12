@@ -171,7 +171,10 @@ def weak_strong_main_categories(checkin, threshold=7):
 def festival_with_year(checkin, include_non_festival=True):
     if (
         checkin.venue is not None
-        and "beer festival" in checkin.venue.name.lower()
+        and (
+            "beer festival" in checkin.venue.name.lower()
+            or "fest 20" in checkin.venue.name.lower()
+        )
     ):
         return f"{checkin.venue.name} ({checkin.datetime.year})"
     if include_non_festival:
