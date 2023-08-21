@@ -7,3 +7,4 @@ pandas
 colour
 folium
 geopy
+wordcloud
