@@ -37,15 +37,18 @@ negativity = {
 }
 colors = {
     word: (
-        positivity,
-
+        int(255 * negativity["word"]),
+        int(255 * positivity["word"]),
+        255 - int(255 * (positivity["word"] + negativity["word"])),
     )
     for word in word_ratings
 }
 occurrences = {word: len(ratings) for word, ratings in word_ratings.items()}
 
 print(word_ratings)
-wc = WordCloud().generate_from_frequencies(occurrences)
+wc = WordCloud().generate_from_frequencies(occurrences).recolor(
+    color_func=(lambda word, **kwargs: colors[word]),
+)
 
 plt.imshow(wc)
 plt.show()
