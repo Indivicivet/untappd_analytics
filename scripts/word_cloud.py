@@ -3,7 +3,6 @@ import string
 from collections import defaultdict
 
 import wordcloud
-from wordcloud import WordCloud
 
 import untappd
 
@@ -48,7 +47,7 @@ colors = {
 occurrences = {word: int(len(ratings) ** 0.1) for word, ratings in word_ratings.items()}
 
 print(word_ratings)
-wc = WordCloud().generate_from_frequencies(occurrences).recolor(
+wc = wordcloud.WordCloud().generate_from_frequencies(occurrences).recolor(
     color_func=(lambda word, **kwargs: colors[word]),
 )
 
