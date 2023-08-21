@@ -52,7 +52,7 @@ colors = {
     for word in word_ratings
 }
 occurrences = {
-    word: int(len(ratings) ** 0.1)
+    word: len(ratings)
     for word, ratings in word_ratings.items()
 }
 
