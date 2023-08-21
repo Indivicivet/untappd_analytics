@@ -43,7 +43,7 @@ colors = {
     )
     for word in word_ratings
 }
-occurrences = {word: len(ratings) for word, ratings in word_ratings.items()}
+occurrences = {word: int(len(ratings) ** 0.1) for word, ratings in word_ratings.items()}
 
 print(word_ratings)
 wc = WordCloud().generate_from_frequencies(occurrences).recolor(
