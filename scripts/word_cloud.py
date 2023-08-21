@@ -60,6 +60,9 @@ print(word_ratings)
 wc = wordcloud.WordCloud(
     width=1280,
     height=720,
+    max_words=1000,
+    max_font_size=200,
+    prefer_horizontal=0.95,
 ).generate_from_frequencies(occurrences).recolor(
     color_func=(lambda word, **kwargs: colors[word]),
 )
