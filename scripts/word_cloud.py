@@ -2,6 +2,7 @@ import statistics
 import string
 from collections import defaultdict
 
+import wordcloud
 from wordcloud import WordCloud
 
 import untappd
@@ -17,6 +18,8 @@ for c in CHECKINS:
         word_alpha = "".join(
             c for c in word.lower() if c in string.ascii_lowercase
         )
+        if word_alpha in wordcloud.STOPWORDS:
+            continue
         word_ratings[word_alpha].append(c.rating)
 
 mean = statistics.mean(all_ratings)
