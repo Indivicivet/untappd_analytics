@@ -2,7 +2,6 @@ import statistics
 import string
 from collections import defaultdict
 
-from matplotlib import pyplot as plt
 from wordcloud import WordCloud
 
 import untappd
@@ -50,5 +49,4 @@ wc = WordCloud().generate_from_frequencies(occurrences).recolor(
     color_func=(lambda word, **kwargs: colors[word]),
 )
 
-plt.imshow(wc)
-plt.show()
+wc.to_image().show()
