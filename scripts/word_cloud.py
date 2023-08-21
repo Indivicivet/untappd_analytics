@@ -36,11 +36,13 @@ negativity = {
     ) / std
     for word, ratings in word_ratings.items()
 }
+
+COLOR_MAG = 196
 colors = {
     word: (
-        int(255 * negativity[word]),
-        int(255 * positivity[word]),
-        255 - int(255 * (positivity[word] + negativity[word])),
+        int(COLOR_MAG * negativity[word]),
+        int(COLOR_MAG * positivity[word]),
+        COLOR_MAG - int(COLOR_MAG / 2 * (positivity[word] + negativity[word])),
     )
     for word in word_ratings
 }
