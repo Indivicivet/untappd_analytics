@@ -20,7 +20,7 @@ for c in CHECKINS:
         if (
             word_alpha in wordcloud.STOPWORDS
             or word_alpha in {
-                "checkin", "posthoc", "drank", "back", "think",
+                "checkin", "posthoc", "drank", "back", "think", "beer",
             }
         ):
             continue
