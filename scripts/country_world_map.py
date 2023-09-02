@@ -77,6 +77,18 @@ for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     ).add_to(markers)
 
 world.render()
-MAP_OUT_FILE = f"out/world_map_{rating_type_str}.html"
+MAP_OUT_FILE = (
+        Path(__file__).parent / "out" / f"world_map_{rating_type_str}.html"
+)
 world.save(MAP_OUT_FILE)
 print(f"saved map to {MAP_OUT_FILE}")
+
+
+try:
+    from selenium import webdriver
+except NameError:
+    print("not launching since selenium not installed")
+else:
+    driver = webdriver.Chrome()
+    driver.get("file://" + str(MAP_OUT_FILE.resolve()))
+    input("press enter/exit to close browser...")
