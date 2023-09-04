@@ -74,6 +74,8 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
     rating_colour_range = (
         (2, 4.1)
         if MAGIC_RATING
+        else (2.5, 3.75)
+        if USE_VENUE
         else (2.5, 4)
     )
     hue = np.interp(rating, rating_colour_range, (0, 0.3))
