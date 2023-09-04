@@ -56,7 +56,7 @@ def get_new_latlong(country):
 
 
 get_latlong = (
-    lambda venue: [venue.lat, venue.long]
+    (lambda venue: [venue.lat, venue.long])
     if USE_VENUE
     else filecached.Function(
         func=get_new_latlong,
