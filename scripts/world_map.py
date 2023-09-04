@@ -10,18 +10,23 @@ import untappd
 import filecached
 
 CHECKINS = untappd.load_latest_checkins()
-country_ratings = defaultdict(list)
+place_ratings = defaultdict(list)
 
 
 # todo :: might want to use a slightly different set of
 # magic_rating params for country-based?
 MAGIC_RATING = True
+USE_VENUE = True  # instead of country
 rating_type_str = "magic" if MAGIC_RATING else "average"
 
 for ci in CHECKINS:
-    country_ratings[ci.beer.brewery.country].append(ci)
+    place_ratings[
+        ci.venue
+        if USE_VENUE
+        else ci.beer.brewery.country
+    ].append(ci)
 
-country_rating_and_count = sorted(
+place_rating_and_count = sorted(
     (
         (
             (
@@ -30,10 +35,12 @@ country_rating_and_count = sorted(
                 else sum(ci.rating for ci in cis) / len(cis)
             ),
             len(cis),
-            country,
+            place,
         )
-        for country, cis in country_ratings.items()
+        for place, cis in place_ratings.items()
+        if place is not None
     ),
+    key=lambda t: t[:2],
     reverse=True,
 )
 
@@ -48,18 +55,22 @@ def get_new_latlong(country):
     return [location.latitude, location.longitude]
 
 
-get_latlong = filecached.Function(
-    func=get_new_latlong,
-    file=Path("out/world_latlongs.json"),
+get_latlong = (
+    lambda venue: [venue.lat, venue.long]
+    if USE_VENUE
+    else filecached.Function(
+        func=get_new_latlong,
+        file=Path("out/world_latlongs.json"),
+    )
 )
 
-for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
-    country_rank_str = (
-        f"{country} (rank {i+1})"
+for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
+    place_rank_str = (
+        f"{place} (rank {i + 1})"
         f" - {rating_type_str} rating"
         f" {rating:.2f} over {n_ratings} ratings"
     )
-    print(country_rank_str)
+    print(place_rank_str)
     rating_colour_range = (
         (2, 4.1)
         if MAGIC_RATING
@@ -67,18 +78,20 @@ for i, (rating, n_ratings, country) in enumerate(country_rating_and_count):
     )
     hue = np.interp(rating, rating_colour_range, (0, 0.3))
     folium.Circle(
-        location=get_latlong(country),
+        location=get_latlong(place),
         radius=20_000 * n_ratings ** 0.4,  # meters
         # stroke=False,
         color=colour.Color(hsl=(hue, 1, 0.3)).hex_l,
         fill=True,
         fill_color=colour.Color(hsl=(hue, 1, 0.5)).hex_l,
-        tooltip=country_rank_str,
+        tooltip=place_rank_str,
     ).add_to(markers)
 
 world.render()
+place_tag = "venues" if USE_VENUE else "countries"
 MAP_OUT_FILE = (
-        Path(__file__).parent / "out" / f"world_map_{rating_type_str}.html"
+        Path(__file__).parent / "out"
+        / f"world_map_{place_tag}_{rating_type_str}.html"
 )
 world.save(MAP_OUT_FILE)
 print(f"saved map to {MAP_OUT_FILE}")
