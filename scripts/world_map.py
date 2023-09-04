@@ -15,8 +15,8 @@ place_ratings = defaultdict(list)
 
 # todo :: might want to use a slightly different set of
 # magic_rating params for country-based?
-MAGIC_RATING = True
 USE_VENUE = True  # instead of country
+MAGIC_RATING = True and (not USE_VENUE)  # forbid being silly :)))
 rating_type_str = "magic" if MAGIC_RATING else "average"
 
 for ci in CHECKINS:
