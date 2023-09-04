@@ -79,7 +79,11 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
     hue = np.interp(rating, rating_colour_range, (0, 0.3))
     folium.Circle(
         location=get_latlong(place),
-        radius=20_000 * n_ratings ** 0.4,  # meters
+        radius=(
+            20 * min(n_ratings, 20) ** 0.4
+            if USE_VENUE
+            else 20_000 * n_ratings ** 0.4
+        ),  # meters
         # stroke=False,
         color=colour.Color(hsl=(hue, 1, 0.3)).hex_l,
         fill=True,
