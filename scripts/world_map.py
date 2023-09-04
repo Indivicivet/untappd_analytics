@@ -82,7 +82,8 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
     folium.Circle(
         location=get_latlong(place),
         radius=(
-            20 * min(n_ratings, 20) ** 0.4
+            20 * min(n_ratings, 20) ** 0.4  # * 4
+            # ^make this 4x bigger if you haven't had a lot of beers somewhere!
             if USE_VENUE
             else 20_000 * n_ratings ** 0.4
         ),  # meters
