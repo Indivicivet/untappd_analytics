@@ -190,6 +190,18 @@ def by_keyword(keywords):
     ]
 
 
+def checkin_comment_length(
+    checkin,
+    char_thresholds=(20, 50, 90),
+):
+    if len(checkin.comment) == 0:
+        return "0"
+    for prev, thresh in zip((0, ) + char_thresholds, char_thresholds):
+        if len(checkin.comment) <= thresh:
+            return f"{prev+1} ~ {thresh}"
+    return f"{max(char_thresholds) + 1}+"
+
+
 def save_various_plots(checkins, out_dir=None):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
@@ -218,6 +230,7 @@ def save_various_plots(checkins, out_dir=None):
         "nth_time_having": BeerNthTimeTracker().beer_n,
         "taster_or_not": lambda checkin: checkin.serving_type == "Taster",
         "weak_strong_main_categories": weak_strong_main_categories,
+        "checkin_comment_length": checkin_comment_length,
         "fruit": by_keyword([
             "cherry",
             "blueberry",
