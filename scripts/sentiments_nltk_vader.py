@@ -15,7 +15,7 @@ for c in CIS:
 
 
 for c in sorted(CIS, key=lambda x: x._compound_score, reverse=True)[:25]:
-    print(f"{c._compound_score} ({c.rating}) | {c.beer.name} | {c.comment}")
+    print(f"{c._compound_score} ({c.rating}) | {c.beer} | {c.comment}")
 
 plt.figure(figsize=(12.8, 7.2))
 plt.scatter(
