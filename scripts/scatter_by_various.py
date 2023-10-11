@@ -1,10 +1,14 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import seaborn
 from nltk.sentiment import vader
 
 import untappd
 import untappd_utils
+
+
+seaborn.set()
 
 
 @untappd_utils.show_or_save_to_out_file
