@@ -1,3 +1,7 @@
+# todo :: can we do more interesting things with sentiment analysis? :)
+# we probably can! but the basic thing this script does atm is subsumed by
+# scatter_by_various.py
+
 import matplotlib.pyplot as plt
 from nltk.sentiment import vader
 
