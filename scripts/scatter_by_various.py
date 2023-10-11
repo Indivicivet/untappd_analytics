@@ -31,14 +31,17 @@ def save_various_scatters(checkins, out_dir=None):
     dict_of_things = {
         "ratings": [c.rating for c in checkins],
         "comment_length": [len(c.comment) for c in checkins],
+        "time_of_day": [c.datetime.hour + c.datetime.minute / 60 for c in checkins]
     }
     for x, y, kwargs in [
         ["comment_length", "ratings", {}],
+        ["time_of_day", "comment_length", {}]
     ]:
         scatter_things(
             dict_of_things=dict_of_things,
             key_x=x,
             key_y=y,
+            **kwargs,
             out_file=out_dir / f"scatter_{y}_vs_{x}.png",
         )
 
