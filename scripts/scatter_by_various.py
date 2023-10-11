@@ -36,11 +36,15 @@ def save_various_scatters(checkins, out_dir=None):
         "comment_length": [len(c.comment) for c in checkins],
         "time_of_day": [c.datetime.hour + c.datetime.minute / 60 for c in checkins],
         "sentiment_compound": [s["compound"] for s in sentiments],
+        "sentiment_pos": [s["pos"] for s in sentiments],
+        "sentiment_neg": [s["neg"] for s in sentiments],
     }
     for x, y, kwargs in [
         ["comment_length", "rating", {}],
         ["time_of_day", "comment_length", {}],
         ["sentiment_compound", "rating", {}],
+        ["sentiment_pos", "rating", {}],
+        ["sentiment_neg", "rating", {}],
     ]:
         scatter_things(
             dict_of_things=dict_of_things,
