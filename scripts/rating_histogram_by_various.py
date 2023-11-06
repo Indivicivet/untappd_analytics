@@ -98,6 +98,7 @@ def show_histogram(
 
     x_data = [i / 4 for i in range(1, 21)]
     plt.figure(figsize=(12.8, 7.2))
+    plt.gca().margins(0.01, 0.01)
     for label, counts in sorted(category_data.items()):
         scale_factor = 100 / sum(counts.values()) if normalize else 1
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
