@@ -244,22 +244,12 @@ def save_various_plots(checkins, out_dir=None):
         "date_seg_3": date_segment_3,
         "festival": festival_with_year,
         "brewery_common": ByFuncSpecificValuesOnly.top_n(
-            func=(
-                lambda ci:
-                    ci.beer.brewery.name
-                    if ci.beer.brewery is not None
-                    else None
-            ),
+            func=lambda ci: ci.beer.brewery.name,
             all_checkins=checkins,
             n=6,
         ),
         "brewery_top_magic": ByFuncSpecificValuesOnly.top_magic_n(
-            func=(
-                lambda ci:
-                    ci.beer.brewery.name
-                    if ci.beer.brewery is not None
-                    else None
-            ),
+            func=lambda ci: ci.beer.brewery.name,
             all_checkins=checkins,
             n=6,
         ),
