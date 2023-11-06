@@ -73,6 +73,26 @@ class ByFuncSpecificValuesOnly:
             allow_other=allow_other,
         )
 
+    @classmethod
+    def top_magic_n(
+        cls, func, all_checkins, n=5, allow_other=False, **magic_kwargs
+    ):
+        by_func_value = defaultdict(list)
+        for checkin in all_checkins:
+            by_func_value[func(checkin)].append(checkin)
+        magics = [
+            (untappd.magic_rating(checkins, **magic_kwargs)[0], func_val)
+            for func_val, checkins in by_func_value.items()
+        ]
+        return cls(
+            func=func,
+            included_values=[
+                func_val
+                for _, func_val in sorted(magics, reverse=True, key=lambda t: t[0])
+            ][:n],
+            allow_other=allow_other,
+        )
+
 
 # todo :: move to untappd?
 @untappd_utils.show_or_save_to_out_file
@@ -223,7 +243,17 @@ def save_various_plots(checkins, out_dir=None):
         "date_seg_nederlands": date_segment_nl,
         "date_seg_3": date_segment_3,
         "festival": festival_with_year,
-        "brewery": ByFuncSpecificValuesOnly.top_n(
+        "brewery_common": ByFuncSpecificValuesOnly.top_n(
+            func=(
+                lambda ci:
+                    ci.beer.brewery.name
+                    if ci.beer.brewery is not None
+                    else None
+            ),
+            all_checkins=checkins,
+            n=6,
+        ),
+        "brewery_top_magic": ByFuncSpecificValuesOnly.top_magic_n(
             func=(
                 lambda ci:
                     ci.beer.brewery.name
