@@ -210,8 +210,8 @@ def save_various_plots(checkins, out_dir=None):
         "hour": lambda checkin: checkin.datetime.hour,
         "session_n": SessionTracker().session_n,
         "strength": strength_class,
-        "singapore": date_segment_sg,
-        "nederlands": date_segment_nl,
+        "date_seg_singapore": date_segment_sg,
+        "date_seg_nederlands": date_segment_nl,
         "festival": festival_with_year,
         "brewery": ByFuncSpecificValuesOnly.top_n(
             func=(
