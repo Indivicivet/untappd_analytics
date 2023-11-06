@@ -263,7 +263,11 @@ def save_various_plots(checkins, out_dir=None):
             all_checkins=checkins,
             n=6,
         ),
-        "venue": ByFuncSpecificValuesOnly.top_n(
+        "venue_common": ByFuncSpecificValuesOnly.top_n(
+            func=lambda ci: ci.venue.name if ci.venue is not None else None,
+            all_checkins=checkins,
+        ),
+        "venue_top_magic": ByFuncSpecificValuesOnly.top_magic_n(
             func=lambda ci: ci.venue.name if ci.venue is not None else None,
             all_checkins=checkins,
         ),
