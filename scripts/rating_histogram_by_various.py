@@ -184,6 +184,19 @@ def date_segment_3(checkin):
     return "After"
 
 
+def date_segment_4(checkin):
+    if checkin.datetime < datetime.datetime(2023, 11, 11):
+        return None
+    if checkin.datetime < datetime.datetime(2023, 11, 17):
+        return "S"
+    if checkin.datetime < datetime.datetime(2023, 11, 21, 4):
+        return "O"
+    if checkin.datetime < datetime.datetime(2023, 11, 21, 16):
+        print(checkin)
+        return "S"
+    return None
+
+
 # todo :: there are better (non-lineplot) visualizations for this
 def weak_strong_main_categories(checkin, threshold=7):
     style = checkin.beer.get_style_category()
@@ -242,6 +255,7 @@ def save_various_plots(checkins, out_dir=None):
         "date_seg_singapore": date_segment_sg,
         "date_seg_nederlands": date_segment_nl,
         "date_seg_3": date_segment_3,
+        "date_seg_4_sos": date_segment_4,
         "festival": festival_with_year,
         "brewery_common": ByFuncSpecificValuesOnly.top_n(
             func=lambda ci: ci.beer.brewery.name,
