@@ -89,6 +89,7 @@ class ByFuncSpecificValuesOnly:
             included_values=[
                 func_val
                 for _, func_val in sorted(magics, reverse=True, key=lambda t: t[0])
+                if func_val is not None
             ][:n],
             allow_other=allow_other,
         )
