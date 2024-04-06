@@ -175,8 +175,8 @@ def show_violin(
     plt.figure(figsize=(12.8, 7.2))
     plt.gca().margins(0.01, 0.01)
     plt.violinplot(
-        quantiles=[[0, 0.25, 0.5, 0.75, 1]] * len(category_data),
         list(category_data.values()),
+        quantiles=[[0, 0.1, 0.5, 0.9, 1]] * len(category_data),
         vert=False,
     )
     plt.title(title)
