@@ -231,7 +231,6 @@ def date_segment_4(checkin):
     if checkin.datetime < datetime.datetime(2023, 11, 21, 4):
         return "O"
     if checkin.datetime < datetime.datetime(2023, 11, 21, 16):
-        print(checkin)
         return "S"
     return None
 
