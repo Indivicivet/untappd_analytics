@@ -187,7 +187,6 @@ def show_violin(
         list(range(1, len(category_data) + 1)),
         labels=list(category_data),
     )
-    #plt.gca().grid(which="minor", color="w", linewidth=0.5)
 
 
 def strength_class(checkin):
