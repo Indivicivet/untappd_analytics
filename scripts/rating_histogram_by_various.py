@@ -181,6 +181,8 @@ def show_violin(
         widths=0.75,
         bw_method=0.25 + 0.1,  # known discrete sampling, smoothed a bit extra
     )
+    if plt.xlim()[0] < 2:
+        plt.xlim(left=2)
     plt.title(title)
     plt.xlabel("rating")
     plt.gca().set_yticks(
