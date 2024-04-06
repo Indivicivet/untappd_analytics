@@ -178,6 +178,8 @@ def show_violin(
         list(category_data.values()),
         quantiles=[[0, 0.1, 0.5, 0.9, 1]] * len(category_data),
         vert=False,
+        widths=0.75,
+        bw_method=0.25 + 0.1,  # known discrete sampling, smoothed a bit extra
     )
     plt.title(title)
     plt.xlabel("rating")
