@@ -59,7 +59,7 @@ class ByFuncSpecificValuesOnly:
         return None
 
     @classmethod
-    def top_n(cls, func, all_checkins, n=5, allow_other=False):
+    def most_common_n(cls, func, all_checkins, n=5, allow_other=False):
         return cls(
             func=func,
             included_values=[
@@ -304,7 +304,7 @@ def save_various_plots(
         "date_seg_3": date_segment_3,
         "date_seg_4_sos": date_segment_4,
         "festival": festival_with_year,
-        "brewery_common": ByFuncSpecificValuesOnly.top_n(
+        "brewery_common": ByFuncSpecificValuesOnly.most_common_n(
             func=lambda ci: ci.beer.brewery.name,
             all_checkins=checkins,
             n=6,
@@ -314,7 +314,7 @@ def save_various_plots(
             all_checkins=checkins,
             n=6,
         ),
-        "venue_common": ByFuncSpecificValuesOnly.top_n(
+        "venue_common": ByFuncSpecificValuesOnly.most_common_n(
             func=lambda ci: ci.venue.name if ci.venue is not None else None,
             all_checkins=checkins,
         ),
