@@ -175,12 +175,13 @@ def show_violin(
     plt.figure(figsize=(12.8, 7.2))
     plt.gca().margins(0.01, 0.01)
     plt.violinplot(
-        [values for _, values in category_data.items()],
         quantiles=[[0, 0.25, 0.5, 0.75, 1]] * len(category_data),
+        list(category_data.values()),
+        vert=False,
     )
     plt.title(title)
-    plt.ylabel("rating")
-    plt.gca().set_xticks(
+    plt.xlabel("rating")
+    plt.gca().set_yticks(
         list(range(1, len(category_data) + 1)),
         labels=list(category_data),
     )
