@@ -148,6 +148,45 @@ def show_histogram(
         )
 
 
+@untappd_utils.show_or_save_to_out_file
+def show_violin(
+    data: Sequence[untappd.Checkin],
+    # todo :: its really "sortable":
+    func: Callable[[untappd.Checkin], Union[Any, list[Any], tuple[Any]]],
+    normalize: bool = False,
+    show_n_checkins: bool = True,
+    title: Optional[str] = None,
+):
+    seaborn.set()
+    # similar code to show_histogram's accumulation, but here we actually
+    # store the checkins, since this is what violinplot wants
+    # (alternatively we could share code and convert format in one function...)
+    category_data = defaultdict(list)
+    for checkin in data:
+        if (result := func(checkin)) is not None:
+            rating = checkin.rating or 0
+            if isinstance(result, (list, tuple)):
+                # can't check iterable because strings are iterable
+                for category in result:
+                    category_data[category].append(rating)
+            else:
+                category_data[result].append(rating)
+
+    plt.figure(figsize=(12.8, 7.2))
+    plt.gca().margins(0.01, 0.01)
+    plt.violinplot(
+        [values for _, values in category_data.items()],
+        quantiles=[[0, 0.25, 0.5, 0.75, 1]] * len(category_data),
+    )
+    plt.title(title)
+    plt.ylabel("rating")
+    plt.gca().set_xticks(
+        list(range(1, len(category_data) + 1)),
+        labels=list(category_data),
+    )
+    #plt.gca().grid(which="minor", color="w", linewidth=0.5)
+
+
 def strength_class(checkin):
     if checkin.beer.abv < 5:
         return "5%"
@@ -244,7 +283,11 @@ def checkin_comment_length(
     return f"{max(char_thresholds) + 1}+"
 
 
-def save_various_plots(checkins, out_dir=None):
+def save_various_plots(
+    checkins,
+    out_dir=None,
+    violin=False,
+):
     if out_dir is None:
         out_dir = Path(__file__).parent / "out"
     for tag, func in {
@@ -300,17 +343,27 @@ def save_various_plots(checkins, out_dir=None):
             "galaxy",  # beware: other beers may sneak in...
         ]),
     }.items():
-        out_file = out_dir / f"ratings_by_{tag}.png"
-        show_histogram(
-            checkins,
-            func=func,
-            normalize=tag not in ["hour", "hop"],
-            title=f"ratings by {tag}",
-            out_file=out_file,
-        )
+        if violin:
+            show_violin(
+                checkins,
+                func=func,
+                title=f"ratings by {tag}",
+                out_file=out_dir / f"violin_by_{tag}.png"
+            )
+        else:
+            show_histogram(
+                checkins,
+                func=func,
+                normalize=tag not in ["hour", "hop"],
+                title=f"ratings by {tag}",
+                out_file=out_dir / f"ratings_by_{tag}.png",
+            )
 
 
 if __name__ == "__main__":
     CHECKINS = untappd.load_latest_checkins()
-    save_various_plots(CHECKINS)
+    save_various_plots(
+        CHECKINS,
+        violin=True,
+    )
     # show_histogram(CHECKINS, func=strength_class, normalize=True)
