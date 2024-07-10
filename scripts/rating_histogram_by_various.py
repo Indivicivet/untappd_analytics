@@ -98,10 +98,12 @@ class ByFuncSpecificValuesOnly:
 CHECKIN_VALUES = tuple(i / 4 for i in range(1, 21))
 
 
-def _detailed_label(s_label: str, rating_counts: dict) -> str:
+def _checkins_extra_str(s_label: str, rating_counts: Union[dict, list]) -> str:
+    if not isinstance(rating_counts, dict):
+        rating_counts = Counter(rating_counts)
     total_checkins = sum(rating_counts.values())
     average = sum(x * rating_counts.get(x, 0) for x in CHECKIN_VALUES) / total_checkins
-    return f"{s_label} ({total_checkins} checkins, {average:.3f} average)"
+    return f"({total_checkins} checkins, {average:.3f} average)"
 
 
 # todo :: move to untappd?
@@ -134,7 +136,7 @@ def show_histogram(
         plt.plot(
             *untappd_utils.smooth_ratings(CHECKIN_VALUES, y_data),
             label=(
-                _detailed_label(label, counts)
+                f"{label} {_checkins_extra_str(label, counts)}"
                 if show_n_checkins
                 else label
             )
@@ -193,7 +195,14 @@ def show_violin(
     plt.xlabel("rating")
     plt.gca().set_yticks(
         list(range(1, len(category_data) + 1)),
-        labels=list(category_data),
+        labels=(
+            [
+                f"{label}\n{_checkins_extra_str(label, counts)}"
+                for label, counts in category_data.items()
+            ]
+            if show_n_checkins
+            else list(category_data)
+        ),
     )
 
 
