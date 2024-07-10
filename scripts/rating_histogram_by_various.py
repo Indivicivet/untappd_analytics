@@ -261,7 +261,7 @@ def festival_with_year(checkin, include_non_festival=True):
             and "festival market" not in checkin.venue.name.lower()
         )
     ):
-        return f"{checkin.venue.name} ({checkin.datetime.year})"
+        return f"{checkin.venue.name}\n({checkin.datetime.year})"
     if include_non_festival:
         return "Non-festival"
     return None
