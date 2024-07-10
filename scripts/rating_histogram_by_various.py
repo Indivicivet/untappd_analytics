@@ -154,7 +154,6 @@ def show_violin(
     data: Sequence[untappd.Checkin],
     # todo :: its really "sortable":
     func: Callable[[untappd.Checkin], Union[Any, list[Any], tuple[Any]]],
-    normalize: bool = False,
     show_n_checkins: bool = True,
     title: Optional[str] = None,
 ):
