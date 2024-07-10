@@ -95,6 +95,12 @@ class ByFuncSpecificValuesOnly:
         )
 
 
+def _detailed_label(s_label: str, rating_counts: dict) -> str:
+    total_checkins = sum(rating_counts.values())
+    average = sum(x * rating_counts.get(x, 0) for x in range(1, 21)) / total_checkins
+    return f"{s_label} ({total_checkins} checkins, {average:.3f} average)"
+
+
 # todo :: move to untappd?
 @untappd_utils.show_or_save_to_out_file
 def show_histogram(
@@ -123,12 +129,10 @@ def show_histogram(
     for label, counts in sorted(category_data.items()):
         scale_factor = 100 / sum(counts.values()) if normalize else 1
         y_data = [counts.get(x, 0) * scale_factor for x in x_data]
-        total_checkins = sum(counts.values())
-        average = sum(x * counts.get(x, 0) for x in x_data) / total_checkins
         plt.plot(
             *untappd_utils.smooth_ratings(x_data, y_data),
             label=(
-                f"{label} ({total_checkins} checkins, {average:.3f} average)"
+                _detailed_label(label, counts)
                 if show_n_checkins
                 else label
             )
