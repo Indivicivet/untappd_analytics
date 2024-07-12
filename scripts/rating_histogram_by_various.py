@@ -98,7 +98,7 @@ class ByFuncSpecificValuesOnly:
 CHECKIN_VALUES = tuple(i / 4 for i in range(1, 21))
 
 
-def _checkins_extra_str(s_label: str, rating_counts: Union[dict, list]) -> str:
+def _checkins_extra_str(rating_counts: Union[dict, list]) -> str:
     if not isinstance(rating_counts, dict):
         rating_counts = Counter(rating_counts)
     total_checkins = sum(rating_counts.values())
@@ -136,7 +136,7 @@ def show_histogram(
         plt.plot(
             *untappd_utils.smooth_ratings(CHECKIN_VALUES, y_data),
             label=(
-                f"{label} {_checkins_extra_str(label, counts)}"
+                f"{label} {_checkins_extra_str(counts)}"
                 if show_n_checkins
                 else label
             )
@@ -197,7 +197,7 @@ def show_violin(
         list(range(1, len(category_data) + 1)),
         labels=(
             [
-                f"{label}\n{_checkins_extra_str(label, counts)}"
+                f"{label}\n{_checkins_extra_str(counts)}"
                 for label, counts in category_data.items()
             ]
             if show_n_checkins
