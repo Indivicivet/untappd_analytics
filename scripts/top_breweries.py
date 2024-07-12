@@ -8,7 +8,16 @@ from pathlib import Path
 
 import untappd
 
-CHECKINS = untappd.load_latest_checkins()
+
+SPECIFIC_STYLES = ["sour"]
+SPECIFIC_COUNTRIES = ["England", "Scotland", "Wales"]
+
+
+CHECKINS = [
+    c
+    for c in untappd.load_latest_checkins()
+    if not SPECIFIC_STYLES or c.beer.get_style_category() in SPECIFIC_STYLES
+]
 
 brewery_checkins = defaultdict(list)
 
@@ -28,15 +37,21 @@ def get_style_ratios(checkins):
 scores_breweries = [
     (*untappd.magic_rating(checkins), brewery)
     for brewery, checkins in brewery_checkins.items()
-    # if brewery.country in ["England", "Scotland", "Wales"]
+    if not SPECIFIC_COUNTRIES or brewery.country in SPECIFIC_COUNTRIES
 ]
 
 scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
 
 SHOW_N_BREWERIES = 20
 SHOW_TOP_N = 5  # 0 for less detailed view :)
-SHOW_STYLES = True
+SHOW_STYLES = not SPECIFIC_STYLES
 
+if SPECIFIC_COUNTRIES:
+    print("Specific countries:", ", ".join(SPECIFIC_COUNTRIES))
+    print()
+if SPECIFIC_STYLES:
+    print("Specific styles:", ", ".join(SPECIFIC_STYLES))
+    print()
 
 all_beer_score, _ = untappd.magic_rating(CHECKINS)
 
