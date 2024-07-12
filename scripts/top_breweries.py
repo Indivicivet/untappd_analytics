@@ -44,7 +44,7 @@ scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
 
 SHOW_N_BREWERIES = 20
 SHOW_TOP_N = 5  # 0 for less detailed view :)
-SHOW_STYLES = not SPECIFIC_STYLES
+SHOW_STYLES = len(SPECIFIC_STYLES) != 1
 
 if SPECIFIC_COUNTRIES:
     print("Specific countries:", ", ".join(SPECIFIC_COUNTRIES))
