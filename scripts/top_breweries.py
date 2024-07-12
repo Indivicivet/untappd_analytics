@@ -9,8 +9,8 @@ from pathlib import Path
 import untappd
 
 
-SPECIFIC_STYLES = ["sour"]
-SPECIFIC_COUNTRIES = ["England", "Scotland", "Wales"]
+SPECIFIC_STYLES = []
+SPECIFIC_COUNTRIES = []
 
 
 CHECKINS = [
