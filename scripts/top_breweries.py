@@ -28,6 +28,7 @@ def get_style_ratios(checkins):
 scores_breweries = [
     (*untappd.magic_rating(checkins), brewery)
     for brewery, checkins in brewery_checkins.items()
+    # if brewery.country in ["England", "Scotland", "Wales"]
 ]
 
 scores_sorted = sorted(scores_breweries, key=lambda t: t[0], reverse=True)
