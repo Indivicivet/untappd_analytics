@@ -330,7 +330,7 @@ def average_rating_by_beer(
 def magic_rating(
     checkins: Sequence[Checkin],
     dropoff_ratio: float = 0.8,
-    average_score_weight: float = 0.5,
+    average_score_weight: float = 0.35,
     neutral_rating: float = 3.25,
     use_global: bool = False,
 ) -> Tuple[float, list[Beer]]:
