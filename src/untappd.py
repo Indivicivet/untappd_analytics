@@ -331,6 +331,7 @@ def magic_rating(
     checkins: Sequence[Checkin],
     dropoff_ratio: float = 0.8,
     average_score_weight: float = 0.5,
+    neutral_rating: float = 3.25,
     use_global: bool = False,
 ) -> Tuple[float, list[Beer]]:
     """
@@ -339,6 +340,11 @@ def magic_rating(
     using either dropoff_ratio=1 or average_score_weight=1 should give
     a pure average rating
     todo :: unit test for this!
+
+    `neutral_rating` indicates the rating at which additional beers give
+    zero added score, and beers below this reduce the score.
+    neutral_rating = 0 will give zero penalization for adding beers,
+    regardless of rating.
 
     returns (magic score, list of beers by average rating)
     """
@@ -352,9 +358,12 @@ def magic_rating(
     return (
         # magic score
         average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
-        + (1 - average_score_weight) * (1 - dropoff_ratio) * sum(  # geometric sum
-            r * dropoff_ratio ** i
-            for i, (_, r) in enumerate(top_ratings)
+        + (1 - average_score_weight) * (
+            neutral_rating
+            + (1 - dropoff_ratio) * sum(  # geometric sum
+                (r - neutral_rating) * dropoff_ratio ** i
+                for i, (_, r) in enumerate(top_ratings)
+            )
         ),
         # list of beers by top rating
         top_ratings,
