@@ -346,6 +346,9 @@ def magic_rating(
     neutral_rating = 0 will give zero penalization for adding beers,
     regardless of rating.
 
+    if both `average_score_weight` and `neutral_rating` are zero,
+    the score can only increase as beers are added.
+
     returns (magic score, list of beers by average rating)
     """
     top_ratings = sorted(
