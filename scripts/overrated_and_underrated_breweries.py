@@ -29,6 +29,8 @@ scores_personal_global = [
 ]
 
 print(f"using {MIN_CHECKINS=}")
+print(f"that leaves {len(scores_personal_global)}-many breweries")
+print()
 
 scores_sorted = sorted(scores_personal_global, key=lambda t: t[0] - t[1])
 print("most overrated breweries (in my opinion):")
