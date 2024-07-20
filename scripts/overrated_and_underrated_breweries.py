@@ -25,7 +25,7 @@ scores_personal_global = [
             checkins, use_global=True, average_score_weight=1
         )[0]
     ) != 0
-        and len(checkins) > MIN_CHECKINS
+    and len(checkins) > MIN_CHECKINS
 ]
 
 print(f"using {MIN_CHECKINS=}")
