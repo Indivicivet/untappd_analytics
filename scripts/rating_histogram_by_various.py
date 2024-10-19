@@ -268,14 +268,17 @@ def weak_strong_main_categories(checkin, threshold=7):
 
 
 def festival_with_year(checkin, include_non_festival=True):
-    if (
-        checkin.venue is not None
-        and (
+    if checkin.venue is not None:
+        if (
             " fest" in checkin.venue.name.lower()
             and "festival market" not in checkin.venue.name.lower()
-        )
-    ):
-        return f"{checkin.venue.name}\n({checkin.datetime.year})"
+        ):
+            return f"{checkin.venue.name}\n({checkin.datetime.year})"
+        # hardcoded known beer festivals:
+        if "Shiinoki Cul" in checkin.venue.name:
+            return f"Kanazawa Craft Beer Festival\n({checkin.datetime.year})"
+        if "Osaka Castle Park" in checkin.venue.name:
+            return f"Craft Beer Holiday\n({checkin.datetime.year})"
     if include_non_festival:
         return "Non-festival"
     return None
