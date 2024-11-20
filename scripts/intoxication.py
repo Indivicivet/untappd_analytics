@@ -61,6 +61,7 @@ plt.title(
 plt.xlabel("hours elapsed (todo: better!)")
 axes_intox.set_ylabel("units in body")
 if SHOW_RATINGS:
+    # todo :: add option of intox vs rating scatter
     axes_ratings = axes_intox.twinx()
     axes_ratings.plot(
         [(ci.datetime - START_TIME).total_seconds() / 3600 for ci in relevant_checkins],
