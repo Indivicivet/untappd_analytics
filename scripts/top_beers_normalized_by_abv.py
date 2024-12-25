@@ -73,5 +73,12 @@ for i, beer in enumerate(beers_sorted[:20]):
 plt.bar(
     x=UPPER_BOUNDS,
     height=[stats_by_abv[bucket][0] for bucket in UPPER_BOUNDS],
+    label="mean",
 )
+plt.bar(
+    x=UPPER_BOUNDS,
+    height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
+    label="variance",
+)
+plt.legend()
 plt.show()
