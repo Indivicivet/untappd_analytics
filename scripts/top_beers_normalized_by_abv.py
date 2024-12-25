@@ -80,5 +80,6 @@ plt.bar(
     height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
     label="variance",
 )
+plt.xlabel("abv")
 plt.legend()
 plt.show()
