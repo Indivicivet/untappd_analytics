@@ -80,6 +80,15 @@ plt.bar(
     height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
     label="variance",
 )
+plt.bar(
+    x=UPPER_BOUNDS,
+    height=[
+        len(ratings_by_abv[bucket]) * (5 / len(CHECKINS))
+        for bucket in UPPER_BOUNDS]
+    ,
+    label="number of ratings, arbitrarily scaled",
+    alpha=0.5,
+)
 plt.xlabel("abv")
 plt.legend()
 plt.show()
