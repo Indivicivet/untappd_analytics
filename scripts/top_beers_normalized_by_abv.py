@@ -89,8 +89,8 @@ plt.bar(
     **x_plot_args,
     height=[
         len(ratings_by_abv[bucket]) * (5 / len(CHECKINS))
-        for bucket in UPPER_BOUNDS]
-    ,
+        for bucket in UPPER_BOUNDS
+    ],
     label="number of ratings, arbitrarily scaled",
     alpha=0.5,
 )
