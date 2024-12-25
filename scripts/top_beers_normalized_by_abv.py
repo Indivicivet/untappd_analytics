@@ -70,24 +70,23 @@ for i, beer in enumerate(beers_sorted[:20]):
 # we could do better than bucketing.
 # (maybe it's ok for high abv theoretically being worse, but
 # there's definitely not quite a smooth curve going on here)
+x_plot_args = {
+    "x": UPPER_BOUNDS - UPPER_BOUNDS[1],
+    "align": "edge",
+    "width": UPPER_BOUNDS[1],
+}
 plt.bar(
-    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
-    align="edge",
-    width=UPPER_BOUNDS[1],
+    **x_plot_args,
     height=[stats_by_abv[bucket][0] for bucket in UPPER_BOUNDS],
     label="mean",
 )
 plt.bar(
-    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
-    align="edge",
-    width=UPPER_BOUNDS[1],
+    **x_plot_args,
     height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
     label="variance",
 )
 plt.bar(
-    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
-    align="edge",
-    width=UPPER_BOUNDS[1],
+    **x_plot_args,
     height=[
         len(ratings_by_abv[bucket]) * (5 / len(CHECKINS))
         for bucket in UPPER_BOUNDS]
