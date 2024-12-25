@@ -10,6 +10,7 @@ initially a copy-paste of top_beers_normalized_by_style_category.py
 import statistics
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 import untappd
@@ -63,3 +64,14 @@ for i, beer in enumerate(beers_sorted[:20]):
     )
     print(beer)
     print()
+
+
+# todo :: there's non-monotonicity here?! figure out how to address that.
+# we could do better than bucketing.
+# (maybe it's ok for high abv theoretically being worse, but
+# there's definitely not quite a smooth curve going on here)
+plt.bar(
+    x=UPPER_BOUNDS,
+    height=[stats_by_abv[bucket][0] for bucket in UPPER_BOUNDS],
+)
+plt.show()
