@@ -71,17 +71,23 @@ for i, beer in enumerate(beers_sorted[:20]):
 # (maybe it's ok for high abv theoretically being worse, but
 # there's definitely not quite a smooth curve going on here)
 plt.bar(
-    x=UPPER_BOUNDS,
+    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
+    align="edge",
+    width=UPPER_BOUNDS[1],
     height=[stats_by_abv[bucket][0] for bucket in UPPER_BOUNDS],
     label="mean",
 )
 plt.bar(
-    x=UPPER_BOUNDS,
+    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
+    align="edge",
+    width=UPPER_BOUNDS[1],
     height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
     label="variance",
 )
 plt.bar(
-    x=UPPER_BOUNDS,
+    x=UPPER_BOUNDS - UPPER_BOUNDS[1],
+    align="edge",
+    width=UPPER_BOUNDS[1],
     height=[
         len(ratings_by_abv[bucket]) * (5 / len(CHECKINS))
         for bucket in UPPER_BOUNDS]
