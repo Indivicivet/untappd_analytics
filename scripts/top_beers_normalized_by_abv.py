@@ -83,7 +83,7 @@ plt.bar(
 plt.bar(
     **x_plot_args,
     height=[stats_by_abv[bucket][1] for bucket in UPPER_BOUNDS],
-    label="variance",
+    label="std",
 )
 plt.bar(
     **x_plot_args,
