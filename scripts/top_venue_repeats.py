@@ -18,6 +18,8 @@ for venue_i, (venue, beer_counts) in enumerate(sorted(
     reverse=True,
 )[:10]):
     print(f"#{venue_i + 1}", "No venue" if venue is None else venue.name)
-    for beer_i, (beer, count) in enumerate(beer_counts.most_common(10)):
+    for beer_i, (beer, count) in enumerate(beer_counts.most_common(100)):
+        if count <= 2:
+            break
         print(f"#{beer_i + 1} ({count}): {beer}")
     print()
