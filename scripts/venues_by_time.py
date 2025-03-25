@@ -1,3 +1,4 @@
+import datetime
 from collections import defaultdict, Counter
 
 from matplotlib import pyplot as plt
@@ -18,7 +19,9 @@ DAYS = [
 day_counts = defaultdict(lambda: Counter())
 
 for ci in CIS:
-    day_counts[ci.datetime.strftime("%A")][ci.venue] += 1
+    day_counts[
+        (ci.datetime - datetime.timedelta(hours=5)).strftime("%A")
+    ][ci.venue] += 1
 
 ROWS = 2
 COLS = 4
