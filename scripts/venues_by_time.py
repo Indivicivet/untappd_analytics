@@ -28,7 +28,7 @@ for i, day in enumerate(DAYS):
     ax = axes[i // COLS, i % COLS]
     ax.pie(
         [c for _, c in top_counts],
-        labels=[v for v, _ in top_counts],
+        labels=[v if v is not None else "None" for v, _ in top_counts],
     )
     ax.set_title(day)
     # ax.legend()
