@@ -45,4 +45,9 @@ for i, (venue, _) in enumerate(venue_total_counts.most_common(ROWS * COLS)):
     )
     ax.set_title(venue)
     # ax.legend()
+plt.suptitle(
+    "Number of days visited"
+    if COUNT_VISITS
+    else "Total checkins on each day"
+)
 plt.show()
