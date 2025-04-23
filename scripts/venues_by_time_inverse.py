@@ -37,7 +37,7 @@ for i, (venue, _) in enumerate(venue_total_counts.most_common(ROWS * COLS)):
     ax = axes[i // COLS, i % COLS]
     ax.pie(
         [count_dict[day] for day in DAYS],
-        labels=DAYS,
+        labels=[f"{day} ({count_dict[day]})" for day in DAYS],
     )
     ax.set_title(venue)
     # ax.legend()
