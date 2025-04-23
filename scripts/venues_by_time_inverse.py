@@ -17,15 +17,19 @@ DAYS = [
     "Saturday",
     "Sunday",
 ]
+COUNT_VISITS = True  # ignore dupes on the same day
 
-venue_counts = defaultdict(lambda: Counter())
+venue_counts = defaultdict(Counter)
 venue_total_counts = Counter()
+venue_counted_days = defaultdict(set)
 
 for ci in CIS:
-    venue_counts[ci.venue][
-        (ci.datetime - datetime.timedelta(hours=5)).strftime("%A")
-    ] += 1
+    sensible_datetime = ci.datetime - datetime.timedelta(hours=5)
+    if COUNT_VISITS and sensible_datetime.date() in venue_counted_days[ci.venue]:
+        continue  # skip if dupe on same day
+    venue_counts[ci.venue][sensible_datetime.strftime("%A")] += 1
     venue_total_counts[ci.venue] += 1
+    venue_counted_days[ci.venue].add(sensible_datetime.date())
 
 
 ROWS = 2
