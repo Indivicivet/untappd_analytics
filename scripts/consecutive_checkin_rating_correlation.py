@@ -59,6 +59,7 @@ seaborn.heatmap(
 ax.invert_yaxis()
 for ellipse in pca_ellipses([1, 2, 3]):
     ax.add_patch(ellipse)
+ax.axline((0, 0), (19, 19))
 
 plt.xlabel("first checkin")
 plt.ylabel("second checkin")
