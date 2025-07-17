@@ -46,13 +46,14 @@ def pca_ellipses(sigmas):
 
 
 # plot heatmap
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 8))
 seaborn.heatmap(
     pairs,
     xticklabels=ratings,
     yticklabels=ratings,
     annot=True,
     fmt="d",
+    square=True,
     ax=ax,
 )
 ax.invert_yaxis()
