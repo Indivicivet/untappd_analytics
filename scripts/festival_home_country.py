@@ -18,7 +18,7 @@ for ci in CIS:
         ci.beer.brewery.country
     ] += 1
 
-cols = math.ceil(len(festivals) ** 0.5)
+cols = math.ceil(len(festivals) ** 0.5 * 1.3)  # heuristic based on aspect
 fig, axs = plt.subplots(
     math.ceil(len(festivals) / cols),
     cols,
