@@ -32,7 +32,10 @@ for ax, (festival_name, festival_data) in zip(axs.flat, festivals.items()):
     ax.set_title(festival_name, fontsize=10)
     ax.pie(
         [top_count, rest],
-        labels=[top_country, "other" if rest else ""],
+        labels=[
+            f"{top_country} ({top_count / festival_data.total():.1%})",
+            "other" if rest else "",
+        ],
     )
     ax.set_visible(True)
 plt.show()
