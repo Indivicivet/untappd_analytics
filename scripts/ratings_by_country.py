@@ -7,6 +7,15 @@ from matplotlib import pyplot as plt
 import untappd
 
 
+def _short_country(country_name):
+    """
+    'China / People's Republic of China' is just too long a tag.
+    """
+    if "China" in country_name:
+        return "China"
+    return country_name
+
+
 def _get_colour(country_name):
     # Asia
     if "China" in country_name:
@@ -24,11 +33,8 @@ def _get_colour(country_name):
 def country_pie_and_ratings(cis):
     ratings_by_country = defaultdict(list)
     for ci in cis:
-        ratings_by_country[ci.beer.brewery.country].append(ci.rating)
-    country_freq = Counter(
-        ci.beer.brewery.country
-        for ci in cis
-    )
+        ratings_by_country[_short_country(ci.beer.brewery.country)].append(ci.rating)
+    country_freq = Counter(_short_country(ci.beer.brewery.country) for ci in cis)
     print(country_freq.most_common())
 
     country_order = [c for c, _ in country_freq.most_common()][::-1]  # top to bottom
