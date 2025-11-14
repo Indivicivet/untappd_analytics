@@ -1,4 +1,5 @@
 import datetime
+import statistics
 from collections import Counter, defaultdict
 
 from matplotlib import pyplot as plt
@@ -57,7 +58,9 @@ def country_pie_and_ratings(cis):
 
     ax_violin.set_yticks(
         list(range(1, len(country_order) + 1)),
-        labels=list(country_order),
+        labels=[
+            f"{c} ({statistics.mean(ratings_by_country[c]):.2f})" for c in country_order
+        ],
     )
     plt.show()
 
