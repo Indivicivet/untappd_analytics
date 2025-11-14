@@ -6,8 +6,11 @@ import untappd
 
 
 def _get_colour(country_name):
+    # Asia
     if "China" in country_name:
         return "red"
+    if "Japan" in country_name:
+        return "#DDDDDD"
     # NA: blue
     if "United States" in country_name:
         return "darkblue"
