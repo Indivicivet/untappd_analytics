@@ -38,7 +38,7 @@ def country_pie_and_ratings(cis):
 
     ax_pie.pie(
         [country_freq[c] for c in country_order],
-        labels=country_order,
+        labels=[f"{c} ({country_freq[c]})" for c in country_order],
         startangle=90,
         colors=country_cols,
     )
