@@ -5,6 +5,17 @@ from matplotlib import pyplot as plt
 import untappd
 
 
+def _get_colour(country_name):
+    if "China" in country_name:
+        return "red"
+    # NA: blue
+    if "United States" in country_name:
+        return "darkblue"
+    if "Canada" in country_name:
+        return "#3333BB"
+    return "gray"
+
+
 def country_pie_and_ratings(cis):
     ratings_by_country = defaultdict(list)
     for ci in cis:
@@ -14,16 +25,6 @@ def country_pie_and_ratings(cis):
         for ci in cis
     )
     print(country_freq.most_common())
-
-    def _get_colour(country_name):
-        if "China" in country_name:
-            return "red"
-        # NA: blue
-        if "United States" in country_name:
-            return "darkblue"
-        if "Canada" in country_name:
-            return "#3333BB"
-        return "gray"
 
     country_order = [c for c, _ in country_freq.most_common()][::-1]  # top to bottom
     country_cols = [_get_colour(c) for c in country_order]
