@@ -30,7 +30,7 @@ def _get_colour(country_name):
     return "gray"
 
 
-def country_pie_and_ratings(cis):
+def country_pie_and_ratings(cis, plt_title=None):
     ratings_by_country = defaultdict(list)
     for ci in cis:
         ratings_by_country[_short_country(ci.beer.brewery.country)].append(ci.rating)
@@ -73,6 +73,8 @@ def country_pie_and_ratings(cis):
             f"{c} ({statistics.mean(ratings_by_country[c]):.2f})" for c in country_order
         ],
     )
+    if plt_title is not None:
+        plt.suptitle(plt_title)
     plt.show()
 
 
@@ -84,11 +86,13 @@ if __name__ == "__main__":
         for ci in ALL_CIS
         if FEST_TAG in ((ci.venue and ci.venue.name) or "").lower()
     ]
-    country_pie_and_ratings(FEST_CIS)
+    country_pie_and_ratings(FEST_CIS, plt_title=FEST_TAG)
+    plt.suptitle("Entire time")
     country_pie_and_ratings(
         [
             ci
             for ci in ALL_CIS
             if datetime.datetime(2025, 10, 23) < ci.datetime < datetime.datetime(2025, 11, 9, 23)
-        ]
+        ],
+        plt_title="Time region",
     )
