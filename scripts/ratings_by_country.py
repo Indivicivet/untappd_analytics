@@ -1,3 +1,4 @@
+import datetime
 from collections import Counter, defaultdict
 
 from matplotlib import pyplot as plt
@@ -70,3 +71,10 @@ if __name__ == "__main__":
         if FEST_TAG in ((ci.venue and ci.venue.name) or "").lower()
     ]
     country_pie_and_ratings(FEST_CIS)
+    country_pie_and_ratings(
+        [
+            ci
+            for ci in ALL_CIS
+            if datetime.datetime(2025, 10, 23) < ci.datetime < datetime.datetime(2025, 11, 9, 23)
+        ]
+    )
