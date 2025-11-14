@@ -87,7 +87,6 @@ if __name__ == "__main__":
         if FEST_TAG in ((ci.venue and ci.venue.name) or "").lower()
     ]
     country_pie_and_ratings(FEST_CIS, plt_title=FEST_TAG)
-    plt.suptitle("Entire time")
     country_pie_and_ratings(
         [
             ci
