@@ -282,7 +282,7 @@ def festival_with_year(checkin, include_non_festival=True):
         if (
             " fest" in checkin.venue.name.lower()
             and "festival market" not in checkin.venue.name.lower()
-        ):
+        ) or "beer celebration" in checkin.venue.name.lower():
             return f"{checkin.venue.name}\n({checkin.datetime.year})"
         # hardcoded known beer festivals:
         if "Shiinoki Cul" in checkin.venue.name:
