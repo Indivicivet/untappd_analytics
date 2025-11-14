@@ -40,7 +40,12 @@ def country_pie_and_ratings(cis):
     country_order = [c for c, _ in country_freq.most_common()][::-1]  # top to bottom
     country_cols = [_get_colour(c) for c in country_order]
 
-    fig, (ax_pie, ax_violin) = plt.subplots(1, 2, figsize=(12, 7.2))
+    fig, (ax_pie, ax_violin) = plt.subplots(
+        1,
+        2,
+        figsize=(12, 7.2),
+        constrained_layout=True,
+    )
 
     ax_pie.pie(
         [country_freq[c] for c in country_order],
