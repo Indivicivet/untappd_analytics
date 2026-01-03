@@ -12,9 +12,11 @@ times_non_taster = [
     if checkin.serving_type != "Taster"
 ]
 times_unique = []
+times_repeat = []
 hit_beers = set()
 for checkin in CHECKINS:
     if checkin.beer in hit_beers:
+        times_repeat.append(checkin.datetime)
         continue
     times_unique.append(checkin.datetime)
     hit_beers.add(checkin.beer)
@@ -34,6 +36,12 @@ plt.plot(
     range(len(times_unique)),
     label="unique",
     linestyle="dashed"
+)
+plt.plot(
+    times_repeat,
+    range(len(times_repeat)),
+    label="repeat",
+    linestyle="dashed",
 )
 plt.xlabel("date")
 plt.ylabel("checkins")
