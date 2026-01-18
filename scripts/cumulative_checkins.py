@@ -31,7 +31,7 @@ for checkin in CHECKINS:
 
 
 # extrapolation
-def plot_extrapolated(use_times, label_tag, color):
+def plot_extrapolated(use_times, color):
     numeric_time_days = mpl_dates.date2num(use_times)
     cumulative_counts = np.arange(len(use_times))
     fit_window_start_time = use_times[-1] - FIT_MOST_RECENT
@@ -51,7 +51,6 @@ def plot_extrapolated(use_times, label_tag, color):
     plt.plot(
         mpl_dates.num2date(numeric_time_for_plot),
         fitted_polynomial(numeric_time_for_plot),
-        label=f"{label_tag} (deg {EXTRAPOLATE_DEGREE})",
         linewidth=1,
         linestyle="dashed",
     )
@@ -60,7 +59,7 @@ def plot_extrapolated(use_times, label_tag, color):
 seaborn.set()
 palette = seaborn.color_palette()
 plt.figure(figsize=(12.8, 7.2))
-plot_extrapolated(times_non_taster, label_tag="non-taster", color=palette[0])
+plot_extrapolated(times_non_taster, color=palette[0])
 plt.plot(
     times_non_taster,
     range(len(times_non_taster)),
@@ -68,7 +67,7 @@ plt.plot(
     color=palette[0],
     alpha=0.7,
 )
-plot_extrapolated(times, label_tag="total", color=palette[1])
+plot_extrapolated(times, color=palette[1])
 plt.plot(
     times,
     range(len(times)),
@@ -76,7 +75,7 @@ plt.plot(
     color=palette[1],
     alpha=0.7,
 )
-plot_extrapolated(times_unique, label_tag="unique", color=palette[2])
+plot_extrapolated(times_unique, color=palette[2])
 plt.plot(
     times_unique,
     range(len(times_unique)),
@@ -84,7 +83,7 @@ plt.plot(
     color=palette[2],
     alpha=0.7,
 )
-plot_extrapolated(times_repeat, label_tag="repeat", color=palette[3])
+plot_extrapolated(times_repeat, color=palette[3])
 plt.plot(
     times_repeat,
     range(len(times_repeat)),
