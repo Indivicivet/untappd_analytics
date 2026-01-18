@@ -69,7 +69,13 @@ plt.plot(
     alpha=0.7,
 )
 plot_extrapolated(times, label_tag="total", color=palette[1])
-plt.plot(times, range(len(times)), label="total checkins", color=palette[1], alpha=0.7)
+plt.plot(
+    times,
+    range(len(times)),
+    label="total checkins",
+    color=palette[1],
+    alpha=0.7,
+)
 plot_extrapolated(times_unique, label_tag="unique", color=palette[2])
 plt.plot(
     times_unique,
