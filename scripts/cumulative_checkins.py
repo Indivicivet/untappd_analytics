@@ -84,10 +84,12 @@ plt.plot(
     color=palette[2],
     alpha=0.7,
 )
+plot_extrapolated(times_repeat, label_tag="repeat", color=palette[3])
 plt.plot(
     times_repeat,
     range(len(times_repeat)),
     label="repeat",
+    color=palette[3],
 )
 plt.xlabel("date")
 plt.ylabel("checkins")
