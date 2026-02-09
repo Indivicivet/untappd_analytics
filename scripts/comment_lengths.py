@@ -41,7 +41,7 @@ def plot_comment_lengths(
     
     # Sort keys to make legend logical
     # Custom sort order
-    order = ["< 3", "3", "3.25", "3.5", "3.75 - 4", "4.25+", "other"]
+    order = ["< 3", "3", "3.25", "3.5", "3.75", "4+", "other"]
     sorted_keys = sorted(
         checkins_by_group.keys(),
         key=lambda k: order.index(k) if k in order else 999
