@@ -3,7 +3,7 @@ import collections
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import seaborn as sns
+import seaborn
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
@@ -36,7 +36,7 @@ def plot_comment_lengths(
     out_file=None,
     title="Comment Length Distribution by Rating",
 ):
-    sns.set_theme(style="whitegrid")
+    seaborn.set()
     plt.figure(figsize=(12, 8))
     
     # Sort keys to make legend logical
