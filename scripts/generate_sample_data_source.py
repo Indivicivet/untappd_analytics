@@ -53,7 +53,7 @@ checkin_dicts = [
     make_random_checkin().to_dict()
     for _ in range(1000)
 ]
-assert not target_file.exists()  # comment out if happy overwriting
 target_file = untappd.DEFAULT_DATA_SOURCE / f"sample_data_{seed=}.json"
+assert not target_file.exists()  # comment out if happy overwriting
 target_file.write_text(json.dumps(checkin_dicts))
 print(f"successfully wrote out to {target_file}")
