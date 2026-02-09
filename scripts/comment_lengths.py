@@ -22,10 +22,10 @@ def get_checkins_by_rating(checkins):
             key = "3.25"
         elif c.rating == 3.5:
             key = "3.5"
-        elif 3.75 <= c.rating <= 4:
-            key = "3.75 - 4"
-        elif c.rating >= 4.25:
-            key = "4.25+"
+        elif c.rating == 3.75:
+            key = "3.75"
+        elif c.rating >= 4:
+            key = "4+"
         else:
             key = "other"  # Should typically not happen with standard steps
         grouped[key].append(c)
