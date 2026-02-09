@@ -5,16 +5,14 @@ import matplotlib.pyplot as plt
 
 import untappd
 
-# todo :: consolidate this categorization logic
-# into a utils file?
-import rating_histogram_by_various
+import untappd_categorise
 
 TOP_N = 5
 CIS = untappd.load_latest_checkins()
 
 festivals = defaultdict(Counter)
 for ci in CIS:
-    festivals[rating_histogram_by_various.festival_with_year(ci)][
+    festivals[untappd_categorise.festival_with_year(ci)][
         ci.beer.brewery.country
     ] += 1
 
