@@ -115,3 +115,19 @@ def test_Checkin_to_dict_from_dict_consistent_1():
     resulting_dict = checkin.to_dict()
     resulting_checkin = untappd.Checkin.from_dict(resulting_dict)
     assert resulting_checkin == checkin
+
+
+def test_venue_from_dict_with_coords():
+    venue_dict = {
+        "venue_name": "Test Venue",
+        "venue_city": "Test City",
+        "venue_state": "Test State",
+        "venue_country": "Test Country",
+        "venue_lat": "12.345",
+        "venue_lng": "-67.890",
+    }
+    venue = untappd.Venue.from_checkin_dict(venue_dict)
+    assert venue.lat == 12.345
+    assert venue.long == -67.890
+    assert isinstance(venue.lat, float)
+    assert isinstance(venue.long, float)

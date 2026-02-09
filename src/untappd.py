@@ -166,9 +166,8 @@ class Venue:
     city: str
     state: str
     country: str
-    # todo :: types for these :)
-    lat: Optional[Any] = None
-    long: Optional[Any] = None
+    lat: Optional[float] = None
+    long: Optional[float] = None
 
     def __hash__(self):
         if self.city is None:
@@ -185,8 +184,8 @@ class Venue:
             city=d["venue_city"],
             state=d["venue_state"],
             country=d["venue_country"],
-            lat=d["venue_lat"],
-            long=d["venue_lng"],
+            lat=float(d["venue_lat"]) if d.get("venue_lat") else None,
+            long=float(d["venue_lng"]) if d.get("venue_lng") else None,
         )
 
     def to_dict(self) -> dict:
