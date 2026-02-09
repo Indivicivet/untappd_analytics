@@ -8,6 +8,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 import untappd
+import untappd_utils
 
 
 def get_checkins_by_rating(checkins):
@@ -31,9 +32,9 @@ def get_checkins_by_rating(checkins):
     return grouped
 
 
+@untappd_utils.show_or_save_to_out_file
 def plot_comment_lengths(
     checkins_by_group,
-    out_file=None,
     title="Comment Length Distribution by Rating",
 ):
     seaborn.set()
@@ -87,14 +88,6 @@ def plot_comment_lengths(
     
     # Add some minor gridlines for log scale readability if needed
     plt.grid(True, which="both", ls="-", alpha=0.2)
-    
-    if out_file:
-        out_path = Path(out_file)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(out_path, bbox_inches="tight")
-        print(f"Saved plot to {out_path}")
-    else:
-        plt.show()
 
 
 if __name__ == "__main__":
@@ -102,5 +95,5 @@ if __name__ == "__main__":
     grouped = get_checkins_by_rating(checkins)
     plot_comment_lengths(
         grouped, 
-        out_file=Path(__file__).parent / "out" / "comment_lengths_by_rating.png"
+        # out_file=Path(__file__).parent / "out" / "comment_lengths_by_rating.png"
     )
