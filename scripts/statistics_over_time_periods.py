@@ -48,10 +48,7 @@ def percentiles(
     take_ratios=(0.1, 0.25, 0.5, 0.75, 0.9),
 ):
     sorted_values = sorted(values)
-    return tuple(
-        sorted_values[int(ratio * len(values))]
-        for ratio in take_ratios
-    )
+    return tuple(sorted_values[int(ratio * len(values))] for ratio in take_ratios)
 
 
 # todo :: definitely very much speed optimisation possible ^^
