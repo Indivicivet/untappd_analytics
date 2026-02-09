@@ -5,6 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 
 import untappd
 
@@ -67,9 +68,12 @@ def plot_comment_lengths(
             continue
         y_density = y_vals / total
         
+        # Smooth the data
+        y_smooth = gaussian_filter1d(y_density, sigma=2)
+        
         plt.plot(
             x_vals, 
-            y_density, 
+            y_smooth, 
             label=f"{label} (n={total})",
             linewidth=2,
             alpha=0.8
