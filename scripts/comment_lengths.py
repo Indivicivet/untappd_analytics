@@ -9,6 +9,7 @@ from scipy.ndimage import gaussian_filter1d
 
 import untappd
 
+
 def get_checkins_by_rating(checkins):
     grouped = collections.defaultdict(list)
     for c in checkins:
@@ -16,18 +17,16 @@ def get_checkins_by_rating(checkins):
             continue
         if c.rating < 3:
             key = "< 3"
-        elif c.rating == 3:
+        elif c.rating <= 3:
             key = "3"
-        elif c.rating == 3.25:
+        elif c.rating <= 3.25:
             key = "3.25"
-        elif c.rating == 3.5:
+        elif c.rating <= 3.5:
             key = "3.5"
-        elif c.rating == 3.75:
+        elif c.rating <= 3.75:
             key = "3.75"
-        elif c.rating >= 4:
-            key = "4+"
         else:
-            key = "other"  # Should typically not happen with standard steps
+            key = "4+"
         grouped[key].append(c)
     return grouped
 
