@@ -2,16 +2,14 @@ from collections import defaultdict
 
 import untappd
 
-# todo :: consolidate this categorization logic
-# into a utils file?
-import rating_histogram_by_various
+import untappd_categorise
 
 TOP_N = 5
 CIS = untappd.load_latest_checkins()
 
 festivals = defaultdict(list)
 for ci in CIS:
-    festivals[rating_histogram_by_various.festival_with_year(ci)].append(ci)
+    festivals[untappd_categorise.festival_with_year(ci)].append(ci)
 
 for festival, checkins in festivals.items():
     print(festival)
