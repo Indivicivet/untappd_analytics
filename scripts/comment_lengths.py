@@ -94,14 +94,10 @@ def plot_comment_lengths(
         plt.show()
 
 
-def main():
+if __name__ == "__main__":
     checkins = untappd.load_latest_checkins()
     grouped = get_checkins_by_rating(checkins)
     plot_comment_lengths(
         grouped, 
         out_file="out/comment_lengths_by_rating.png"
     )
-
-
-if __name__ == "__main__":
-    main()
