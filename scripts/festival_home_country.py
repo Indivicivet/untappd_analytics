@@ -12,9 +12,7 @@ CIS = untappd.load_latest_checkins()
 
 festivals = defaultdict(Counter)
 for ci in CIS:
-    festivals[untappd_categorise.festival_with_year(ci)][
-        ci.beer.brewery.country
-    ] += 1
+    festivals[untappd_categorise.festival_with_year(ci)][ci.beer.brewery.country] += 1
 
 cols = math.ceil(len(festivals) ** 0.5 * 1.3)  # heuristic based on aspect
 fig, axs = plt.subplots(
