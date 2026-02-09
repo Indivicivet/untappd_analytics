@@ -87,19 +87,19 @@ def probability_further_in_session(
 ) -> tuple[list[float], list[float]]:
     sessions = compute_sessions(checkins)
 
-    # For each checkin except the last in its session, record session average rating
+    # For each checkin (except last) use session average rating *so far* and whether there's another drink
     observations: list[tuple[float, bool]] = []
     for session in sessions:
-        if len(session) == 1:
-            continue  # singletons provide no positive examples
-        session_avg = sum(c.rating for c in session if c.rating is not None) / len(
-            session
-        )
+        running_sum = 0.0
         for idx, c in enumerate(session):
-            has_further = idx < len(session) - 1
-            # Skip the last drink (as has_further == False always) if we want a
-            # pure conditional? Keep it: it contributes negatives.
-            observations.append((session_avg, has_further))
+            if c.rating is None:
+                continue
+            running_sum += c.rating
+            avg_so_far = running_sum / (idx + 1)
+            if idx == len(session) - 1:  # last has no further drink
+                continue
+            has_further = True  # next in same session always within 6h
+            observations.append((avg_so_far, has_further))
 
     counts: dict[float, list[bool]] = defaultdict(list)
     for avg_rating, has_further in observations:
@@ -118,18 +118,12 @@ def probability_further_in_session(
 if __name__ == "__main__":  # pragma: no cover
     checkins = untappd.load_latest_checkins()
 
-    xs1, ys1 = probability_next_within_six_hours(checkins)
-    plt.figure()
-    plt.scatter(xs1, ys1)
-    plt.xlabel("Rating bin centre")
-    plt.ylabel("P(next drink within 6h)")
-    plt.title("Probability of next drink within 6h vs rating")
-
+    # Only plot session average rating so far vs probability of next drink
     xs2, ys2 = probability_further_in_session(checkins)
     plt.figure()
     plt.scatter(xs2, ys2)
-    plt.xlabel("Session average rating bin centre")
-    plt.ylabel("P(further drink in session)")
-    plt.title("Probability of further drink vs session average rating")
+    plt.xlabel("Session average rating so far bin centre")
+    plt.ylabel("P(next drink within 6h)")
+    plt.title("Probability of next drink vs session average rating so far")
 
     plt.show()
