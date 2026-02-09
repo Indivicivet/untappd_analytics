@@ -103,5 +103,5 @@ if __name__ == "__main__":
     grouped = get_checkins_by_rating(checkins)
     plot_comment_lengths(
         grouped, 
-        out_file="out/comment_lengths_by_rating.png"
+        out_file=Path(__file__).parent / "out" / "comment_lengths_by_rating.png"
     )
