@@ -69,7 +69,7 @@ def plot_comment_lengths(
         y_density = y_vals / total
         
         # Smooth the data
-        y_smooth = gaussian_filter1d(y_density, sigma=2)
+        y_smooth = gaussian_filter1d(y_density, sigma=5)
         
         plt.plot(
             x_vals, 
