@@ -14,14 +14,11 @@ def load_latest_datafile(
     data_source: Optional[Union[Path, str]] = None,
     prefer_non_sample_data: bool = True,
 ):
-    data_source = (
-        DEFAULT_DATA_SOURCE
-        if data_source is None
-        else Path(data_source)
-    )
+    data_source = DEFAULT_DATA_SOURCE if data_source is None else Path(data_source)
     files = sorted(
         [*data_source.glob("*.json"), *data_source.glob("*.csv")],
-        key=lambda x: x.stat().st_mtime, reverse=True,
+        key=lambda x: x.stat().st_mtime,
+        reverse=True,
     )
     if prefer_non_sample_data:
         non_sample_files = [file for file in files if "sample" not in file.name]
@@ -144,11 +141,11 @@ class Beer:
             "beer_name": self.name,
             **self.brewery.to_dict(),
             "beer_abv": str(self.abv),  # todo :: precision?
-            "bid": str(self.id) if self.id is not None else None,
+            "bid": _str_or_none(self.id),
             "global_rating_score": self.global_rating,
             "global_weighted_rating_score": self.global_weighted_rating,
             "beer_type": self.type,
-            "beer_ibu": str(self.ibu),
+            "beer_ibu": _str_or_none(self.ibu),
             "beer_url": str(self.url),
         }
 
@@ -243,15 +240,12 @@ class Checkin:
         return cls(
             beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
-            rating=(
-                float(d["rating_score"])
-                if d["rating_score"]
+            rating=(float(d["rating_score"]) if d["rating_score"] else None),
+            datetime=(
+                datetime.strptime(d["created_at"], "%Y-%m-%d %H:%M:%S")
+                if d.get("created_at")
                 else None
             ),
-            datetime=datetime.strptime(
-                d["created_at"],
-                "%Y-%m-%d %H:%M:%S"
-            ) if d.get("created_at") else None,
             url=d["checkin_url"],
             flavour_profiles=[],  # todo :)
             purchase_venue=d["purchase_venue"] or None,  # todo :: make actual Venue?
@@ -270,20 +264,24 @@ class Checkin:
             **(self.venue.to_dict() if self.venue is not None else {}),
             "comment": self.comment,
             "rating_score": str(self.rating) if self.rating is not None else None,
-            "created_at": datetime.strftime(
-                self.datetime,
-                "%Y-%m-%d %H:%M:%S",
-            ) if self.datetime is not None else "",
+            "created_at": (
+                datetime.strftime(
+                    self.datetime,
+                    "%Y-%m-%d %H:%M:%S",
+                )
+                if self.datetime is not None
+                else ""
+            ),
             "checkin_url": self.url,
             "purchase_venue": self.purchase_venue,
             "serving_type": self.serving_type,
             # todo :: something to do with flavour profiles :)
-            "checkin_id": str(self.id) if self.id is not None else None,
+            "checkin_id": _str_or_none(self.id),
             "photo_url": self.photo_url,
             "tagged_friends": self.tagged_friends,
             # todo :: so much duplication of this pattern, consider reshuffle
-            "total_toasts": str(self.total_toasts) if self.total_toasts is not None else None,
-            "total_comments": str(self.total_comments) if self.total_comments is not None else None,
+            "total_toasts": _str_or_none(self.total_toasts),
+            "total_comments": _str_or_none(self.total_comments),
         }
 
 
@@ -360,10 +358,12 @@ def magic_rating(
     return (
         # magic score
         average_score_weight * sum(v for _, v in top_ratings) / len(top_ratings)
-        + (1 - average_score_weight) * (
+        + (1 - average_score_weight)
+        * (
             neutral_rating
-            + (1 - dropoff_ratio) * sum(  # geometric sum
-                (r - neutral_rating) * dropoff_ratio ** i
+            + (1 - dropoff_ratio)
+            * sum(  # geometric sum
+                (r - neutral_rating) * dropoff_ratio**i
                 for i, (_, r) in enumerate(top_ratings)
             )
         ),
