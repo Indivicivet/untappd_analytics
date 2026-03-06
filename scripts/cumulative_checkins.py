@@ -56,41 +56,47 @@ def plot_extrapolated(use_times, color):
     )
 
 
-seaborn.set()
-palette = seaborn.color_palette()
-plt.figure(figsize=(12.8, 7.2))
-plot_extrapolated(times_non_taster, color=palette[0])
-plt.plot(
-    times_non_taster,
-    range(len(times_non_taster)),
-    label="non-taster",
-    color=palette[0],
-    alpha=0.7,
-)
-plot_extrapolated(times, color=palette[1])
-plt.plot(
-    times,
-    range(len(times)),
-    label="total checkins",
-    color=palette[1],
-    alpha=0.7,
-)
-plot_extrapolated(times_unique, color=palette[2])
-plt.plot(
-    times_unique,
-    range(len(times_unique)),
-    label="unique",
-    color=palette[2],
-    alpha=0.7,
-)
-plot_extrapolated(times_repeat, color=palette[3])
-plt.plot(
-    times_repeat,
-    range(len(times_repeat)),
-    label="repeat",
-    color=palette[3],
-)
-plt.xlabel("date")
-plt.ylabel("checkins")
-plt.legend()
-plt.show()
+def plot_cumulative_checkins():
+    seaborn.set()
+    palette = seaborn.color_palette()
+    plt.figure(figsize=(12.8, 7.2))
+    plot_extrapolated(times_non_taster, color=palette[0])
+    plt.plot(
+        times_non_taster,
+        range(len(times_non_taster)),
+        label="non-taster",
+        color=palette[0],
+        alpha=0.7,
+    )
+    plot_extrapolated(times, color=palette[1])
+    plt.plot(
+        times,
+        range(len(times)),
+        label="total checkins",
+        color=palette[1],
+        alpha=0.7,
+    )
+    plot_extrapolated(times_unique, color=palette[2])
+    plt.plot(
+        times_unique,
+        range(len(times_unique)),
+        label="unique",
+        color=palette[2],
+        alpha=0.7,
+    )
+    plot_extrapolated(times_repeat, color=palette[3])
+    plt.plot(
+        times_repeat,
+        range(len(times_repeat)),
+        label="repeat",
+        color=palette[3],
+    )
+    plt.xlabel("date")
+    plt.ylabel("checkins")
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    plot_cumulative_checkins()
+    # plot_checkin_rate()
