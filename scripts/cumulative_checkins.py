@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mpl_dates
 import seaborn
 import numpy as np
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 import untappd
 
@@ -68,8 +68,25 @@ def get_checkin_rate_curve(use_times, num_points=400):
     if len(use_times) < 2:
         return numeric_time_for_plot, np.zeros_like(numeric_time_for_plot)
     fitted_kde = gaussian_kde(numeric_time_days)
-    # gaussian_kde integrates to 1, so scale back to checkins/day.
-    checkin_rate = fitted_kde(numeric_time_for_plot) * len(use_times)
+    bandwidth_days = np.sqrt(fitted_kde.covariance[0, 0])
+    observed_start = numeric_time_days[0]
+    observed_end = numeric_time_days[-1]
+
+    # Renormalize each Gaussian over the observed window so edge points do not
+    # implicitly assume zero checkins just beyond the first/last data point.
+    scaled_offsets = (
+        numeric_time_for_plot[:, np.newaxis] - numeric_time_days[np.newaxis, :]
+    ) / bandwidth_days
+    kernel_values = norm.pdf(scaled_offsets) / bandwidth_days
+    normalization = (
+        norm.cdf((observed_end - numeric_time_for_plot) / bandwidth_days)
+        - norm.cdf((observed_start - numeric_time_for_plot) / bandwidth_days)
+    )
+    normalization = np.clip(normalization, 1e-12, None)
+
+    # The corrected KDE still integrates to 1 over the observed window, so
+    # scale back to checkins/day.
+    checkin_rate = kernel_values.mean(axis=1) / normalization * len(use_times)
     return numeric_time_for_plot, checkin_rate
 
 
