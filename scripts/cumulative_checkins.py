@@ -67,9 +67,24 @@ def get_checkin_rate_curve(use_times, num_points=400):
     )
     if len(use_times) < 2:
         return numeric_time_for_plot, np.zeros_like(numeric_time_for_plot)
-    fitted_kde = gaussian_kde(numeric_time_days)
+
+    edge_window = min(len(use_times), 11)
+    edge_spacing = np.diff(numeric_time_days[-edge_window:]).mean()
+    edge_spacing = max(edge_spacing, 1e-3)
+    edge_pad = 10
+    padded_time_days = np.concatenate(
+        [
+            numeric_time_days,
+            numeric_time_days[-1] + edge_spacing * np.arange(1, edge_pad + 1),
+        ]
+    )
+
+    fitted_kde = gaussian_kde(padded_time_days)
     # gaussian_kde integrates to 1, so scale back to checkins/day.
-    checkin_rate = fitted_kde(numeric_time_for_plot) * len(use_times)
+    checkin_rate = fitted_kde(numeric_time_for_plot) * len(padded_time_days)
+
+    edge_point_count = max(1, num_points // 20)
+    checkin_rate[-edge_point_count:] = checkin_rate[-edge_point_count - 1]
     return numeric_time_for_plot, checkin_rate
 
 
@@ -195,5 +210,5 @@ def plot_checkin_rate():
 
 
 if __name__ == "__main__":
-    plot_cumulative_checkins()
-    # plot_checkin_rate()
+    # plot_cumulative_checkins()
+    plot_checkin_rate()
