@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mpl_dates
 import seaborn
 import numpy as np
-from scipy.stats import gaussian_kde, norm
+from scipy import stats
 
 import untappd
 
@@ -67,7 +67,7 @@ def get_checkin_rate_curve(use_times, num_points=400):
     )
     if len(use_times) < 2:
         return numeric_time_for_plot, np.zeros_like(numeric_time_for_plot)
-    fitted_kde = gaussian_kde(numeric_time_days)
+    fitted_kde = stats.gaussian_kde(numeric_time_days)
     bandwidth_days = np.sqrt(fitted_kde.covariance[0, 0])
     observed_start = numeric_time_days[0]
     observed_end = numeric_time_days[-1]
@@ -77,10 +77,10 @@ def get_checkin_rate_curve(use_times, num_points=400):
     scaled_offsets = (
         numeric_time_for_plot[:, np.newaxis] - numeric_time_days[np.newaxis, :]
     ) / bandwidth_days
-    kernel_values = norm.pdf(scaled_offsets) / bandwidth_days
+    kernel_values = stats.norm.pdf(scaled_offsets) / bandwidth_days
     normalization = (
-        norm.cdf((observed_end - numeric_time_for_plot) / bandwidth_days)
-        - norm.cdf((observed_start - numeric_time_for_plot) / bandwidth_days)
+        stats.norm.cdf((observed_end - numeric_time_for_plot) / bandwidth_days)
+        - stats.norm.cdf((observed_start - numeric_time_for_plot) / bandwidth_days)
     )
     normalization = np.clip(normalization, 1e-12, None)
 
