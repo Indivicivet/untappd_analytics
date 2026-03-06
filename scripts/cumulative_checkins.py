@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mpl_dates
 import seaborn
 import numpy as np
+from scipy.stats import gaussian_kde
 
 import untappd
 
@@ -51,6 +52,52 @@ def plot_extrapolated(use_times, color):
     plt.plot(
         mpl_dates.num2date(numeric_time_for_plot),
         fitted_polynomial(numeric_time_for_plot),
+        color=color,
+        linewidth=1,
+        linestyle="dashed",
+    )
+
+
+def get_checkin_rate_curve(use_times, num_points=400):
+    numeric_time_days = mpl_dates.date2num(use_times)
+    numeric_time_for_plot = np.linspace(
+        numeric_time_days[0],
+        numeric_time_days[-1],
+        num_points,
+    )
+    if len(use_times) < 2:
+        return numeric_time_for_plot, np.zeros_like(numeric_time_for_plot)
+    fitted_kde = gaussian_kde(numeric_time_days)
+    # gaussian_kde integrates to 1, so scale back to checkins/day.
+    checkin_rate = fitted_kde(numeric_time_for_plot) * len(use_times)
+    return numeric_time_for_plot, checkin_rate
+
+
+def plot_rate_extrapolated(use_times, color):
+    numeric_time_for_plot, checkin_rate = get_checkin_rate_curve(use_times)
+    fit_window_start_time = use_times[-1] - FIT_MOST_RECENT
+    fit_window_start_numeric = mpl_dates.date2num(fit_window_start_time)
+    fit_window_mask = numeric_time_for_plot >= fit_window_start_numeric
+    fitted_polynomial = np.poly1d(
+        np.polyfit(
+            numeric_time_for_plot[fit_window_mask],
+            checkin_rate[fit_window_mask],
+            deg=EXTRAPOLATE_DEGREE,
+        )
+    )
+    extrapolated_numeric_time = np.linspace(
+        fit_window_start_numeric,
+        mpl_dates.date2num(use_times[-1] + EXTRAPOLATE_TIME),
+        200,
+    )
+    extrapolated_rate = np.maximum(
+        fitted_polynomial(extrapolated_numeric_time),
+        0,
+    )
+    plt.plot(
+        mpl_dates.num2date(extrapolated_numeric_time),
+        extrapolated_rate,
+        color=color,
         linewidth=1,
         linestyle="dashed",
     )
@@ -93,6 +140,56 @@ def plot_cumulative_checkins():
     )
     plt.xlabel("date")
     plt.ylabel("checkins")
+    plt.legend()
+    plt.show()
+
+
+def plot_checkin_rate():
+    seaborn.set()
+    palette = seaborn.color_palette()
+    plt.figure(figsize=(12.8, 7.2))
+
+    plot_rate_extrapolated(times_non_taster, color=palette[0])
+    numeric_time_for_plot, checkin_rate = get_checkin_rate_curve(times_non_taster)
+    plt.plot(
+        mpl_dates.num2date(numeric_time_for_plot),
+        checkin_rate,
+        label="non-taster",
+        color=palette[0],
+        alpha=0.7,
+    )
+
+    plot_rate_extrapolated(times, color=palette[1])
+    numeric_time_for_plot, checkin_rate = get_checkin_rate_curve(times)
+    plt.plot(
+        mpl_dates.num2date(numeric_time_for_plot),
+        checkin_rate,
+        label="total checkins",
+        color=palette[1],
+        alpha=0.7,
+    )
+
+    plot_rate_extrapolated(times_unique, color=palette[2])
+    numeric_time_for_plot, checkin_rate = get_checkin_rate_curve(times_unique)
+    plt.plot(
+        mpl_dates.num2date(numeric_time_for_plot),
+        checkin_rate,
+        label="unique",
+        color=palette[2],
+        alpha=0.7,
+    )
+
+    plot_rate_extrapolated(times_repeat, color=palette[3])
+    numeric_time_for_plot, checkin_rate = get_checkin_rate_curve(times_repeat)
+    plt.plot(
+        mpl_dates.num2date(numeric_time_for_plot),
+        checkin_rate,
+        label="repeat",
+        color=palette[3],
+    )
+
+    plt.xlabel("date")
+    plt.ylabel("checkins / day")
     plt.legend()
     plt.show()
 
