@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 import json
 import warnings
@@ -5,7 +7,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Any, Sequence, Union, Tuple
+from typing import Optional, Any, Sequence, Union, Tuple, ClassVar
 
 DEFAULT_DATA_SOURCE = Path(__file__).resolve().parent.parent / "data_sources"
 
@@ -63,6 +65,7 @@ CATEGORY_KEYWORDS = {
 
 @dataclass
 class Brewery:
+    _cache: ClassVar[dict[Tuple[str, Optional[int]], Brewery]] = {}
     name: str
     url: Optional[str] = None
     country: Optional[str] = None
@@ -78,14 +81,21 @@ class Brewery:
 
     @classmethod
     def from_checkin_dict(cls, d: dict):
-        return cls(
-            name=d["brewery_name"],
+        name = d["brewery_name"]
+        id = int(d["brewery_id"]) if d.get("brewery_id") else None
+        if (name, id) in cls._cache:
+            return cls._cache[(name, id)]
+
+        brewery = cls(
+            name=name,
             url=d["brewery_url"],
             country=d["brewery_country"],
             city=d["brewery_city"],
             state=d["brewery_state"],
-            id=int(d["brewery_id"]) if d.get("brewery_id") else None,
+            id=id,
         )
+        cls._cache[(name, id)] = brewery
+        return brewery
 
     def to_dict(self) -> dict:
         return {
@@ -101,6 +111,7 @@ class Brewery:
 # todo :: slots?
 @dataclass
 class Beer:
+    _cache: ClassVar[dict[Tuple[str, Brewery, Optional[int]], Beer]] = {}
     name: str
     brewery: Brewery
     abv: float  # todo :: would be nice if optional
@@ -119,6 +130,12 @@ class Beer:
 
     @classmethod
     def from_checkin_dict(cls, d: dict):
+        name = d["beer_name"]
+        brewery = Brewery.from_checkin_dict(d)
+        bid = int(d["bid"]) if d.get("bid") else None
+        if (name, brewery, bid) in cls._cache:
+            return cls._cache[(name, brewery, bid)]
+
         try:
             ibu = int(d["beer_ibu"])
         except ValueError:
@@ -127,18 +144,19 @@ class Beer:
                 f"you have a beer with non-integer ibu {ibu}"
                 ", that may break some assumptions..."
             )
-        return cls(
-            name=d["beer_name"],
-            # todo :: cache breweries? (and beers, ofc)
-            brewery=Brewery.from_checkin_dict(d),
+        beer = cls(
+            name=name,
+            brewery=brewery,
             abv=float(d["beer_abv"]),
-            id=int(d["bid"]) if d.get("bid") else None,
+            id=bid,
             global_rating=d["global_rating_score"],
             global_weighted_rating=d["global_weighted_rating_score"],
             type=d["beer_type"],
             ibu=ibu,
             url=d["beer_url"],
         )
+        cls._cache[(name, brewery, bid)] = beer
+        return beer
 
     def to_dict(self) -> dict:
         return {
