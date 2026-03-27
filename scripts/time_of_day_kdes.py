@@ -6,8 +6,8 @@ import untappd_utils
 
 
 def get_adjusted_time(datetime_obj):
-    # Map 5 AM to 0 to keep drinking sessions contiguous
-    return (datetime_obj.hour - 5) % 24 + datetime_obj.minute / 60
+    # Map 7 AM to 0 to keep drinking sessions contiguous
+    return (datetime_obj.hour - 7) % 24 + datetime_obj.minute / 60
 
 
 def format_time(datetime_obj):
@@ -23,11 +23,12 @@ def plot_time_of_day_kdes(checkins, n_blocks=6):
     checkins_with_abv.sort(key=lambda c: get_adjusted_time(c.datetime))
 
     # Split into n_blocks quantiles
-    block_size = len(checkins_with_abv) // n_blocks
-    blocks = [
-        checkins_with_abv[i * block_size : (i + 1) * block_size]
-        for i in range(n_blocks)
-    ]
+    blocks = []
+    total = len(checkins_with_abv)
+    for i in range(n_blocks):
+        start = i * total // n_blocks
+        end = (i + 1) * total // n_blocks
+        blocks.append(checkins_with_abv[start:end])
 
     plt.figure(figsize=(12.8, 7.2))
     sns.set_theme()
