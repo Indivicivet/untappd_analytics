@@ -82,7 +82,4 @@ for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
     ax.tick_params(labelsize=8)
     ax.set_xlabel("Rating", fontsize=8)
     ax.set_ylabel("Logit", fontsize=8)
-
-fig.supxlabel("Overall Rating", fontsize=12)
-fig.supylabel("Overall Logit Score", fontsize=12)
 plt.show()
