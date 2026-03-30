@@ -41,12 +41,12 @@ for ci, analysis in zip(
 
 total_scores["neutral"] = -total_scores["neutral"]  # keep numerical value for ref
 top_emotions = list(sorted(total_scores.items(), key=lambda t: t[1], reverse=True))
-print(top_emotions[:6])
 
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
 fig, axes = plt.subplots(3, 4, figsize=(12.8, 7.2))
+print(top_emotions[:len(axes.flatten())])
 for i, (emotion_name, _) in enumerate(top_emotions[:len(axes.flatten())]):
     ax = axes.flatten()[i]
     x = [c.rating for c in CIS]
