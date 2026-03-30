@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import transformers
 from tqdm import tqdm
+import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
 
 import untappd
@@ -20,7 +21,13 @@ def logit(v):
     return np.log(clipped / (1 - clipped))
 
 
-CIS = untappd.load_latest_checkins()[:1000]
+PLOT_LATEST_N = None  # 1000
+PLOT_SCATTER = PLOT_LATEST_N is not None
+PLOT_KDE = PLOT_LATEST_N is None
+
+CIS = untappd.load_latest_checkins()
+if PLOT_LATEST_N is not None:
+    CIS = CIS[-PLOT_LATEST_N:]
 
 MODEL_ID = "SamLowe/roberta-base-go_emotions"  # "standard robust small choice"
 PIPELINE = transformers.pipeline(
@@ -56,7 +63,10 @@ for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
     x = [c.rating for c in CIS]
     y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
     x, y = np.array(x), np.array(y)
-    ax.scatter(x, y, alpha=10 / len(CIS), s=30)
+    if PLOT_SCATTER:
+        ax.scatter(x, y, alpha=10 / len(CIS), s=30)
+    if PLOT_KDE:
+        sns.kdeplot(x=x, y=y, ax=ax, gridsize=40)
     # "reduced major axis" 2D fit
     slope = np.sign(np.corrcoef(x, y)[0, 1]) * (np.std(y) / np.std(x))
     color = cmap(np.clip((slope + 3) / 7, 0, 1))  # hardcoded for ~+4 to ~-3
