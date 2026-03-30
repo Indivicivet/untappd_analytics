@@ -33,7 +33,7 @@ total_scores = defaultdict(float)
 for ci, analysis in zip(
     CIS,
     # must pass generator to pipeline for tqdm to work
-    tqdm(PIPELINE((c.comment for c in CIS), batch_size=64), total=len(CIS))
+    tqdm(PIPELINE((c.comment for c in CIS), batch_size=64), total=len(CIS)),
 ):
     emotion_scores[ci] = {d["label"]: d["score"] for d in analysis}
     for emotion, score in emotion_scores[ci].items():
