@@ -16,7 +16,10 @@ CIS = untappd.load_latest_checkins()[:100]
 
 MODEL_ID = "SamLowe/roberta-base-go_emotions"  # "standard robust small choice"
 PIPELINE = transformers.pipeline(
-    "text-classification", model=MODEL_ID, device=0, top_k=None,
+    "text-classification",
+    model=MODEL_ID,
+    device=0,
+    top_k=None,
 )
 emotion_scores = {}
 total_scores = defaultdict(float)
