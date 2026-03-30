@@ -48,7 +48,7 @@ for i, (emotion_name, _) in enumerate(top_emotions[:9]):
     x = [c.rating for c in CIS]
     y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
     x, y = np.array(x), np.array(y)
-    ax.scatter(x, y, alpha=0.1, s=100)
+    ax.scatter(x, y, alpha=0.01, s=100)
     # "reduced major axis" 2D fit
     slope = np.sign(np.corrcoef(x, y)[0, 1]) * (np.std(y) / np.std(x))
     ax.plot(x, slope * (x - x.mean()) + y.mean(), color="green", linewidth=2)
