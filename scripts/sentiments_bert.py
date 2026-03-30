@@ -45,12 +45,13 @@ print(top_emotions[:6])
 fig, axes = plt.subplots(3, 3, figsize=(12.8, 7.2))
 for i, (emotion_name, _) in enumerate(top_emotions[:9]):
     ax = axes.flatten()[i]
-    ax.scatter(
-        [c.rating for c in CIS],
-        [logit(emotion_scores[c][emotion_name]) for c in CIS],
-        alpha=0.1,
-        s=100,
-    )
+    x = [c.rating for c in CIS]
+    y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
+    x, y = np.array(x), np.array(y)
+    ax.scatter(x, y, alpha=0.1, s=100)
+    # "reduced major axis" 2D fit
+    slope = np.sign(np.corrcoef(x, y)[0, 1]) * (np.std(y) / np.std(x))
+    ax.plot(x, slope * (x - x.mean()) + y.mean(), color="green", linewidth=2)
     ax.set_title(emotion_name)
     ax.set_xlabel("Rating")
     ax.set_ylabel("Logit Score")
