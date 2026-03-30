@@ -3,12 +3,19 @@
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import transformers
 from tqdm import tqdm
 
 if not torch.cuda.is_available():
     raise RuntimeError("no CUDA :(")
+
+
+def logit(x):
+    x = np.clip(x, 1e-7, 1 - 1e-7)
+    return np.log(x / (1 - x))
+
 
 import untappd
 
@@ -40,13 +47,13 @@ for i, (emotion_name, _) in enumerate(top_emotions[:6]):
     ax = axes.flatten()[i]
     ax.scatter(
         [c.rating for c in CIS],
-        [emotion_scores[c][emotion_name] for c in CIS],
+        [logit(emotion_scores[c][emotion_name]) for c in CIS],
         alpha=0.1,
         s=100,
     )
     ax.set_title(emotion_name)
     ax.set_xlabel("Rating")
-    ax.set_ylabel("Emotion Score")
+    ax.set_ylabel("Logit Score")
 
 plt.tight_layout()
 plt.show()
