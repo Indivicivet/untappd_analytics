@@ -46,8 +46,8 @@ print(top_emotions[:6])
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
-fig, axes = plt.subplots(3, 3, figsize=(12.8, 7.2))
-for i, (emotion_name, _) in enumerate(top_emotions[:9]):
+fig, axes = plt.subplots(3, 4, figsize=(12.8, 7.2))
+for i, (emotion_name, _) in enumerate(top_emotions[:len(axes.flatten())]):
     ax = axes.flatten()[i]
     x = [c.rating for c in CIS]
     y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
