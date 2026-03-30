@@ -12,32 +12,35 @@ if not torch.cuda.is_available():
 
 import untappd
 
-CIS = untappd.load_latest_checkins()[:50]
+CIS = untappd.load_latest_checkins()[:100]
 
 MODEL_ID = "SamLowe/roberta-base-go_emotions"  # "standard robust small choice"
 PIPELINE = transformers.pipeline(
     "text-classification", model=MODEL_ID, device=0, top_k=None,
 )
-comments = [c.comment for c in CIS]
+emotion_scores = {}
 total_scores = defaultdict(float)
-for ci, analysis in zip(tqdm(CIS), PIPELINE(comments, batch_size=64)):
-    ci._emotion_scores = {d["label"] : d["score"] for d in analysis}
-    for emotion, score in ci._emotion_scores.items():
+for ci, analysis in zip(tqdm(CIS), PIPELINE([c.comment for c in CIS], batch_size=64)):
+    emotion_scores[ci] = {d["label"]: d["score"] for d in analysis}
+    for emotion, score in emotion_scores[ci].items():
         total_scores[emotion] += score
 
-print(total_scores)
+total_scores["neutral"] = -total_scores["neutral"]  # keep numerical value for ref
+top_emotions = list(sorted(total_scores.items(), key=lambda t: t[1], reverse=True))
+print(top_emotions[:6])
 
-for c in sorted(
-    CIS,
-    key=lambda x: max(x._emotion_scores.values()), reverse=True
-):
-    print(f"{c._emotion_scores} ({c.rating}) | {c.beer} | {c.comment}")
+# for ci, emotions in sorted(emotion_scores.items()):
+#     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
-# plt.figure(figsize=(12.8, 7.2))
-# plt.scatter(
-#     [c.rating for c in CIS],
-#     [c._compound_score for c in CIS],
-#     alpha=0.05,
-#     s=100,
-# )
-# plt.show()
+plt.figure(figsize=(12.8, 7.2))
+fig, ax = plt.subplots(3, 2)
+for i, (emotion_name, _) in enumerate(top_emotions):
+    if i > len(ax):
+        continue
+    ax[i].scatter(
+        [c.rating for c in CIS],
+        [emotion_scores[c][emotion_name] for c in CIS],
+        alpha=0.05,
+        s=100,
+    )
+plt.show()
