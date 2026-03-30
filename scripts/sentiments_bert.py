@@ -59,7 +59,7 @@ for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
     ax.scatter(x, y, alpha=0.001, s=30)
     # "reduced major axis" 2D fit
     slope = np.sign(np.corrcoef(x, y)[0, 1]) * (np.std(y) / np.std(x))
-    color = cmap(np.clip((slope + 3) / 7, 0, 1))
+    color = cmap(np.clip((slope + 3) / 7, 0, 1))  # hardcoded for ~+4 to ~-3
     ax.plot(
         x,
         slope * (x - x.mean()) + y.mean(),
