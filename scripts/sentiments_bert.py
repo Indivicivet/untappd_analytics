@@ -19,7 +19,7 @@ def logit(x):
 
 import untappd
 
-CIS = untappd.load_latest_checkins()[:100]
+CIS = untappd.load_latest_checkins()[:1000]
 
 MODEL_ID = "SamLowe/roberta-base-go_emotions"  # "standard robust small choice"
 PIPELINE = transformers.pipeline(
@@ -42,8 +42,8 @@ print(top_emotions[:6])
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
-fig, axes = plt.subplots(3, 2, figsize=(12.8, 7.2))
-for i, (emotion_name, _) in enumerate(top_emotions[:6]):
+fig, axes = plt.subplots(3, 3, figsize=(12.8, 7.2))
+for i, (emotion_name, _) in enumerate(top_emotions[:9]):
     ax = axes.flatten()[i]
     ax.scatter(
         [c.rating for c in CIS],
