@@ -19,7 +19,7 @@ def logit(v):
 
 import untappd
 
-CIS = untappd.load_latest_checkins()
+CIS = untappd.load_latest_checkins()[:1000]
 
 MODEL_ID = "SamLowe/roberta-base-go_emotions"  # "standard robust small choice"
 PIPELINE = transformers.pipeline(
@@ -45,9 +45,9 @@ top_emotions = list(sorted(total_scores.items(), key=lambda t: t[1], reverse=Tru
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
-fig, axes = plt.subplots(4, 5, figsize=(12.8, 7.2))
-print(top_emotions[:len(axes.flatten())])
-for i, (emotion_name, _) in enumerate(top_emotions[:len(axes.flatten())]):
+fig, axes = plt.subplots(4, 5, figsize=(12.8, 7.2), constrained_layout=True)
+print(top_emotions[: len(axes.flatten())])
+for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
     ax = axes.flatten()[i]
     x = [c.rating for c in CIS]
     y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
@@ -60,10 +60,12 @@ for i, (emotion_name, _) in enumerate(top_emotions[:len(axes.flatten())]):
         slope * (x - x.mean()) + y.mean(),
         label=f"{slope:.2f}",
     )
-    ax.legend()
-    ax.set_title(emotion_name)
-    ax.set_xlabel("Rating")
-    ax.set_ylabel("Logit Score")
+    ax.legend(fontsize=8)
+    ax.set_title(emotion_name, fontsize=10)
+    ax.tick_params(labelsize=8)
+    ax.set_xlabel("Rating", fontsize=8)
+    ax.set_ylabel("Logit", fontsize=8)
 
-plt.tight_layout()
+fig.supxlabel("Overall Rating", fontsize=12)
+fig.supylabel("Overall Logit Score", fontsize=12)
 plt.show()
