@@ -7,6 +7,9 @@ import numpy as np
 import torch
 import transformers
 from tqdm import tqdm
+from matplotlib.colors import LinearSegmentedColormap
+
+import untappd
 
 if not torch.cuda.is_available():
     raise RuntimeError("no CUDA :(")
@@ -16,8 +19,6 @@ def logit(v):
     clipped = np.clip(v, 1e-7, 1 - 1e-7)
     return np.log(clipped / (1 - clipped))
 
-
-import untappd
 
 CIS = untappd.load_latest_checkins()[:1000]
 
@@ -45,6 +46,9 @@ top_emotions = list(sorted(total_scores.items(), key=lambda t: t[1], reverse=Tru
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
+
+cmap = LinearSegmentedColormap.from_list("rg", ["red", "gray", "green"])
+
 fig, axes = plt.subplots(4, 5, figsize=(12.8, 7.2), constrained_layout=True)
 print(top_emotions[: len(axes.flatten())])
 for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
@@ -52,14 +56,17 @@ for i, (emotion_name, _) in enumerate(top_emotions[: len(axes.flatten())]):
     x = [c.rating for c in CIS]
     y = [logit(emotion_scores[c][emotion_name]) for c in CIS]
     x, y = np.array(x), np.array(y)
-    ax.scatter(x, y, alpha=0.01, s=100)
+    ax.scatter(x, y, alpha=0.001, s=30)
     # "reduced major axis" 2D fit
     slope = np.sign(np.corrcoef(x, y)[0, 1]) * (np.std(y) / np.std(x))
+    color = cmap(np.clip((slope + 3) / 7, 0, 1))
     ax.plot(
         x,
         slope * (x - x.mean()) + y.mean(),
         label=f"{slope:.2f}",
+        color=color,
     )
+    ax.set_facecolor((*color[:3], 0.05))
     ax.legend(fontsize=8)
     ax.set_title(emotion_name, fontsize=10)
     ax.tick_params(labelsize=8)
