@@ -12,9 +12,9 @@ if not torch.cuda.is_available():
     raise RuntimeError("no CUDA :(")
 
 
-def logit(x):
-    x = np.clip(x, 1e-7, 1 - 1e-7)
-    return np.log(x / (1 - x))
+def logit(v):
+    clipped = np.clip(v, 1e-7, 1 - 1e-7)
+    return np.log(clipped / (1 - clipped))
 
 
 import untappd
