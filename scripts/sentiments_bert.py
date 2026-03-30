@@ -32,15 +32,18 @@ print(top_emotions[:6])
 # for ci, emotions in sorted(emotion_scores.items()):
 #     print(f"{emotions} ({c.rating}) | {c.beer} | {c.comment}")
 
-plt.figure(figsize=(12.8, 7.2))
-fig, ax = plt.subplots(3, 2)
-for i, (emotion_name, _) in enumerate(top_emotions):
-    if i > len(ax):
-        continue
-    ax[i].scatter(
+fig, axes = plt.subplots(3, 2, figsize=(12.8, 7.2))
+for i, (emotion_name, _) in enumerate(top_emotions[:6]):
+    ax = axes.flatten()[i]
+    ax.scatter(
         [c.rating for c in CIS],
         [emotion_scores[c][emotion_name] for c in CIS],
-        alpha=0.05,
+        alpha=0.1,
         s=100,
     )
+    ax.set_title(emotion_name)
+    ax.set_xlabel("Rating")
+    ax.set_ylabel("Emotion Score")
+
+plt.tight_layout()
 plt.show()
