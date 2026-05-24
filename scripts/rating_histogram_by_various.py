@@ -98,7 +98,7 @@ def show_violin(
             else:
                 category_data[result].append(rating)
 
-    plt.figure(figsize=(12.8, 7.2))
+    plt.figure(figsize=(12.8, max(7.2, len(category_data) * 0.75)))
     plt.gca().margins(0.01, 0.01)
     plt.violinplot(
         list(category_data.values()),
@@ -122,8 +122,7 @@ def show_violin(
             else list(category_data)
         ),
     )
-
-
+    plt.gca().tick_params(axis="y", labelsize="small")
 
 
 def save_various_plots(
