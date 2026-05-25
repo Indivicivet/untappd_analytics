@@ -162,59 +162,110 @@ def analyze_subset(
     print()
 
     # 2. Hypothesis Testing: Is Subset consistent with Global?
-    print("Hypothesis Testing (H0: Subset matches global background):")
-
-    # t-test
+    print("Hypothesis Testing:")
+    print("  First, confirm that the mean is indeed significantly higher:")
     t_stat, t_p = stats.ttest_ind(global_ratings, subset_ratings, equal_var=False)
     print(
-        f"  Welch's t-test:       t = {t_stat:.4f}, p-value = {t_p:.4g} "
-        f"({'Reject H0' if t_p < 0.05 else 'Cannot reject H0'})"
+        f"    Welch's t-test (Means): t = {t_stat:.4f}, p-value = {t_p:.4g} "
+        f"({'Significantly different' if t_p < 0.05 else 'Not significantly different'})"
     )
 
-    # Mann-Whitney U
-    u_stat, u_p = stats.mannwhitneyu(
-        global_ratings, subset_ratings, alternative="two-sided"
+    print(
+        "\n  H0: The subset check-ins are consistent with the global background distribution"
+    )
+    print("      up to translation (shift in mean) and/or scale (change in variance).")
+    print(
+        "      We test variance consistency, standardized shape, and top-tier ratios:\n"
+    )
+
+    # H0_a: Variance consistency
+    levene_stat, levene_p = stats.levene(global_ratings, subset_ratings)
+    var_glob = np.var(global_ratings, ddof=1)
+    var_sub = np.var(subset_ratings, ddof=1)
+    chi2_var_stat = (n_sub - 1) * var_sub / var_glob
+    p_var_low = stats.chi2.cdf(chi2_var_stat, n_sub - 1)
+    p_var_high = 1.0 - stats.chi2.cdf(chi2_var_stat, n_sub - 1)
+    chi2_var_p = 2.0 * min(p_var_low, p_var_high)
+
+    print(f"    a) Variance Consistency (H0: Equal variances):")
+    print(
+        f"       Levene's test:   W = {levene_stat:.4f}, p-value = {levene_p:.4g} "
+        f"({'Reject H0' if levene_p < 0.05 else 'Cannot reject H0 (Consistent Variance)'})"
     )
     print(
-        f"  Mann-Whitney U test:  U = {u_stat:.1f}, p-value = {u_p:.4g} "
-        f"({'Reject H0' if u_p < 0.05 else 'Cannot reject H0'})"
+        f"       Chi-Square test:  stat = {chi2_var_stat:.4f}, p-value = {chi2_var_p:.4g} "
+        f"({'Reject H0' if chi2_var_p < 0.05 else 'Cannot reject H0 (Consistent Variance)'})"
     )
 
-    # Kolmogorov-Smirnov
-    ks_stat, ks_p = stats.ks_2samp(global_ratings, subset_ratings)
+    # H0_b: Shape consistency (standardized KS test)
+    z_glob = (global_ratings - mu_glob) / std_glob
+    z_sub = (subset_ratings - mu_sub) / std_sub
+    ks_stat_z, ks_p_z = stats.ks_2samp(z_glob, z_sub)
+    print(f"    b) Shape Consistency (H0: Standardized ratings have same shape):")
     print(
-        f"  Kolmogorov-Smirnov:   D = {ks_stat:.4f}, p-value = {ks_p:.4g} "
-        f"({'Reject H0' if ks_p < 0.05 else 'Cannot reject H0'})"
+        f"       Two-Sample KS:   D = {ks_stat_z:.4f}, p-value = {ks_p_z:.4g} "
+        f"({'Reject H0' if ks_p_z < 0.05 else 'Cannot reject H0 (Consistent Shape)'})"
     )
 
-    # Monte Carlo Resampling (empirical p-values under H0)
-    print("\nMonte Carlo Resampling (100,000 runs):")
+    # H0_c: Relative ratio of top-tier ratings (Fisher's exact test)
+    g_counts = Counter(global_ratings)
+    g_max = g_counts.get(r_max, 0)
+    g_next_plus = sum(count for r, count in g_counts.items() if r >= r_next)
+    table = [[g_max, g_next_plus], [c_max, c_next_plus]]
+    odds_ratio, p_fisher = stats.fisher_exact(table)
+    print(
+        f"    c) Top-tier Ratio Consistency (H0: Ratio of {r_max:.2f} to >= {r_next:.2f} is consistent):"
+    )
+    print(
+        f"       Fisher's Exact:  p-value = {p_fisher:.4g} "
+        f"({'Reject H0' if p_fisher < 0.05 else 'Cannot reject H0 (Consistent Ratio)'})"
+    )
+
+    # Shifted Non-Parametric Resampling (Non-parametric shifted background)
+    print("\n  Shifted Non-Parametric Resampling (100,000 runs):")
+    print("    We shift the global ratings to match the subset's mean rating")
+    print("    and round to the nearest 0.25 (to keep ratings discrete).")
+
+    mean_diff = mu_sub - mu_glob
+    global_shifted = np.round((global_ratings + mean_diff) * 4) / 4
+
     n_runs = 100000
     np.random.seed(42)
-    mc_samples = np.random.choice(global_ratings, size=(n_runs, n_sub))
+    mc_shifted = np.random.choice(global_shifted, size=(n_runs, n_sub))
+    mc_shifted_c_max = np.sum(mc_shifted == r_max, axis=1)
+    mc_shifted_c_next = np.sum(mc_shifted >= r_next, axis=1)
 
-    # Mean rating resampling
-    mc_means = np.mean(mc_samples, axis=1)
-    p_mean = np.mean(mc_means >= mu_sub)
-    print(f"  Prob of getting a mean rating >= {mu_sub:.4f} under H0: {p_mean:.5f}")
-
-    # Top ratings resampling (joint probability of >= c_max of r_max AND 0 >= r_next)
-    mc_c_max = np.sum(mc_samples == r_max, axis=1)
-    mc_c_next = np.sum(mc_samples >= r_next, axis=1)
-    p_top_anom = np.mean((mc_c_max >= c_max) & (mc_c_next == 0))
-    print(
-        f"  Prob of getting >= {c_max} beers rated {r_max:.2f} and 0 rated >= {r_next:.2f} under H0: {p_top_anom:.5f}"
+    p_mc_shifted_max = np.mean(mc_shifted_c_max >= c_max)
+    p_mc_shifted_next = np.mean(mc_shifted_c_next == 0)
+    p_mc_shifted_both = np.mean((mc_shifted_c_max >= c_max) & (mc_shifted_c_next == 0))
+    p_mc_shifted_cond = (
+        p_mc_shifted_both / p_mc_shifted_max if p_mc_shifted_max > 0 else 0.0
     )
 
-    if p_mean < 0.05 or p_top_anom < 0.05:
+    print(f"    Under this shifted background distribution:")
+    print(
+        f"      Prob of getting >= {c_max} ratings of {r_max:.2f}:             {p_mc_shifted_max:.5f}"
+    )
+    print(
+        f"      Prob of getting 0 ratings of >= {r_next:.2f}:               {p_mc_shifted_next:.5f}"
+    )
+    print(
+        f"      Joint Prob of BOTH:                                    {p_mc_shifted_both:.5f}"
+    )
+    print(
+        f"      Conditional Prob of 0 ratings >= {r_next:.2f} GIVEN >= {c_max} of {r_max:.2f}:  {p_mc_shifted_cond:.5f}"
+    )
+
+    if levene_p >= 0.05 and ks_p_z >= 0.05 and p_fisher >= 0.05:
         print(
-            "  Conclusion: There is strong evidence to reject H0. The subset's rating\n"
-            "              statistics are NOT consistent with the global background."
+            "\n  Conclusion: There is NO sufficient evidence to reject H0. The subset's\n"
+            "              variance, shape, and relative top-tier ratios are consistent\n"
+            "              with a translated/scaled version of the global background."
         )
     else:
         print(
-            "  Conclusion: There is NOT sufficient evidence to reject H0. The subset is\n"
-            "              consistent with a random draw from the global background."
+            "\n  Conclusion: There is evidence to reject H0. The subset's ratings are\n"
+            "              significantly different in shape, variance, or ratio from the background."
         )
 
     # 3. Discretized Gaussian Modeling of the Subset
