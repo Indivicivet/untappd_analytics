@@ -585,11 +585,11 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 card_text = "\n".join(lines)
 
                 text_font = _get_font_for_text(card_text)
-                text_font.set_size(7.5)
+                text_font.set_size(8.2)
                 text_font.set_weight("medium")
 
                 callout_y = 1.05 + y_shift
-                flag_y = callout_y + 0.44
+                flag_y = callout_y + 0.48
 
                 if code:
                     imagebox = _get_flag_image(code, zoom=0.18)
@@ -619,11 +619,11 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     fontproperties=text_font,
                     color="#111111",
                     bbox=dict(
-                        boxstyle="round,pad=0.25",
+                        boxstyle="round,pad=0.28",
                         facecolor="#ffffff",
                         edgecolor=color,
                         alpha=0.96,
-                        linewidth=1.2,
+                        linewidth=1.4,
                     ),
                     arrowprops=dict(
                         arrowstyle="-|>",
@@ -631,13 +631,14 @@ def plot_location_timeline(seg_dicts: list[dict]):
                             "arc3,rad=0.1" if x_shift != 0 else "arc3,rad=0"
                         ),
                         color=color,
-                        lw=1.0,
+                        lw=1.1,
                     ),
                     zorder=5,
                 )
             else:
-                # Multi-destination Tour Card
-                first_color = COUNTRY_META.get(tour[0]["raw_country"], {}).get(
+                # Multi-destination Tour Card: colored by main destination (highest duration)
+                main_seg = max(tour, key=lambda s: s["duration_days"])
+                main_color = COUNTRY_META.get(main_seg["raw_country"], {}).get(
                     "color", "#4a7c59"
                 )
 
@@ -671,23 +672,24 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 card_text = "\n".join(lines)
 
                 text_font = _get_font_for_text(card_text)
-                text_font.set_size(7.2)
+                text_font.set_size(7.8)
                 text_font.set_weight("medium")
 
-                callout_y = 1.00 + 0.07 * len(lines) + y_shift
-                tour_flag_y = callout_y + 0.09 * len(lines) + 0.32
+                callout_y = 0.98 + 0.075 * len(lines) + y_shift
+                tour_flag_y = callout_y + 0.09 * len(lines) + 0.36
 
-                unique_codes = []
-                for s in tour:
-                    cd = COUNTRY_META.get(s["raw_country"], {}).get("code")
-                    if cd and cd not in unique_codes:
-                        unique_codes.append(cd)
+                # Include all flags in visits in sequential order, including duplicates
+                all_tour_codes = [
+                    COUNTRY_META.get(s["raw_country"], {}).get("code")
+                    for s in tour
+                    if COUNTRY_META.get(s["raw_country"], {}).get("code")
+                ]
 
-                n_flags = len(unique_codes)
-                flag_spacing_days = 6.0
+                n_flags = len(all_tour_codes)
+                flag_spacing_days = 6.8
                 flag_start_x = mid_num - ((n_flags - 1) * flag_spacing_days) / 2.0
 
-                for f_idx, f_code in enumerate(unique_codes):
+                for f_idx, f_code in enumerate(all_tour_codes):
                     imagebox = _get_flag_image(f_code, zoom=0.16)
                     if imagebox:
                         ab = AnnotationBbox(
@@ -718,18 +720,18 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     fontproperties=text_font,
                     color="#111111",
                     bbox=dict(
-                        boxstyle="round,pad=0.30",
+                        boxstyle="round,pad=0.32",
                         facecolor="#ffffff",
-                        edgecolor=first_color,
+                        edgecolor=main_color,
                         alpha=0.96,
-                        linewidth=1.3,
+                        linewidth=1.4,
                     ),
                     arrowprops=dict(
                         arrowstyle="-|>",
                         connectionstyle=(
                             "arc3,rad=0.1" if x_shift != 0 else "arc3,rad=0"
                         ),
-                        color=first_color,
+                        color=main_color,
                         lw=1.1,
                     ),
                     zorder=5,
