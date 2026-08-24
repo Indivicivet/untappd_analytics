@@ -110,7 +110,7 @@ def _get_font_for_text(text: str) -> fm.FontProperties:
     return fm.FontProperties(family=["Segoe UI", "DejaVu Sans", "sans-serif"])
 
 
-def _get_flag_image(code: str, zoom: float = 0.20) -> Optional[OffsetImage]:
+def _get_flag_image(code: str, zoom: float = 0.18) -> Optional[OffsetImage]:
     FLAGS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     flag_file = FLAGS_CACHE_DIR / f"{code.lower()}.png"
     if not flag_file.exists():
@@ -138,7 +138,6 @@ def build_location_timeline(cis: list[untappd.Checkin]) -> list[dict]:
 
     def clean_country(ci: untappd.Checkin) -> Optional[str]:
         if ci.venue and ci.venue.country:
-            # Untappd at Home default artifact in NC, USA
             if ci.venue.country == "United States" and "Untappd at Home" in (
                 ci.venue.name or ""
             ):
@@ -191,7 +190,6 @@ def build_location_timeline(cis: list[untappd.Checkin]) -> list[dict]:
                     }
                 )
 
-    # Consolidate continuous country segments
     segments = []
     curr_seg = [records[0]]
     for rec in records[1:]:
@@ -209,7 +207,6 @@ def build_location_timeline(cis: list[untappd.Checkin]) -> list[dict]:
         s_dt = s[0]["ci"].datetime
         e_dt = s[-1]["ci"].datetime
 
-        # Subregions visited in chronological order (unique)
         sub_list = []
         for x in s:
             sub = x["subregion"]
@@ -299,8 +296,9 @@ def print_timeline(seg_dicts: list[dict]):
 @untappd_utils.show_or_save_to_out_file
 def plot_location_timeline(seg_dicts: list[dict]):
     """
-    Renders a multi-row year-by-year visual timeline with color-coded country segments,
-    flags, exact date ranges, duration indicators, and visited sub-regions.
+    Renders a unified multi-row visual timeline with shared vertical month gridlines,
+    compact vertical spacing, color-coded country segments, flags, exact date ranges,
+    duration indicators, and visited sub-regions.
     """
     min_year = min(s["start_dt"].year for s in seg_dicts)
     max_year = max(s["end_dt"].year for s in seg_dicts)
@@ -308,7 +306,18 @@ def plot_location_timeline(seg_dicts: list[dict]):
     years = list(range(start_year, max_year + 1))
     n_rows = len(years)
 
-    fig, axes = plt.subplots(n_rows, 1, figsize=(18, 2.15 * n_rows), sharex=False)
+    # Reference year for normalized leap-year month alignment across all rows
+    base_ref_year = 2024
+    ref_start = datetime.datetime(base_ref_year, 1, 1)
+    ref_end = datetime.datetime(base_ref_year, 12, 31, 23, 59, 59)
+
+    fig, axes = plt.subplots(
+        n_rows,
+        1,
+        figsize=(18, 1.25 * n_rows + 0.6),
+        sharex=True,
+        gridspec_kw={"hspace": 0.12},
+    )
     if n_rows == 1:
         axes = [axes]
     fig.patch.set_facecolor("#f6f8fa")
@@ -319,19 +328,39 @@ def plot_location_timeline(seg_dicts: list[dict]):
 
         r_start = datetime.datetime(year, 1, 1)
         r_end = datetime.datetime(year, 12, 31, 23, 59, 59)
-        ax.set_xlim(r_start, r_end)
-        ax.set_ylim(-0.25, 2.95)
+
+        ax.set_xlim(ref_start, ref_end)
+        ax.set_ylim(-0.15, 2.05)
         ax.get_yaxis().set_visible(False)
 
-        # Month gridlines
+        # Subtle vertical month gridlines aligned seamlessly across all subplots
         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=list(range(1, 13))))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
-        ax.grid(axis="x", linestyle=":", alpha=0.5, color="#d0d0d0")
+        ax.grid(axis="x", linestyle="--", alpha=0.45, color="#b0b8c4", zorder=1)
+
+        # Month labels only at top of first row and bottom of last row
+        if row_idx == 0:
+            ax.xaxis.set_label_position("top")
+            ax.xaxis.tick_top()
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+            ax.tick_params(axis="x", labelsize=10, pad=3, length=3, color="#888888")
+        elif row_idx == n_rows - 1:
+            ax.xaxis.tick_bottom()
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+            ax.tick_params(axis="x", labelsize=10, pad=3, length=3, color="#888888")
+        else:
+            ax.tick_params(
+                axis="x",
+                which="both",
+                bottom=False,
+                top=False,
+                labelbottom=False,
+                labeltop=False,
+            )
 
         # Year label on left margin
         ax.text(
             -0.035,
-            0.35,
+            0.28,
             str(year),
             transform=ax.transAxes,
             fontsize=12,
@@ -358,7 +387,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
             curr_c = [non_uk_segs[0]]
             for s in non_uk_segs[1:]:
                 prev_s = curr_c[-1]
-                if (s["start_dt"] - prev_s["end_dt"]).days < 28:
+                if (s["start_dt"] - prev_s["end_dt"]).days < 20:
                     curr_c.append(s)
                 else:
                     clusters.append(curr_c)
@@ -369,30 +398,43 @@ def plot_location_timeline(seg_dicts: list[dict]):
         callout_positions = {}
         for c in clusters:
             if len(c) == 1:
-                callout_positions[id(c[0])] = (0.0, 1.25)
+                callout_positions[id(c[0])] = (0.0, 1.05)
             elif len(c) == 2:
-                callout_positions[id(c[0])] = (-16.0, 1.45)
-                callout_positions[id(c[1])] = (16.0, 0.85)
+                callout_positions[id(c[0])] = (-10.0, 1.25)
+                callout_positions[id(c[1])] = (10.0, 0.72)
             elif len(c) >= 3:
-                callout_positions[id(c[0])] = (-22.0, 1.55)
-                callout_positions[id(c[1])] = (0.0, 0.82)
-                callout_positions[id(c[2])] = (22.0, 1.55)
+                callout_positions[id(c[0])] = (-15.0, 1.30)
+                callout_positions[id(c[1])] = (0.0, 0.70)
+                callout_positions[id(c[2])] = (15.0, 1.30)
                 for extra_idx, extra_seg in enumerate(c[3:], start=3):
                     callout_positions[id(extra_seg)] = (
-                        26.0 * (extra_idx - 1),
-                        0.85,
+                        18.0 * (extra_idx - 1),
+                        0.72,
                     )
+
+        def to_ref_dt(dt: datetime.datetime) -> datetime.datetime:
+            doy = dt.timetuple().tm_yday
+            is_leap = (dt.year % 4 == 0 and dt.year % 100 != 0) or (dt.year % 400 == 0)
+            if not is_leap and doy > 59:
+                doy += 1
+            sec = dt.hour * 3600 + dt.minute * 60 + dt.second
+            return datetime.datetime(base_ref_year, 1, 1) + datetime.timedelta(
+                days=doy - 1, seconds=sec
+            )
 
         for seg in row_segs:
             s_start = max(seg["start_dt"], r_start)
             s_end = min(seg["end_dt"], r_end)
 
-            start_num = mdates.date2num(s_start)
-            end_num = mdates.date2num(s_end)
+            ref_s_start = to_ref_dt(s_start)
+            ref_s_end = to_ref_dt(s_end)
+
+            start_num = mdates.date2num(ref_s_start)
+            end_num = mdates.date2num(ref_s_end)
             actual_width = max(end_num - start_num, 0.05)
 
-            bar_height = 0.42
-            bar_y = 0.08
+            bar_height = 0.38
+            bar_y = 0.05
 
             if seg["is_transition"]:
                 rect = patches.FancyBboxPatch(
@@ -437,28 +479,28 @@ def plot_location_timeline(seg_dicts: list[dict]):
             )
             ax.add_patch(rect)
 
-            mid_date = s_start + (s_end - s_start) / 2
+            mid_date = ref_s_start + (ref_s_end - ref_s_start) / 2
             mid_num = mdates.date2num(mid_date)
 
             if seg["raw_country"] != "United Kingdom":
-                x_shift_days, callout_y = callout_positions.get(id(seg), (0.0, 1.25))
+                x_shift_days, callout_y = callout_positions.get(id(seg), (0.0, 1.05))
                 card_x_num = mid_num + x_shift_days
-                flag_y = callout_y + 0.58
+                flag_y = callout_y + 0.40
 
                 # Draw a marker pin for short trips (< 4 days)
                 if seg["duration_days"] < 4.0:
                     ax.plot(
                         [mid_num, mid_num],
-                        [bar_y + bar_height, bar_y + bar_height + 0.15],
+                        [bar_y + bar_height, bar_y + bar_height + 0.12],
                         color=color,
                         lw=1.5,
                         zorder=4,
                     )
                     ax.scatter(
                         [mid_num],
-                        [bar_y + bar_height + 0.15],
+                        [bar_y + bar_height + 0.12],
                         color=color,
-                        s=25,
+                        s=22,
                         zorder=4,
                         edgecolor="#ffffff",
                         linewidth=0.8,
@@ -466,15 +508,15 @@ def plot_location_timeline(seg_dicts: list[dict]):
 
                 # Embed country flag icon cleanly above card
                 if code:
-                    imagebox = _get_flag_image(code, zoom=0.20)
+                    imagebox = _get_flag_image(code, zoom=0.18)
                     if imagebox:
                         ab = AnnotationBbox(
                             imagebox,
                             (card_x_num, flag_y),
                             frameon=True,
-                            pad=0.08,
+                            pad=0.06,
                             bboxprops=dict(
-                                boxstyle="round,pad=0.08",
+                                boxstyle="round,pad=0.06",
                                 facecolor="white",
                                 edgecolor="#cccccc",
                                 lw=0.8,
@@ -510,7 +552,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 label_text = "\n".join(lines)
 
                 text_font = _get_font_for_text(label_text)
-                text_font.set_size(8)
+                text_font.set_size(7.5)
                 text_font.set_weight("medium")
 
                 ax.annotate(
@@ -523,11 +565,11 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     fontproperties=text_font,
                     color="#111111",
                     bbox=dict(
-                        boxstyle="round,pad=0.32",
+                        boxstyle="round,pad=0.25",
                         facecolor="#ffffff",
                         edgecolor=color,
                         alpha=0.96,
-                        linewidth=1.4,
+                        linewidth=1.2,
                     ),
                     arrowprops=dict(
                         arrowstyle="-|>",
@@ -535,7 +577,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
                             "arc3,rad=0.1" if x_shift_days != 0 else "arc3,rad=0"
                         ),
                         color=color,
-                        lw=1.1,
+                        lw=1.0,
                     ),
                     zorder=5,
                 )
@@ -548,18 +590,18 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     va="center",
                     color="#ffffff",
                     fontweight="bold",
-                    fontsize=9,
+                    fontsize=8.5,
                     zorder=4,
                 )
 
     fig.suptitle(
         f"Geographical Travel Timeline from Untappd Check-ins ({start_year} – {max_year})",
-        fontsize=16,
+        fontsize=15,
         fontweight="bold",
         y=0.995,
         color="#1a1a1a",
     )
-    plt.subplots_adjust(left=0.06, right=0.98, top=0.96, bottom=0.03, hspace=0.48)
+    plt.subplots_adjust(left=0.06, right=0.98, top=0.955, bottom=0.035)
 
 
 if __name__ == "__main__":
