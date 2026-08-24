@@ -94,23 +94,40 @@ COUNTRY_META = {
         "flag": "🇹🇭",
         "color": "#e9c46a",
     },
+    "대한민국": {
+        "name": "대한민국",
+        "code": "kr",
+        "flag": "🇰🇷",
+        "color": "#1d3557",
+    },
+    "South Korea": {
+        "name": "대한민국",
+        "code": "kr",
+        "flag": "🇰🇷",
+        "color": "#1d3557",
+    },
 }
 
 
 def _get_font_for_text(text: str) -> fm.FontProperties:
     """
-    Select appropriate font based on Unicode script content (Thai, CJK, Latin).
+    Select appropriate font based on Unicode script content (Hangul, Thai, CJK, Latin).
     """
-    if any("\u0e00" <= ch <= "\u0e7f" for ch in text):
-        return fm.FontProperties(family=["Leelawadee UI", "Tahoma", "sans-serif"])
-    if any(ord(ch) > 0x2E80 for ch in text):
-        return fm.FontProperties(
-            family=["Microsoft YaHei", "SimHei", "Yu Gothic", "sans-serif"]
-        )
-    return fm.FontProperties(family=["Segoe UI", "DejaVu Sans", "sans-serif"])
+    return fm.FontProperties(
+        family=[
+            "Microsoft JhengHei",
+            "Microsoft YaHei",
+            "SimHei",
+            "Malgun Gothic",
+            "Leelawadee UI",
+            "Yu Gothic",
+            "Segoe UI",
+            "DejaVu Sans",
+        ]
+    )
 
 
-def _get_flag_image(code: str, zoom: float = 0.18) -> Optional[OffsetImage]:
+def _get_flag_image(code: str, zoom: float = 0.16) -> Optional[OffsetImage]:
     FLAGS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     flag_file = FLAGS_CACHE_DIR / f"{code.lower()}.png"
     if not flag_file.exists():
@@ -297,8 +314,8 @@ def print_timeline(seg_dicts: list[dict]):
 def plot_location_timeline(seg_dicts: list[dict]):
     """
     Renders a unified multi-row visual timeline with shared vertical month gridlines,
-    compact vertical spacing, color-coded country segments, flags, exact date ranges,
-    duration indicators, and visited sub-regions.
+    compact vertical spacing, collision-free multi-destination tour cards, flags,
+    exact date ranges, duration indicators, and visited sub-regions.
     """
     min_year = min(s["start_dt"].year for s in seg_dicts)
     max_year = max(s["end_dt"].year for s in seg_dicts)
@@ -306,17 +323,26 @@ def plot_location_timeline(seg_dicts: list[dict]):
     years = list(range(start_year, max_year + 1))
     n_rows = len(years)
 
-    # Reference year for normalized leap-year month alignment across all rows
     base_ref_year = 2024
     ref_start = datetime.datetime(base_ref_year, 1, 1)
     ref_end = datetime.datetime(base_ref_year, 12, 31, 23, 59, 59)
 
+    def to_ref_dt(dt: datetime.datetime) -> datetime.datetime:
+        doy = dt.timetuple().tm_yday
+        is_leap = (dt.year % 4 == 0 and dt.year % 100 != 0) or (dt.year % 400 == 0)
+        if not is_leap and doy > 59:
+            doy += 1
+        sec = dt.hour * 3600 + dt.minute * 60 + dt.second
+        return datetime.datetime(base_ref_year, 1, 1) + datetime.timedelta(
+            days=doy - 1, seconds=sec
+        )
+
     fig, axes = plt.subplots(
         n_rows,
         1,
-        figsize=(18, 1.25 * n_rows + 0.6),
+        figsize=(18, 1.38 * n_rows + 0.6),
         sharex=True,
-        gridspec_kw={"hspace": 0.12},
+        gridspec_kw={"hspace": 0.16},
     )
     if n_rows == 1:
         axes = [axes]
@@ -330,14 +356,12 @@ def plot_location_timeline(seg_dicts: list[dict]):
         r_end = datetime.datetime(year, 12, 31, 23, 59, 59)
 
         ax.set_xlim(ref_start, ref_end)
-        ax.set_ylim(-0.15, 2.05)
+        ax.set_ylim(-0.15, 2.50)
         ax.get_yaxis().set_visible(False)
 
-        # Subtle vertical month gridlines aligned seamlessly across all subplots
         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=list(range(1, 13))))
         ax.grid(axis="x", linestyle="--", alpha=0.45, color="#b0b8c4", zorder=1)
 
-        # Month labels only at top of first row and bottom of last row
         if row_idx == 0:
             ax.xaxis.set_label_position("top")
             ax.xaxis.tick_top()
@@ -357,10 +381,9 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 labeltop=False,
             )
 
-        # Year label on left margin
         ax.text(
             -0.035,
-            0.28,
+            0.22,
             str(year),
             transform=ax.transAxes,
             fontsize=12,
@@ -374,54 +397,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
             s for s in seg_dicts if s["start_dt"] <= r_end and s["end_dt"] >= r_start
         ]
 
-        # Non-UK segments that will have callout annotations
-        non_uk_segs = [
-            s
-            for s in row_segs
-            if s["raw_country"] != "United Kingdom" and not s["is_transition"]
-        ]
-
-        # Cluster non-UK segments to compute collision-free offsets
-        clusters = []
-        if non_uk_segs:
-            curr_c = [non_uk_segs[0]]
-            for s in non_uk_segs[1:]:
-                prev_s = curr_c[-1]
-                if (s["start_dt"] - prev_s["end_dt"]).days < 20:
-                    curr_c.append(s)
-                else:
-                    clusters.append(curr_c)
-                    curr_c = [s]
-            clusters.append(curr_c)
-
-        # Map each segment to its (x_shift_days, y_level)
-        callout_positions = {}
-        for c in clusters:
-            if len(c) == 1:
-                callout_positions[id(c[0])] = (0.0, 1.05)
-            elif len(c) == 2:
-                callout_positions[id(c[0])] = (-10.0, 1.25)
-                callout_positions[id(c[1])] = (10.0, 0.72)
-            elif len(c) >= 3:
-                callout_positions[id(c[0])] = (-15.0, 1.30)
-                callout_positions[id(c[1])] = (0.0, 0.70)
-                callout_positions[id(c[2])] = (15.0, 1.30)
-                for extra_idx, extra_seg in enumerate(c[3:], start=3):
-                    callout_positions[id(extra_seg)] = (
-                        18.0 * (extra_idx - 1),
-                        0.72,
-                    )
-
-        def to_ref_dt(dt: datetime.datetime) -> datetime.datetime:
-            doy = dt.timetuple().tm_yday
-            is_leap = (dt.year % 4 == 0 and dt.year % 100 != 0) or (dt.year % 400 == 0)
-            if not is_leap and doy > 59:
-                doy += 1
-            sec = dt.hour * 3600 + dt.minute * 60 + dt.second
-            return datetime.datetime(base_ref_year, 1, 1) + datetime.timedelta(
-                days=doy - 1, seconds=sec
-            )
-
+        # Draw all track bars
         for seg in row_segs:
             s_start = max(seg["start_dt"], r_start)
             s_end = min(seg["end_dt"], r_end)
@@ -433,8 +409,8 @@ def plot_location_timeline(seg_dicts: list[dict]):
             end_num = mdates.date2num(ref_s_end)
             actual_width = max(end_num - start_num, 0.05)
 
-            bar_height = 0.38
-            bar_y = 0.05
+            bar_height = 0.35
+            bar_y = 0.04
 
             if seg["is_transition"]:
                 rect = patches.FancyBboxPatch(
@@ -462,9 +438,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
             )
             color = meta["color"]
             name = meta["name"]
-            code = meta.get("code")
 
-            # Draw the visual bar on the timeline
             visual_bar_width = max(actual_width, 1.2)
             rect = patches.FancyBboxPatch(
                 (start_num, bar_y),
@@ -482,37 +456,147 @@ def plot_location_timeline(seg_dicts: list[dict]):
             mid_date = ref_s_start + (ref_s_end - ref_s_start) / 2
             mid_num = mdates.date2num(mid_date)
 
-            if seg["raw_country"] != "United Kingdom":
-                x_shift_days, callout_y = callout_positions.get(id(seg), (0.0, 1.05))
-                card_x_num = mid_num + x_shift_days
-                flag_y = callout_y + 0.40
+            # Short trip marker pin
+            if seg["raw_country"] != "United Kingdom" and seg["duration_days"] < 4.0:
+                ax.plot(
+                    [mid_num, mid_num],
+                    [bar_y + bar_height, bar_y + bar_height + 0.10],
+                    color=color,
+                    lw=1.5,
+                    zorder=4,
+                )
+                ax.scatter(
+                    [mid_num],
+                    [bar_y + bar_height + 0.10],
+                    color=color,
+                    s=20,
+                    zorder=4,
+                    edgecolor="#ffffff",
+                    linewidth=0.8,
+                )
+            elif seg["raw_country"] == "United Kingdom" and (s_end - s_start).days > 30:
+                ax.text(
+                    mid_num,
+                    bar_y + bar_height / 2,
+                    "United Kingdom",
+                    ha="center",
+                    va="center",
+                    color="#ffffff",
+                    fontweight="bold",
+                    fontsize=8.5,
+                    zorder=4,
+                )
 
-                # Draw a marker pin for short trips (< 4 days)
-                if seg["duration_days"] < 4.0:
-                    ax.plot(
-                        [mid_num, mid_num],
-                        [bar_y + bar_height, bar_y + bar_height + 0.12],
-                        color=color,
-                        lw=1.5,
-                        zorder=4,
-                    )
-                    ax.scatter(
-                        [mid_num],
-                        [bar_y + bar_height + 0.12],
-                        color=color,
-                        s=22,
-                        zorder=4,
-                        edgecolor="#ffffff",
-                        linewidth=0.8,
-                    )
+        # Group non-UK segments into Tours (if gap between trips is < 5 days)
+        non_uk_segs = [
+            s
+            for s in row_segs
+            if s["raw_country"] != "United Kingdom" and not s["is_transition"]
+        ]
+        tours = []
+        if non_uk_segs:
+            curr_tour = [non_uk_segs[0]]
+            for s in non_uk_segs[1:]:
+                prev_s = curr_tour[-1]
+                if (s["start_dt"] - prev_s["end_dt"]).total_seconds() / 86400.0 < 5.0:
+                    curr_tour.append(s)
+                else:
+                    tours.append(curr_tour)
+                    curr_tour = [s]
+            tours.append(curr_tour)
 
-                # Embed country flag icon cleanly above card
+        # Separate adjacent tour cards if centers are close horizontally
+        tour_offsets = {}
+        for t_idx, tour in enumerate(tours):
+            t_start = to_ref_dt(tour[0]["start_dt"])
+            t_end = to_ref_dt(tour[-1]["end_dt"])
+            t_mid = mdates.date2num(t_start + (t_end - t_start) / 2)
+
+            x_shift = 0.0
+            y_shift = 0.0
+            if t_idx > 0:
+                prev_t = tours[t_idx - 1]
+                p_start = to_ref_dt(prev_t[0]["start_dt"])
+                p_end = to_ref_dt(prev_t[-1]["end_dt"])
+                p_mid = mdates.date2num(p_start + (p_end - p_start) / 2)
+
+                if (t_mid - p_mid) < 42.0:
+                    tour_offsets[t_idx - 1] = (-9.0, 0.0)
+                    x_shift = 9.0
+            tour_offsets[t_idx] = (x_shift, y_shift)
+
+        for t_idx, tour in enumerate(tours):
+            tour_start_dt = tour[0]["start_dt"]
+            tour_end_dt = tour[-1]["end_dt"]
+            ref_tour_start = to_ref_dt(tour_start_dt)
+            ref_tour_end = to_ref_dt(tour_end_dt)
+
+            raw_mid_num = mdates.date2num(
+                ref_tour_start + (ref_tour_end - ref_tour_start) / 2
+            )
+            x_shift, y_shift = tour_offsets.get(t_idx, (0.0, 0.0))
+            mid_num = raw_mid_num + x_shift
+
+            total_days = max(
+                (tour_end_dt - tour_start_dt).total_seconds() / 86400.0, 0.0
+            )
+            total_cis = sum(s["count"] for s in tour)
+
+            def fmt_d(d):
+                if d < 1.0:
+                    return "<1d"
+                elif abs(d - round(d)) < 0.15:
+                    return f"{int(round(d))}d"
+                return f"{d:.1f}d"
+
+            if len(tour) == 1:
+                # Single destination trip card
+                seg = tour[0]
+                meta = COUNTRY_META.get(
+                    seg["raw_country"],
+                    {
+                        "name": seg["raw_country"],
+                        "color": "#4a7c59",
+                        "code": "un",
+                    },
+                )
+                color = meta["color"]
+                name = meta["name"]
+                code = meta.get("code")
+
+                dur = seg["duration_days"]
+                dur_str = f"[{fmt_d(dur)}]"
+
+                if seg["start_dt"].strftime("%Y-%m-%d") == seg["end_dt"].strftime(
+                    "%Y-%m-%d"
+                ):
+                    date_str = seg["start_dt"].strftime("%d %b")
+                else:
+                    date_str = f"{seg['start_dt'].strftime('%d %b')} – {seg['end_dt'].strftime('%d %b')}"
+
+                subs_text = (
+                    ", ".join(seg["subregions"][:2]) if seg["subregions"] else ""
+                )
+                title_line = f"{name} ({subs_text})" if subs_text else f"{name}"
+                lines = [
+                    title_line,
+                    f"{dur_str}  {date_str} ({seg['count']} check-ins)",
+                ]
+                card_text = "\n".join(lines)
+
+                text_font = _get_font_for_text(card_text)
+                text_font.set_size(7.5)
+                text_font.set_weight("medium")
+
+                callout_y = 1.05 + y_shift
+                flag_y = callout_y + 0.44
+
                 if code:
                     imagebox = _get_flag_image(code, zoom=0.18)
                     if imagebox:
                         ab = AnnotationBbox(
                             imagebox,
-                            (card_x_num, flag_y),
+                            (mid_num, flag_y),
                             frameon=True,
                             pad=0.06,
                             bboxprops=dict(
@@ -525,40 +609,10 @@ def plot_location_timeline(seg_dicts: list[dict]):
                         )
                         ax.add_artist(ab)
 
-                # Format duration string
-                dur = seg["duration_days"]
-                if dur < 1.0:
-                    dur_str = "<1 day"
-                elif abs(dur - round(dur)) < 0.15:
-                    dur_str = f"{int(round(dur))} days" if round(dur) > 1 else "1 day"
-                else:
-                    dur_str = f"{dur:.1f} days"
-
-                # Format dates
-                if seg["start_dt"].strftime("%Y-%m-%d") == seg["end_dt"].strftime(
-                    "%Y-%m-%d"
-                ):
-                    date_str = seg["start_dt"].strftime("%d %b")
-                else:
-                    date_str = f"{seg['start_dt'].strftime('%d %b')} – {seg['end_dt'].strftime('%d %b')}"
-
-                subs_text = (
-                    ", ".join(seg["subregions"][:2]) if seg["subregions"] else ""
-                )
-                lines = [f"{name}"]
-                if subs_text:
-                    lines.append(subs_text)
-                lines.append(f"[{dur_str}]  {date_str} ({seg['count']} check-ins)")
-                label_text = "\n".join(lines)
-
-                text_font = _get_font_for_text(label_text)
-                text_font.set_size(7.5)
-                text_font.set_weight("medium")
-
                 ax.annotate(
-                    label_text,
-                    xy=(mid_num, bar_y + bar_height),
-                    xytext=(card_x_num, callout_y),
+                    card_text,
+                    xy=(raw_mid_num, bar_y + bar_height),
+                    xytext=(mid_num, callout_y),
                     textcoords="data",
                     ha="center",
                     va="center",
@@ -574,24 +628,111 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     arrowprops=dict(
                         arrowstyle="-|>",
                         connectionstyle=(
-                            "arc3,rad=0.1" if x_shift_days != 0 else "arc3,rad=0"
+                            "arc3,rad=0.1" if x_shift != 0 else "arc3,rad=0"
                         ),
                         color=color,
                         lw=1.0,
                     ),
                     zorder=5,
                 )
-            elif seg["raw_country"] == "United Kingdom" and (s_end - s_start).days > 30:
-                ax.text(
-                    mid_num,
-                    bar_y + bar_height / 2,
-                    "United Kingdom",
+            else:
+                # Multi-destination Tour Card
+                first_color = COUNTRY_META.get(tour[0]["raw_country"], {}).get(
+                    "color", "#4a7c59"
+                )
+
+                tour_header = " -> ".join(
+                    COUNTRY_META.get(s["raw_country"], {}).get("name", s["raw_country"])
+                    for s in tour
+                )
+
+                stop_lines = []
+                for s in tour:
+                    c_name = COUNTRY_META.get(s["raw_country"], {}).get(
+                        "name", s["raw_country"]
+                    )
+                    s_subs = ", ".join(s["subregions"][:1]) if s["subregions"] else ""
+                    s_dt_str = (
+                        s["start_dt"].strftime("%d %b")
+                        if s["start_dt"].strftime("%Y-%m-%d")
+                        == s["end_dt"].strftime("%Y-%m-%d")
+                        else f"{s['start_dt'].strftime('%d')}–{s['end_dt'].strftime('%d %b')}"
+                    )
+
+                    loc_desc = f"{c_name} ({s_subs})" if s_subs else c_name
+                    stop_lines.append(
+                        f"• {loc_desc}: {s_dt_str} [{fmt_d(s['duration_days'])}, {s['count']} ci]"
+                    )
+
+                lines = [
+                    f"{tour_header}  [{fmt_d(total_days)}, {total_cis} total check-ins]",
+                    *stop_lines,
+                ]
+                card_text = "\n".join(lines)
+
+                text_font = _get_font_for_text(card_text)
+                text_font.set_size(7.2)
+                text_font.set_weight("medium")
+
+                callout_y = 1.00 + 0.07 * len(lines) + y_shift
+                tour_flag_y = callout_y + 0.09 * len(lines) + 0.32
+
+                unique_codes = []
+                for s in tour:
+                    cd = COUNTRY_META.get(s["raw_country"], {}).get("code")
+                    if cd and cd not in unique_codes:
+                        unique_codes.append(cd)
+
+                n_flags = len(unique_codes)
+                flag_spacing_days = 6.0
+                flag_start_x = mid_num - ((n_flags - 1) * flag_spacing_days) / 2.0
+
+                for f_idx, f_code in enumerate(unique_codes):
+                    imagebox = _get_flag_image(f_code, zoom=0.16)
+                    if imagebox:
+                        ab = AnnotationBbox(
+                            imagebox,
+                            (
+                                flag_start_x + f_idx * flag_spacing_days,
+                                tour_flag_y,
+                            ),
+                            frameon=True,
+                            pad=0.05,
+                            bboxprops=dict(
+                                boxstyle="round,pad=0.05",
+                                facecolor="white",
+                                edgecolor="#cccccc",
+                                lw=0.7,
+                            ),
+                            zorder=6,
+                        )
+                        ax.add_artist(ab)
+
+                ax.annotate(
+                    card_text,
+                    xy=(raw_mid_num, bar_y + bar_height),
+                    xytext=(mid_num, callout_y),
+                    textcoords="data",
                     ha="center",
                     va="center",
-                    color="#ffffff",
-                    fontweight="bold",
-                    fontsize=8.5,
-                    zorder=4,
+                    fontproperties=text_font,
+                    color="#111111",
+                    bbox=dict(
+                        boxstyle="round,pad=0.30",
+                        facecolor="#ffffff",
+                        edgecolor=first_color,
+                        alpha=0.96,
+                        linewidth=1.3,
+                    ),
+                    arrowprops=dict(
+                        arrowstyle="-|>",
+                        connectionstyle=(
+                            "arc3,rad=0.1" if x_shift != 0 else "arc3,rad=0"
+                        ),
+                        color=first_color,
+                        lw=1.1,
+                    ),
+                    zorder=5,
                 )
 
     fig.suptitle(
