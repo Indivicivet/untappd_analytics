@@ -3,14 +3,13 @@ import datetime
 import io
 import sys
 import urllib.request
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
 import matplotlib.dates as mdates
 import matplotlib.font_manager as fm
 import matplotlib.patches as patches
-import numpy as np
 import PIL.Image
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
@@ -111,7 +110,7 @@ COUNTRY_META = {
 
 def _get_font_for_text(text: str) -> fm.FontProperties:
     """
-    Select appropriate font based on Unicode script content (Hangul, Thai, CJK, Latin).
+    Select font properties supporting CJK, Hangul, Thai, and Latin scripts.
     """
     return fm.FontProperties(
         family=[
@@ -314,8 +313,8 @@ def print_timeline(seg_dicts: list[dict]):
 def plot_location_timeline(seg_dicts: list[dict]):
     """
     Renders a compact, unified multi-row visual timeline with shared vertical month gridlines,
-    large readable fonts, collision-free multi-destination tour cards, flags,
-    exact date ranges, duration indicators, and visited sub-regions.
+    pinned bottom baselines for multi-line trip cards, dynamic top-pinned flags,
+    collision-free tour cards, exact date ranges, duration indicators, and visited sub-regions.
     """
     min_year = min(s["start_dt"].year for s in seg_dicts)
     max_year = max(s["end_dt"].year for s in seg_dicts)
@@ -340,7 +339,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
     fig, axes = plt.subplots(
         n_rows,
         1,
-        figsize=(18, 1.15 * n_rows + 0.6),
+        figsize=(18, 1.25 * n_rows + 0.6),
         sharex=True,
         gridspec_kw={"hspace": 0.12},
     )
@@ -356,7 +355,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
         r_end = datetime.datetime(year, 12, 31, 23, 59, 59)
 
         ax.set_xlim(ref_start, ref_end)
-        ax.set_ylim(-0.12, 2.25)
+        ax.set_ylim(-0.12, 2.50)
         ax.get_yaxis().set_visible(False)
 
         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=list(range(1, 13))))
@@ -397,6 +396,9 @@ def plot_location_timeline(seg_dicts: list[dict]):
             s for s in seg_dicts if s["start_dt"] <= r_end and s["end_dt"] >= r_start
         ]
 
+        bar_height = 0.32
+        bar_y = 0.04
+
         # Draw all track bars
         for seg in row_segs:
             s_start = max(seg["start_dt"], r_start)
@@ -408,9 +410,6 @@ def plot_location_timeline(seg_dicts: list[dict]):
             start_num = mdates.date2num(ref_s_start)
             end_num = mdates.date2num(ref_s_end)
             actual_width = max(end_num - start_num, 0.05)
-
-            bar_height = 0.32
-            bar_y = 0.03
 
             if seg["is_transition"]:
                 rect = patches.FancyBboxPatch(
@@ -528,6 +527,9 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     x_shift = shift_val
             tour_offsets[t_idx] = (x_shift, y_shift)
 
+        # Bottom baseline for all callout cards (guarantees clearance above track bar)
+        card_bottom_y = 0.68
+
         for t_idx, tour in enumerate(tours):
             tour_start_dt = tour[0]["start_dt"]
             tour_end_dt = tour[-1]["end_dt"]
@@ -591,8 +593,10 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 text_font.set_size(9.0)
                 text_font.set_weight("medium")
 
-                callout_y = 0.88 + y_shift
-                flag_y = callout_y + 0.46
+                # Pin by the bottom baseline: multiline boxes grow upwards
+                n_l = len(lines)
+                callout_y = card_bottom_y + 0.11 * n_l + 0.09 + y_shift
+                flag_y = card_bottom_y + 0.23 * n_l + 0.44 + y_shift
 
                 if code:
                     imagebox = _get_flag_image(code, zoom=0.18)
@@ -639,7 +643,7 @@ def plot_location_timeline(seg_dicts: list[dict]):
                     zorder=5,
                 )
             else:
-                # Multi-destination Tour Card: colored by main destination (highest duration)
+                # Multi-destination Tour Card: colored by main destination
                 main_seg = max(tour, key=lambda s: s["duration_days"])
                 main_color = COUNTRY_META.get(main_seg["raw_country"], {}).get(
                     "color", "#4a7c59"
@@ -678,8 +682,10 @@ def plot_location_timeline(seg_dicts: list[dict]):
                 text_font.set_size(8.5)
                 text_font.set_weight("medium")
 
-                callout_y = 0.78 + 0.07 * len(lines) + y_shift
-                tour_flag_y = callout_y + 0.085 * len(lines) + 0.36
+                # Pin by the bottom baseline: multiline boxes grow upwards
+                n_l = len(lines)
+                callout_y = card_bottom_y + 0.11 * n_l + 0.09 + y_shift
+                tour_flag_y = card_bottom_y + 0.23 * n_l + 0.44 + y_shift
 
                 # Include all flags in visits in sequential order, including duplicates
                 all_tour_codes = [
