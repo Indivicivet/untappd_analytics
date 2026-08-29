@@ -181,6 +181,7 @@ class Beer:
 
 @dataclass
 class Venue:
+    _cache: ClassVar[dict[Tuple[str, Optional[str]], Venue]] = {}
     name: str
     city: str
     state: str
@@ -198,14 +199,21 @@ class Venue:
 
     @classmethod
     def from_checkin_dict(cls, d: dict):
-        return cls(
-            name=d["venue_name"],
-            city=d["venue_city"],
+        name = d["venue_name"]
+        city = d["venue_city"]
+        if (name, city) in cls._cache:
+            return cls._cache[(name, city)]
+
+        venue = cls(
+            name=name,
+            city=city,
             state=d["venue_state"],
             country=d["venue_country"],
             lat=float(d["venue_lat"]) if d.get("venue_lat") else None,
             long=float(d["venue_lng"]) if d.get("venue_lng") else None,
         )
+        cls._cache[(name, city)] = venue
+        return venue
 
     def to_dict(self) -> dict:
         return {
