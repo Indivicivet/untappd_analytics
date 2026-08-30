@@ -71,7 +71,7 @@ def segment_sessions(
 def compute_markov(
     sessions: list[list[untappd.Checkin]],
     bins: list[tuple[str, float]],
-) -> tuple[list[str], np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[list[str], np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     bin_labels = [label for label, _ in bins]
     n = len(bin_labels)
     bin_indices = {label: i for i, label in enumerate(bin_labels)}
@@ -95,6 +95,14 @@ def compute_markov(
         where=counts.sum(axis=1, keepdims=True) > 0,
     )
 
+    q_base = counts.sum(axis=0, keepdims=True) / counts.sum()
+    p_rel = np.divide(
+        p_full,
+        q_base,
+        out=np.zeros_like(p_full),
+        where=q_base > 0,
+    )
+
     cont_counts = counts[:, :-1]
     p_cont = np.divide(
         cont_counts,
@@ -111,16 +119,24 @@ def compute_markov(
         pi_stat = np.zeros(n)
 
     pi_marg = marginal / marginal.sum()
+    pi_ratio = np.divide(
+        pi_stat,
+        pi_marg,
+        out=np.zeros_like(pi_stat),
+        where=pi_marg > 0,
+    )
 
-    return bin_labels, p_full, pi_stat, pi_marg
+    return bin_labels, p_full, p_rel, pi_stat, pi_marg, pi_ratio
 
 
 @untappd_utils.show_or_save_to_out_file
 def plot_markov_abv(
     bin_labels: list[str],
-    p_full: np.ndarray,
+    p_matrix: np.ndarray,
     pi_stat: np.ndarray,
     pi_marg: np.ndarray,
+    pi_ratio: Optional[np.ndarray] = None,
+    relative: bool = False,
     title_suffix: str = "",
 ) -> None:
     is_fine = len(bin_labels) > 10
@@ -130,30 +146,56 @@ def plot_markov_abv(
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
     col_labels = bin_labels + ["Session End"]
 
-    seaborn.heatmap(
-        p_full,
-        annot=True,
-        fmt=".2f",
-        cmap="Blues",
-        xticklabels=col_labels,
-        yticklabels=bin_labels,
-        cbar_kws={"label": "P(Next | Current)"},
-        ax=ax1,
-        linewidths=0.5,
-        linecolor="#e0e0e0",
-        annot_kws={"size": font_size - 0.5},
-    )
+    if relative:
+        vmax = max(2.0, float(np.percentile(p_matrix, 98)))
+        seaborn.heatmap(
+            p_matrix,
+            annot=True,
+            fmt=".2f",
+            cmap="vlag",
+            center=1.0,
+            vmin=0.0,
+            vmax=vmax,
+            xticklabels=col_labels,
+            yticklabels=bin_labels,
+            cbar_kws={"label": "Relative Probability (Lift vs Marginal Base Rate)"},
+            ax=ax1,
+            linewidths=0.5,
+            linecolor="#e0e0e0",
+            annot_kws={"size": font_size - 0.5},
+        )
+        ax1.set_title(
+            f"Relative ABV Transition Probability (Lift = P / Base Rate){title_suffix}",
+            fontsize=12,
+            fontweight="bold",
+            pad=10,
+        )
+    else:
+        seaborn.heatmap(
+            p_matrix,
+            annot=True,
+            fmt=".2f",
+            cmap="Blues",
+            xticklabels=col_labels,
+            yticklabels=bin_labels,
+            cbar_kws={"label": "P(Next | Current)"},
+            ax=ax1,
+            linewidths=0.5,
+            linecolor="#e0e0e0",
+            annot_kws={"size": font_size - 0.5},
+        )
+        ax1.set_title(
+            f"ABV Markov Transition Matrix P(Next | Current){title_suffix}",
+            fontsize=12,
+            fontweight="bold",
+            pad=10,
+        )
+
     ax1.axvline(
         len(bin_labels),
         color="#d62728",
         linewidth=1.8,
         linestyle="--",
-    )
-    ax1.set_title(
-        f"ABV Markov Transition Matrix P(Next | Current){title_suffix}",
-        fontsize=12,
-        fontweight="bold",
-        pad=10,
     )
     ax1.set_xlabel("Next State", fontsize=10)
     ax1.set_ylabel("Current ABV Bracket", fontsize=10)
@@ -161,92 +203,162 @@ def plot_markov_abv(
     ax1.set_yticklabels(bin_labels, rotation=0, fontsize=font_size)
 
     y_pos = np.arange(len(bin_labels))
-    bar_width = 0.35
 
-    bars1 = ax2.barh(
-        y_pos - bar_width / 2,
-        pi_marg * 100,
-        bar_width,
-        label="Marginal (Overall %)",
-        color="#4C72B0",
-    )
-    bars2 = ax2.barh(
-        y_pos + bar_width / 2,
-        pi_stat * 100,
-        bar_width,
-        label="Stationary (Steady-State %)",
-        color="#DD8452",
-    )
+    if relative and pi_ratio is not None:
+        colors = ["#DD8452" if r >= 1.0 else "#4C72B0" for r in pi_ratio]
+        bars = ax2.barh(
+            y_pos,
+            pi_ratio,
+            height=0.5,
+            color=colors,
+            edgecolor="#555555",
+            linewidth=0.5,
+        )
+        ax2.axvline(
+            1.0,
+            color="#333333",
+            linewidth=1.2,
+            linestyle="--",
+            label="Neutral (1.0x Baseline)",
+        )
+        ax2.set_yticks(y_pos)
+        ax2.set_yticklabels(bin_labels, fontsize=font_size)
+        ax2.invert_yaxis()
+        ax2.set_xlabel("Ratio (Stationary % / Marginal %)", fontsize=10)
+        ax2.set_title(
+            f"Within-Session ABV Enrichment Ratio (Steady-State / Overall){title_suffix}",
+            fontsize=12,
+            fontweight="bold",
+            pad=10,
+        )
+        ax2.legend(loc="lower right")
 
-    ax2.set_yticks(y_pos)
-    ax2.set_yticklabels(bin_labels, fontsize=font_size)
-    ax2.invert_yaxis()
-    ax2.set_xlabel("Probability (%)", fontsize=10)
-    ax2.set_title(
-        f"Stationary vs Marginal ABV Distribution{title_suffix}",
-        fontsize=12,
-        fontweight="bold",
-        pad=10,
-    )
-    ax2.legend(loc="lower right")
-
-    for bar in bars1:
-        w = bar.get_width()
-        ax2.text(
-            w + 0.3,
-            bar.get_y() + bar.get_height() / 2,
-            f"{w:.1f}%",
-            va="center",
-            ha="left",
-            fontsize=font_size,
-            color="#2b4570",
+        for bar in bars:
+            w = bar.get_width()
+            ax2.text(
+                w + 0.02 if w >= 0.5 else 0.52,
+                bar.get_y() + bar.get_height() / 2,
+                f"{w:.2f}x",
+                va="center",
+                ha="left",
+                fontsize=font_size,
+                fontweight="bold" if abs(w - 1.0) > 0.15 else "normal",
+            )
+        ax2.set_xlim(0, max(np.max(pi_ratio) + 0.25, 1.4))
+    else:
+        bar_width = 0.35
+        bars1 = ax2.barh(
+            y_pos - bar_width / 2,
+            pi_marg * 100,
+            bar_width,
+            label="Marginal (Overall %)",
+            color="#4C72B0",
+        )
+        bars2 = ax2.barh(
+            y_pos + bar_width / 2,
+            pi_stat * 100,
+            bar_width,
+            label="Stationary (Steady-State %)",
+            color="#DD8452",
         )
 
-    for bar in bars2:
-        w = bar.get_width()
-        ax2.text(
-            w + 0.3,
-            bar.get_y() + bar.get_height() / 2,
-            f"{w:.1f}%",
-            va="center",
-            ha="left",
-            fontsize=font_size,
-            color="#a04818",
+        ax2.set_yticks(y_pos)
+        ax2.set_yticklabels(bin_labels, fontsize=font_size)
+        ax2.invert_yaxis()
+        ax2.set_xlabel("Probability (%)", fontsize=10)
+        ax2.set_title(
+            f"Stationary vs Marginal ABV Distribution{title_suffix}",
+            fontsize=12,
+            fontweight="bold",
+            pad=10,
         )
+        ax2.legend(loc="lower right")
 
-    ax2.set_xlim(0, max(np.max(pi_marg), np.max(pi_stat)) * 100 + 4)
+        for bar in bars1:
+            w = bar.get_width()
+            ax2.text(
+                w + 0.3,
+                bar.get_y() + bar.get_height() / 2,
+                f"{w:.1f}%",
+                va="center",
+                ha="left",
+                fontsize=font_size,
+                color="#2b4570",
+            )
+
+        for bar in bars2:
+            w = bar.get_width()
+            ax2.text(
+                w + 0.3,
+                bar.get_y() + bar.get_height() / 2,
+                f"{w:.1f}%",
+                va="center",
+                ha="left",
+                fontsize=font_size,
+                color="#a04818",
+            )
+        ax2.set_xlim(0, max(np.max(pi_marg), np.max(pi_stat)) * 100 + 4)
+
     plt.tight_layout()
 
 
 def main(
-    out_file_coarse: Optional[Union[Path, str]] = (
-        Path(__file__).resolve().parent / "out" / "markov_abv_coarse.png"
-    ),
-    out_file_fine: Optional[Union[Path, str]] = (
-        Path(__file__).resolve().parent / "out" / "markov_abv_fine.png"
-    ),
+    out_dir: Optional[Union[Path, str]] = (Path(__file__).resolve().parent / "out"),
 ) -> None:
+    out_dir_path = Path(out_dir) if out_dir is not None else None
     checkins = untappd.load_latest_checkins()
     sessions = segment_sessions(checkins)
 
-    labels_c, p_c, stat_c, marg_c = compute_markov(sessions, COARSE_BINS)
+    # Coarse
+    labels_c, p_c, p_rel_c, stat_c, marg_c, ratio_c = compute_markov(
+        sessions, COARSE_BINS
+    )
     plot_markov_abv(
         labels_c,
         p_c,
         stat_c,
         marg_c,
+        relative=False,
         title_suffix=" (Coarse)",
-        out_file=out_file_coarse,
+        out_file=out_dir_path / "markov_abv_coarse.png" if out_dir_path else None,
+    )
+    plot_markov_abv(
+        labels_c,
+        p_rel_c,
+        stat_c,
+        marg_c,
+        pi_ratio=ratio_c,
+        relative=True,
+        title_suffix=" (Coarse Relative)",
+        out_file=(
+            out_dir_path / "markov_abv_relative_coarse.png" if out_dir_path else None
+        ),
     )
 
-    labels_f, p_f, stat_f, marg_f = compute_markov(sessions, FINE_BINS)
+    # Fine
+    labels_f, p_f, p_rel_f, stat_f, marg_f, ratio_f = compute_markov(
+        sessions, FINE_BINS
+    )
     plot_markov_abv(
         labels_f,
         p_f,
         stat_f,
         marg_f,
+        relative=False,
         title_suffix=" (Fine)",
-        out_file=out_file_fine,
+        out_file=out_dir_path / "markov_abv_fine.png" if out_dir_path else None,
+    )
+    plot_markov_abv(
+        labels_f,
+        p_rel_f,
+        stat_f,
+        marg_f,
+        pi_ratio=ratio_f,
+        relative=True,
+        title_suffix=" (Fine Relative)",
+        out_file=(
+            out_dir_path / "markov_abv_relative_fine.png" if out_dir_path else None
+        ),
     )
 
 
