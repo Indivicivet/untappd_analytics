@@ -3,5 +3,6 @@ __pycache__/
 
 data_sources/
 scripts/out/
+scripts/slop/out/
 
 untappd.egg-info/
