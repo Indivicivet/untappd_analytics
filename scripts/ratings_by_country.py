@@ -79,6 +79,7 @@ def country_pie_and_ratings(cis, plt_title=None):
 
 
 if __name__ == "__main__":
+    # todo :: can I plot a larger dataset without mess...?
     FEST_TAG = "beer celebration"
     ALL_CIS = untappd.load_latest_checkins()
     FEST_CIS = [
