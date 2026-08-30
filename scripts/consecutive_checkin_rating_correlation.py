@@ -1,4 +1,5 @@
 from collections import Counter
+import datetime
 
 import numpy as np
 import seaborn
@@ -9,9 +10,18 @@ import untappd
 
 CIS = untappd.load_latest_checkins()
 
+MAX_GAP = datetime.timedelta(hours=8)
+
 freqs = Counter()
 
 for c0, c1 in zip(CIS, CIS[1:]):
+    if (
+        MAX_GAP is not None
+        and c0.datetime is not None
+        and c1.datetime is not None
+        and not (datetime.timedelta(0) <= (c1.datetime - c0.datetime) <= MAX_GAP)
+    ):
+        continue
     freqs[(c0.rating, c1.rating)] += 1
 
 ratings = [x / 4 for x in range(1, 21)]
