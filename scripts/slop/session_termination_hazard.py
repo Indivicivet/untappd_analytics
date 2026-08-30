@@ -436,75 +436,76 @@ def plot_session_termination_hazard(
 
     # Panel C: Termination Probability vs Hour of Night (Circadian Clock)
     ax3 = axes[1, 0]
-    hour_grid = np.linspace(14.0, 28.0, 100)
-    k_ref = 3.0
-    r_ref = 3.75
-    rd_ref = 0.0
-    u_ref = 4.0
-
-    beta = results["beta"]
-
-    def predict_prob(h_vals, is_wknd):
-        X_pred = np.column_stack(
-            [
-                np.ones_like(h_vals),
-                np.full_like(h_vals, k_ref),
-                np.full_like(h_vals, r_ref),
-                np.full_like(h_vals, rd_ref),
-                np.full_like(h_vals, u_ref),
-                h_vals,
-                np.full_like(h_vals, is_wknd),
-            ]
-        )
-        logits = X_pred @ beta
-        return 1.0 / (1.0 + np.exp(-logits))
-
-    p_weekday = predict_prob(hour_grid, 0.0)
-    p_weekend = predict_prob(hour_grid, 1.0)
-
-    ax3.plot(
-        hour_grid,
-        p_weekday,
-        color="#d62728",
-        linewidth=2.5,
-        label="Weekday (Sun–Thu Model)",
-    )
-    ax3.plot(
-        hour_grid,
-        p_weekend,
-        color="#1f77b4",
-        linewidth=2.5,
-        label="Weekend (Fri–Sat Model)",
-    )
-
     all_hours = hazard_data["hour"]
     all_terms = hazard_data["terminal"]
     all_wknd = hazard_data["is_weekend"]
 
-    h_bins = np.arange(14, 29, 1)
-    bin_centers = h_bins[:-1] + 0.5
+    # Half-hour binning for empirical data points
+    h_bins = np.arange(14.0, 28.5 + 0.5, 0.5)
+    bin_centers = h_bins[:-1] + 0.25
     emp_wd = []
     emp_we = []
-    for b_start, b_end in zip(h_bins[:-1], h_bins[1:]):
+    centers_wd = []
+    centers_we = []
+
+    for b_start, b_end, center in zip(h_bins[:-1], h_bins[1:], bin_centers):
         mask_wd = (all_hours >= b_start) & (all_hours < b_end) & (all_wknd == 0)
         mask_we = (all_hours >= b_start) & (all_hours < b_end) & (all_wknd == 1)
-        emp_wd.append(np.mean(all_terms[mask_wd]) if np.sum(mask_wd) >= 10 else np.nan)
-        emp_we.append(np.mean(all_terms[mask_we]) if np.sum(mask_we) >= 10 else np.nan)
+        if np.sum(mask_wd) >= 10:
+            emp_wd.append(np.mean(all_terms[mask_wd]))
+            centers_wd.append(center)
+        if np.sum(mask_we) >= 10:
+            emp_we.append(np.mean(all_terms[mask_we]))
+            centers_we.append(center)
+
+    # Smoothed curves via Gaussian kernel regression across hour grid
+    hour_grid = np.linspace(14.0, 28.0, 200)
+
+    def kernel_smooth(x, y, x_eval, bandwidth=0.75):
+        diff = (x_eval[:, None] - x[None, :]) / bandwidth
+        weights = np.exp(-0.5 * diff**2)
+        sum_w = np.sum(weights, axis=1)
+        return np.sum(weights * y[None, :], axis=1) / sum_w
+
+    mask_raw_wd = (all_hours >= 13.0) & (all_hours <= 29.0) & (all_wknd == 0)
+    mask_raw_we = (all_hours >= 13.0) & (all_hours <= 29.0) & (all_wknd == 1)
+
+    smooth_wd = kernel_smooth(
+        all_hours[mask_raw_wd], all_terms[mask_raw_wd], hour_grid, bandwidth=0.75
+    )
+    smooth_we = kernel_smooth(
+        all_hours[mask_raw_we], all_terms[mask_raw_we], hour_grid, bandwidth=0.75
+    )
+
+    ax3.plot(
+        hour_grid,
+        smooth_wd,
+        color="#d62728",
+        linewidth=2.5,
+        label="Weekday (Smoothed)",
+    )
+    ax3.plot(
+        hour_grid,
+        smooth_we,
+        color="#1f77b4",
+        linewidth=2.5,
+        label="Weekend (Smoothed)",
+    )
 
     ax3.scatter(
-        bin_centers,
+        centers_wd,
         emp_wd,
         color="#d62728",
-        alpha=0.6,
+        alpha=1.0,
         s=30,
         zorder=4,
         label="Empirical Weekday",
     )
     ax3.scatter(
-        bin_centers,
+        centers_we,
         emp_we,
         color="#1f77b4",
-        alpha=0.6,
+        alpha=1.0,
         s=30,
         zorder=4,
         label="Empirical Weekend",
@@ -536,6 +537,10 @@ def plot_session_termination_hazard(
     # Panel D: Termination Probability vs Cumulative Alcohol Units
     ax4 = axes[1, 1]
     unit_grid = np.linspace(0.5, 12.0, 100)
+    k_ref = 3.0
+    r_ref = 3.75
+    rd_ref = 0.0
+    beta = results["beta"]
 
     for h_val, h_name, col in [
         (20.0, "20:00 (8pm)", "#2ca02c"),
