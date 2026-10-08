@@ -156,20 +156,21 @@ def fit_logistic_hazard(
     )
     y = hazard_data["terminal"]
 
-    # Fit logistic regression via Newton-Raphson / IRLS
+    # Fit logistic regression via Newton-Raphson / IRLS with ridge regularization
     beta = np.zeros(X.shape[1])
+    ridge = 1e-4 * np.eye(X.shape[1])
     for _ in range(100):
         p = 1.0 / (1.0 + np.exp(-X @ beta))
         p = np.clip(p, 1e-15, 1.0 - 1e-15)
         W = p * (1.0 - p)
-        grad = X.T @ (y - p)
-        H = -(X.T * W) @ X
-        step = np.linalg.solve(-H, grad)
+        grad = X.T @ (y - p) - 1e-4 * beta
+        H_neg = (X.T * W) @ X + ridge
+        step = np.linalg.solve(H_neg, grad)
         beta += step
         if np.max(np.abs(step)) < 1e-9:
             break
 
-    cov = np.linalg.inv(-H)
+    cov = np.linalg.inv(H_neg)
     se = np.sqrt(np.diag(cov))
     z = beta / se
     p_vals = 2.0 * stats.norm.sf(np.abs(z))
@@ -180,11 +181,11 @@ def fit_logistic_hazard(
     ci_upper_or = np.exp(ci_upper_beta)
 
     # Goodness-of-fit metrics
-    p_null = np.mean(y)
+    p_null = np.clip(np.mean(y), 1e-6, 1.0 - 1e-6)
     ll_null = np.sum(y * np.log(p_null) + (1.0 - y) * np.log(1.0 - p_null))
     p_fitted = np.clip(1.0 / (1.0 + np.exp(-X @ beta)), 1e-15, 1.0 - 1e-15)
     ll_model = np.sum(y * np.log(p_fitted) + (1.0 - y) * np.log(1.0 - p_fitted))
-    pseudo_r2 = 1.0 - (ll_model / ll_null)
+    pseudo_r2 = 1.0 - (ll_model / ll_null) if abs(ll_null) > 1e-9 else 0.0
 
     return {
         "feature_names": feature_names,
@@ -328,12 +329,12 @@ def plot_session_termination_hazard(
     # Panel A: Kaplan-Meier Survival Curve & Empirical Hazard Rate
     ax1 = axes[0, 0]
     session_lengths = np.array([len(s) for s in sessions])
-    max_k = 15
+    max_k = min(15, int(np.max(session_lengths))) if len(session_lengths) > 0 else 1
     k_vals = np.arange(1, max_k + 1)
     n_at_risk = np.array([np.sum(session_lengths >= k) for k in k_vals])
     n_events = np.array([np.sum(session_lengths == k) for k in k_vals])
-    hazard = n_events / n_at_risk
-    survival = np.cumprod(1.0 - hazard)
+    hazard = np.where(n_at_risk > 0, n_events / np.maximum(n_at_risk, 1), np.nan)
+    survival = np.cumprod(np.where(np.isnan(hazard), 1.0, 1.0 - hazard))
 
     ax1.step(
         k_vals,
@@ -360,20 +361,21 @@ def plot_session_termination_hazard(
         fontsize=12,
         fontweight="bold",
     )
-    ax1.set_xlim(1, max_k)
+    ax1.set_xlim(1, max(max_k, 2))
     ax1.set_ylim(0, 1.05)
     ax1.set_xticks(k_vals)
     ax1.legend(loc="upper right", frameon=True)
 
-    median_len = np.median(session_lengths)
-    mean_len = np.mean(session_lengths)
+    median_len = np.median(session_lengths) if len(session_lengths) > 0 else 0
+    mean_len = np.mean(session_lengths) if len(session_lengths) > 0 else 0
+    max_len = np.max(session_lengths) if len(session_lengths) > 0 else 0
     ax1.text(
         0.05,
         0.25,
         f"Total Sessions: {len(sessions):,}\n"
         f"Median Length: {median_len:.0f} drinks\n"
         f"Mean Length: {mean_len:.2f} drinks\n"
-        f"Max Length: {np.max(session_lengths)} drinks",
+        f"Max Length: {max_len} drinks",
         transform=ax1.transAxes,
         fontsize=10,
         bbox=dict(
@@ -431,7 +433,9 @@ def plot_session_termination_hazard(
         fontsize=12,
         fontweight="bold",
     )
-    ax2.set_xlim(0.4, 1.8)
+    min_x = max(0.05, np.nanmin(ci_lows) * 0.8)
+    max_x = min(15.0, np.nanmax(ci_highs) * 1.25)
+    ax2.set_xlim(min_x, max_x)
     ax2.invert_yaxis()
 
     # Panel C: Termination Probability vs Hour of Night (Circadian Clock)
@@ -462,10 +466,17 @@ def plot_session_termination_hazard(
     hour_grid = np.linspace(14.0, 28.0, 200)
 
     def kernel_smooth(x, y, x_eval, bandwidth=0.75):
+        if len(x) == 0:
+            return np.full_like(x_eval, np.nan)
         diff = (x_eval[:, None] - x[None, :]) / bandwidth
         weights = np.exp(-0.5 * diff**2)
         sum_w = np.sum(weights, axis=1)
-        return np.sum(weights * y[None, :], axis=1) / sum_w
+        return np.divide(
+            np.sum(weights * y[None, :], axis=1),
+            sum_w,
+            out=np.full_like(x_eval, np.nan),
+            where=sum_w > 0,
+        )
 
     mask_raw_wd = (all_hours >= 13.0) & (all_hours <= 29.0) & (all_wknd == 0)
     mask_raw_we = (all_hours >= 13.0) & (all_hours <= 29.0) & (all_wknd == 1)
@@ -538,7 +549,9 @@ def plot_session_termination_hazard(
     ax4 = axes[1, 1]
     unit_grid = np.linspace(0.5, 12.0, 100)
     k_ref = 3.0
-    r_ref = 3.75
+    r_ref = (
+        float(np.mean(hazard_data["rating"])) if len(hazard_data["rating"]) > 0 else 3.5
+    )
     rd_ref = 0.0
     beta = results["beta"]
 
