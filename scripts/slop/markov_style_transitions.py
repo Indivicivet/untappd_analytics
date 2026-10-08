@@ -197,13 +197,25 @@ def compute_markov_matrices(
             )
 
     # Stationary distribution pi P_cont = pi
-    evals, evecs = np.linalg.eig(p_cont.T)
-    idx = int(np.argmin(np.abs(evals - 1.0)))
-    pi_stat = np.real(evecs[:, idx])
-    pi_stat = pi_stat / np.sum(pi_stat)
+    n = len(styles_list)
+    pi_stat = np.full(n, 1.0 / n) if n > 0 else np.array([])
+    if n > 0 and np.any(p_cont > 0):
+        try:
+            evals, evecs = np.linalg.eig(p_cont.T)
+            idx = int(np.argmin(np.abs(evals - 1.0)))
+            pi_stat_raw = np.abs(np.real(evecs[:, idx]))
+            sum_pi = np.sum(pi_stat_raw)
+            if sum_pi > 1e-9:
+                pi_stat = pi_stat_raw / sum_pi
+        except np.linalg.LinAlgError:
+            pass
 
     total_marginal = sum(marginal_counts.values())
-    pi_marg = np.array([marginal_counts[s] / total_marginal for s in styles_list])
+    pi_marg = (
+        np.array([marginal_counts[s] / total_marginal for s in styles_list])
+        if total_marginal > 0
+        else np.zeros(len(styles_list))
+    )
 
     return (
         styles_list,
@@ -358,7 +370,8 @@ def plot_markov_style_transitions(
             color="#a04818",
         )
 
-    ax2.set_xlim(0, max(np.max(pi_marg), np.max(pi_stat)) * 100 + 4)
+    max_val = max(pi_marg.max(initial=0.0), pi_stat.max(initial=0.0))
+    ax2.set_xlim(0, max_val * 100 + 4 if max_val > 0 else 100)
     plt.tight_layout()
 
 
