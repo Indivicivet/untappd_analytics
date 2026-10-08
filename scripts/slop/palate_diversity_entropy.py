@@ -33,6 +33,9 @@ def compute_palate_diversity_metrics(
     avg_abvs: list[float] = []
     unique_ratios: list[float] = []
 
+    if len(checkins) < window_size:
+        window_size = max(5, len(checkins) // 4)
+
     for i in range(window_size, len(checkins) + 1):
         window = checkins[i - window_size : i]
         dates.append(window[-1].datetime)
@@ -67,14 +70,15 @@ def compute_palate_diversity_metrics(
         "avg_rating": np.array(avg_ratings),
         "avg_abv": np.array(avg_abvs),
         "unique_ratio": np.array(unique_ratios),
+        "window_size": window_size,
     }
 
 
 def print_statistical_report(
     checkins: list[untappd.Checkin],
-    metrics: dict[str, np.ndarray],
+    metrics: dict,
     window_size: int = 300,
-) -> tuple[float, float, float, float, float, float]:
+) -> tuple[float, float, float, float, float, float, float]:
     """Prints statistical summary and hypothesis tests for diversity dynamics."""
     all_styles = Counter(c.beer.type for c in checkins)
     h = metrics["entropy"]
@@ -84,6 +88,7 @@ def print_statistical_report(
     abv = metrics["avg_abv"]
     unique_ratio = metrics["unique_ratio"]
     dates = metrics["dates"]
+    actual_window = metrics.get("window_size", window_size)
 
     valid_mask = ~np.isnan(rating) & ~np.isnan(abv)
     h_v = h[valid_mask]
@@ -93,14 +98,30 @@ def print_statistical_report(
     abv_v = abv[valid_mask]
     unique_v = unique_ratio[valid_mask]
 
-    r_h, p_h = stats.pearsonr(h_v, rating_v)
-    rho_h, p_rho_h = stats.spearmanr(h_v, rating_v)
-    r_gs, p_gs = stats.pearsonr(gs_v, rating_v)
-    r_rich, p_rich = stats.pearsonr(rich_v, rating_v)
-    r_abv, p_abv = stats.pearsonr(abv_v, rating_v)
-    r_uniq, p_uniq = stats.pearsonr(unique_v, rating_v)
+    def _corr(func, x, y):
+        return (
+            func(x, y)
+            if len(x) >= 2 and np.std(x) > 1e-9 and np.std(y) > 1e-9
+            else (0.0, 1.0)
+        )
 
-    slope, intercept, r_val, p_val, std_err = stats.linregress(h_v, rating_v)
+    r_h, p_h = _corr(stats.pearsonr, h_v, rating_v)
+    rho_h, p_rho_h = _corr(stats.spearmanr, h_v, rating_v)
+    r_gs, p_gs = _corr(stats.pearsonr, gs_v, rating_v)
+    r_rich, p_rich = _corr(stats.pearsonr, rich_v, rating_v)
+    r_abv, p_abv = _corr(stats.pearsonr, abv_v, rating_v)
+    r_uniq, p_uniq = _corr(stats.pearsonr, unique_v, rating_v)
+
+    if len(h_v) >= 2 and np.std(h_v) > 1e-9:
+        slope, intercept, r_val, p_val, std_err = stats.linregress(h_v, rating_v)
+    else:
+        slope, intercept, r_val, p_val, std_err = (
+            0.0,
+            float(np.mean(rating_v)) if len(rating_v) > 0 else 0.0,
+            0.0,
+            1.0,
+            0.0,
+        )
 
     # Multiple regression: Rating ~ Intercept + H + ABV + UniqueRatio
     x_mat = np.column_stack([np.ones(len(h_v)), h_v, abv_v, unique_v])
@@ -111,22 +132,25 @@ def print_statistical_report(
     )
 
     # Partial correlation: Rating vs Entropy controlling for ABV
-    slope_r_abv, int_r_abv, _, _, _ = stats.linregress(abv_v, rating_v)
-    res_rating_abv = rating_v - (int_r_abv + slope_r_abv * abv_v)
-
-    slope_h_abv, int_h_abv, _, _, _ = stats.linregress(abv_v, h_v)
-    res_h_abv = h_v - (int_h_abv + slope_h_abv * abv_v)
-
-    r_partial, p_partial = stats.pearsonr(res_h_abv, res_rating_abv)
+    if len(abv_v) >= 2 and np.std(abv_v) > 1e-9:
+        slope_r_abv, int_r_abv, _, _, _ = stats.linregress(abv_v, rating_v)
+        res_rating_abv = rating_v - (int_r_abv + slope_r_abv * abv_v)
+        slope_h_abv, int_h_abv, _, _, _ = stats.linregress(abv_v, h_v)
+        res_h_abv = h_v - (int_h_abv + slope_h_abv * abv_v)
+        r_partial, p_partial = _corr(stats.pearsonr, res_h_abv, res_rating_abv)
+    else:
+        r_partial, p_partial = r_h, p_h
 
     print("=" * 78)
-    print("PALATE BREADTH & STYLE DIVERSITY (ENTROPY) ANALYSIS OVER 10-YEAR TIMELINE")
+    print("PALATE BREADTH & STYLE DIVERSITY (ENTROPY) ANALYSIS")
     print("=" * 78)
     print(f"Total Check-ins Analyzed:            {len(checkins):,}")
-    print(f"Date Range:                           {dates[0]:%Y-%m-%d} to {dates[-1]:%Y-%m-%d}")
+    print(
+        f"Date Range:                           {dates[0]:%Y-%m-%d} to {dates[-1]:%Y-%m-%d}"
+    )
     print(f"Total Unique Substyles in Dataset:    {len(all_styles)}")
     print(
-        f"Sliding Window Size (W):             {window_size} check-ins "
+        f"Sliding Window Size (W):             {actual_window} check-ins "
         f"({len(h):,} evaluated windows)"
     )
     print()
@@ -162,12 +186,18 @@ def print_statistical_report(
         f"Spearman rho = {rho_h:+.4f} (p = {p_rho_h:.3e})"
     )
     print(f"  Gini-Simpson vs Rating:      Pearson r = {r_gs:+.4f} (p = {p_gs:.3e})")
-    print(f"  Style Richness vs Rating:    Pearson r = {r_rich:+.4f} (p = {p_rich:.3e})")
+    print(
+        f"  Style Richness vs Rating:    Pearson r = {r_rich:+.4f} (p = {p_rich:.3e})"
+    )
     print(f"  ABV vs Rating:               Pearson r = {r_abv:+.4f} (p = {p_abv:.3e})")
-    print(f"  Unique Beer Ratio vs Rating: Pearson r = {r_uniq:+.4f} (p = {p_uniq:.3e})")
+    print(
+        f"  Unique Beer Ratio vs Rating: Pearson r = {r_uniq:+.4f} (p = {p_uniq:.3e})"
+    )
     print()
     print("3. LINEAR & MULTIPLE REGRESSION MODELS")
-    print(f"  Univariate OLS: Rating = {intercept:.4f} + ({slope:.4f}) * Shannon_Entropy")
+    print(
+        f"  Univariate OLS: Rating = {intercept:.4f} + ({slope:.4f}) * Shannon_Entropy"
+    )
     print(f"    -> R² = {r_val**2:.4f}, Std Error = {std_err:.4f}, p = {p_val:.3e}")
     print("  Partial Correlation (Rating vs Entropy controlling for ABV):")
     print(f"    -> Partial r = {r_partial:+.4f} (p = {p_partial:.3e})")
@@ -193,7 +223,7 @@ def print_statistical_report(
         )
     print("=" * 78)
 
-    return slope, intercept, r_val, p_val, r_partial, p_partial
+    return slope, intercept, r_val, p_val, r_partial, p_partial, rho_h
 
 
 @untappd_utils.show_or_save_to_out_file
@@ -203,7 +233,7 @@ def plot_palate_diversity(
 ) -> None:
     """Generates a 4-panel visual dashboard illustrating palate diversity evolution."""
     metrics = compute_palate_diversity_metrics(checkins, window_size=window_size)
-    slope, intercept, r_val, p_val, r_partial, _ = print_statistical_report(
+    slope, intercept, r_val, p_val, r_partial, _, rho_h = print_statistical_report(
         checkins,
         metrics,
         window_size=window_size,
@@ -215,6 +245,7 @@ def plot_palate_diversity(
     rating = metrics["avg_rating"]
     abv = metrics["avg_abv"]
     unique_ratio = metrics["unique_ratio"]
+    actual_window = metrics.get("window_size", window_size)
 
     seaborn.set_theme(style="whitegrid")
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
@@ -240,7 +271,7 @@ def plot_palate_diversity(
     )
     ax1.tick_params(axis="y", labelcolor=color_entropy)
     ax1.set_title(
-        "A. Palate Diversity Evolution (Window W=300)",
+        f"A. Palate Diversity Evolution (Window W={actual_window})",
         fontsize=13,
         fontweight="bold",
         loc="left",
@@ -419,9 +450,11 @@ def plot_palate_diversity(
         label=f"OLS Fit: $\\bar{{R}} = {intercept:.2f} {slope:+.2f} H$",
     )
 
+    p_str = f"p < 0.001" if p_val < 0.001 else f"p = {p_val:.3f}"
+
     stats_text = (
-        f"Pearson $r = {r_val:+.3f}$ ($p < 10^{{-15}}$)\n"
-        f"Spearman $\\rho = -0.599$\n"
+        f"Pearson $r = {r_val:+.3f}$ (${p_str}$)\n"
+        f"Spearman $\\rho = {rho_h:+.3f}$\n"
         f"Partial $r (\\mid \\text{{ABV}}) = {r_partial:+.3f}$\n"
         f"$R^2 = {r_val**2:.3f}$"
     )
@@ -459,7 +492,7 @@ def plot_palate_diversity(
     ax4.legend(loc="upper right", frameon=True, framealpha=0.9)
 
     plt.suptitle(
-        "Untappd Palate Diversity & Enjoyment Dynamics (10-Year Timeline, W=300)",
+        f"Untappd Palate Diversity & Enjoyment Dynamics (W={actual_window})",
         fontsize=16,
         fontweight="bold",
         y=0.995,
