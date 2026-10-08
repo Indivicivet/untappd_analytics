@@ -240,34 +240,60 @@ def analyze_and_plot_contrast_decay(
     fit_y = np.array([b["resid_r"] for b in session_bins])
     fit_se = np.array([b["se"] for b in session_bins])
 
-    popt, pcov = optimize.curve_fit(
-        exp_decay_func,
-        fit_x,
-        fit_y,
-        sigma=fit_se,
-        p0=[fit_y[0], 0.3],
-        maxfev=10000,
-    )
-    rho_0, lam = float(popt[0]), float(popt[1])
-    rho_0_err = float(np.sqrt(pcov[0, 0]))
-    lam_err = float(np.sqrt(pcov[1, 1]))
-    half_life = float(np.log(2) / lam) if lam > 0 else np.nan
+    rho_0 = np.nan
+    rho_0_err = np.nan
+    lam = np.nan
+    lam_err = np.nan
+    half_life = np.nan
+
+    if len(session_bins) >= 2:
+        try:
+            popt, pcov = optimize.curve_fit(
+                exp_decay_func,
+                fit_x,
+                fit_y,
+                sigma=fit_se,
+                p0=[fit_y[0], 0.3],
+                maxfev=10000,
+            )
+            rho_0, lam = float(popt[0]), float(popt[1])
+            rho_0_err = float(np.sqrt(pcov[0, 0]))
+            lam_err = float(np.sqrt(pcov[1, 1]))
+            half_life = float(np.log(2) / lam) if lam > 0 else np.nan
+        except Exception:
+            pass
 
     print("\n" + "=" * 80)
     print("EXPONENTIAL DECAY MODEL FIT: ρ(Δt) = ρ_0 * exp(-λ * Δt)")
     print("=" * 80)
-    print(f"Initial Autocorrelation (ρ_0 at Δt=0): {rho_0:>+7.4f} ± {rho_0_err:.4f}")
-    print(f"Decay Rate Constant (λ):              {lam:>7.4f} ± {lam_err:.4f} hr⁻¹")
-    print(
-        f"Carryover Half-Life (t_1/2):          {half_life:.2f} hours ({half_life * 60:.1f} minutes)"
-    )
+    if not np.isnan(rho_0):
+        print(
+            f"Initial Autocorrelation (ρ_0 at Δt=0): {rho_0:>+7.4f} ± {rho_0_err:.4f}"
+        )
+    else:
+        print(
+            "Initial Autocorrelation (ρ_0 at Δt=0): N/A (fit failed or insufficient data)"
+        )
+    if not np.isnan(lam):
+        print(f"Decay Rate Constant (λ):              {lam:>7.4f} ± {lam_err:.4f} hr⁻¹")
+        print(
+            f"Carryover Half-Life (t_1/2):          {half_life:.2f} hours ({half_life * 60:.1f} minutes)"
+        )
+    else:
+        print(
+            "Decay Rate Constant (λ):              N/A (fit failed or insufficient data)"
+        )
 
     print("\n" + "-" * 80)
     print("SCIENTIFIC CONCLUSION & PHENOMENON IDENTIFICATION:")
-    if rho_0 > 0:
+    if np.isnan(rho_0):
+        print("  1. INCONCLUSIVE: Exponential decay model could not be fitted.")
+    elif rho_0 > 0:
+        p_rho0 = 2.0 * stats.norm.sf(abs(rho_0 / rho_0_err)) if rho_0_err > 0 else 1.0
+        p_str_r0 = f"p = {p_rho0:.1e}" if p_rho0 < 0.001 else f"p = {p_rho0:.3f}"
         print("  1. HALO / SESSION CARRYOVER CONFIRMED (ρ_0 > 0):")
         print(
-            f"     At Δt -> 0, residual autocorrelation is significantly POSITIVE (ρ_0 = {rho_0:+.3f}, p < 1e-10)."
+            f"     At Δt -> 0, residual autocorrelation is significantly POSITIVE (ρ_0 = {rho_0:+.3f}, {p_str_r0})."
         )
         print(
             "     There is NO evidence of sensory contrast (which would require ρ_0 < 0)."
@@ -278,12 +304,13 @@ def analyze_and_plot_contrast_decay(
         print(
             "     (driven by session mood, social context, venue ambiance, and palate priming)."
         )
-        print(
-            f"  2. DECAY DYNAMICS: The carryover decays with an estimated half-life of ~{half_life:.1f} hours ({half_life*60:.0f} mins)."
-        )
-        print(
-            "     By 4-8 hours post check-in, residual ratings become largely independent."
-        )
+        if not np.isnan(half_life):
+            print(
+                f"  2. DECAY DYNAMICS: The carryover decays with an estimated half-life of ~{half_life:.1f} hours ({half_life*60:.0f} mins)."
+            )
+            print(
+                "     By 4-8 hours post check-in, residual ratings become largely independent."
+            )
     else:
         print("  1. SENSORY CONTRAST CONFIRMED (ρ_0 < 0):")
         print(
@@ -325,14 +352,15 @@ def analyze_and_plot_contrast_decay(
         zorder=4,
     )
 
-    ax1.plot(
-        x_dense,
-        y_decay,
-        color="#d62728",
-        linewidth=2.5,
-        label=rf"Fit: $\rho(\Delta t) = {rho_0:.2f} e^{{-{lam:.2f} \Delta t}}$",
-        zorder=5,
-    )
+    if not np.isnan(rho_0) and not np.isnan(lam):
+        ax1.plot(
+            x_dense,
+            y_decay,
+            color="#d62728",
+            linewidth=2.5,
+            label=rf"Fit: $\rho(\Delta t) = {rho_0:.2f} e^{{-{lam:.2f} \Delta t}}$",
+            zorder=5,
+        )
 
     if not np.isnan(half_life) and half_life <= 8.0:
         ax1.axvline(
@@ -452,15 +480,17 @@ def analyze_and_plot_contrast_decay(
         label=rf"Pairs ($\Delta t < 1\mathrm{{h}}$, $N = {n_sess:,}$)",
     )
 
-    slope_s, intercept_s, r_val_s, p_val_s, _ = stats.linregress(sess_e0, sess_e1)
-    x_line = np.linspace(min(sess_e0), max(sess_e0), 100)
-    ax3.plot(
-        x_line,
-        intercept_s + slope_s * x_line,
-        color="#d62728",
-        linewidth=2.2,
-        label=rf"OLS Trend ($r = {r_val_s:+.3f}$, $p < 10^{{-30}}$)",
-    )
+    if n_sess >= 2 and np.std(sess_e0) > 1e-9:
+        slope_s, intercept_s, r_val_s, p_val_s, _ = stats.linregress(sess_e0, sess_e1)
+        p_s_str = f"p = {p_val_s:.1e}" if p_val_s < 0.001 else f"p = {p_val_s:.3f}"
+        x_line = np.linspace(min(sess_e0), max(sess_e0), 100)
+        ax3.plot(
+            x_line,
+            intercept_s + slope_s * x_line,
+            color="#d62728",
+            linewidth=2.2,
+            label=rf"OLS Trend ($r = {r_val_s:+.3f}$, ${p_s_str}$)",
+        )
 
     ax3.set_xlabel(
         r"Beer $t-1$ Residual $e_{t-1} = R_{t-1} - \hat{R}_{t-1}$", fontsize=11
