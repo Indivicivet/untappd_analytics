@@ -87,7 +87,7 @@ def compute_abv_normalization_models(
 def compute_rolling_abv_dynamics(
     models: dict[str, object],
     window_size: int = 300,
-) -> dict[str, np.ndarray]:
+) -> dict[str, object]:
     """Computes rolling raw and ABV-adjusted rating dynamics over sliding windows."""
     dates: np.ndarray = models["dates"]
     ratings: np.ndarray = models["ratings"]
@@ -95,6 +95,9 @@ def compute_rolling_abv_dynamics(
     adj_lin: np.ndarray = models["adj_ratings_linear"]
     adj_poly: np.ndarray = models["adj_ratings_poly"]
     n = len(ratings)
+
+    if n < window_size:
+        window_size = max(5, n // 4)
 
     roll_dates = []
     roll_raw = []
@@ -123,13 +126,20 @@ def compute_rolling_abv_dynamics(
         "adj_rating_linear": roll_adj_lin_arr,
         "adj_rating_poly": roll_adj_poly_arr,
         "abv_inflation_delta": roll_delta_arr,
+        "window_size": window_size,
     }
+
+
+def safe_pearsonr(x: np.ndarray, y: np.ndarray) -> tuple[float, float]:
+    """Computes Pearson correlation safely if variance is non-zero."""
+    if len(x) >= 2 and np.std(x) > 1e-9 and np.std(y) > 1e-9:
+        return stats.pearsonr(x, y)
+    return 0.0, 1.0
 
 
 def print_statistical_report(
     models: dict[str, object],
-    dynamics: dict[str, np.ndarray],
-    window_size: int = 300,
+    dynamics: dict[str, object],
 ) -> None:
     """Prints comprehensive statistical analysis and annual breakdown tables."""
     ratings: np.ndarray = models["ratings"]
@@ -146,9 +156,10 @@ def print_statistical_report(
     roll_abv = dynamics["abv"]
     roll_adj = dynamics["adj_rating_linear"]
     roll_dates = dynamics["dates"]
+    window_size = dynamics["window_size"]
 
-    r_roll_raw, p_roll_raw = stats.pearsonr(roll_abv, roll_raw)
-    r_roll_adj, p_roll_adj = stats.pearsonr(roll_abv, roll_adj)
+    r_roll_raw, p_roll_raw = safe_pearsonr(roll_abv, roll_raw)
+    r_roll_adj, p_roll_adj = safe_pearsonr(roll_abv, roll_adj)
 
     print("=" * 80)
     print("ABV DECOUPLING & RATING SATISFACTION DYNAMICS ANALYSIS")
@@ -175,7 +186,7 @@ def print_statistical_report(
         f"  Within-Style Slope:     beta = {slope_within:+.4f} (demeaned fixed effects)"
     )
     print()
-    print("2. LONGITUDINAL ROLLING CORRELATION DECOUPLING (W=300)")
+    print(f"2. LONGITUDINAL ROLLING CORRELATION DECOUPLING (W={window_size})")
     print(
         f"  Raw Rating vs. Mean ABV:        Pearson r = {r_roll_raw:+.4f} (p = {p_roll_raw:.3e})"
     )
@@ -216,7 +227,7 @@ def plot_abv_adjusted_dynamics(
     """Generates a 4-panel dashboard isolating ABV correlation from rating satisfaction."""
     models = compute_abv_normalization_models(checkins)
     dynamics = compute_rolling_abv_dynamics(models, window_size=window_size)
-    print_statistical_report(models, dynamics, window_size=window_size)
+    print_statistical_report(models, dynamics)
 
     roll_dates = dynamics["dates"]
     roll_raw = dynamics["raw_rating"]
@@ -319,7 +330,11 @@ def plot_abv_adjusted_dynamics(
 
     # Panel 2 (Top-Right): Cross-Sectional ABV vs Rating Response Function
     ax2 = axes[0, 1]
-    bins = np.linspace(2.5, 14.0, 24)
+    min_b = max(0.0, float(np.percentile(abvs, 1.0)))
+    max_b = float(np.percentile(abvs, 99.0))
+    if max_b <= min_b:
+        max_b = min_b + 5.0
+    bins = np.linspace(min_b, max_b, 24)
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
     bin_means = []
     bin_stds = []
@@ -345,7 +360,7 @@ def plot_abv_adjusted_dynamics(
         label=r"Binned Mean Rating $\pm 1\,\mathrm{SD}$",
     )
 
-    abv_grid = np.linspace(2.0, 14.5, 100)
+    abv_grid = np.linspace(min_b, max_b, 100)
     ax2.plot(
         abv_grid,
         lm["intercept"] + lm["slope"] * abv_grid,
@@ -370,11 +385,12 @@ def plot_abv_adjusted_dynamics(
         fontweight="bold",
         loc="left",
     )
-    ax2.legend(loc="lower right", frameon=True, framealpha=0.9)
+    p_val_lm = lm["p_value"]
+    p_str = f"p = {p_val_lm:.2e}" if p_val_lm < 0.001 else f"p = {p_val_lm:.3f}"
 
     fit_text = (
         f"Linear Slope $\\beta = +{lm['slope']:.4f}$ / % ABV\n"
-        f"Pearson $r = {lm['r']:+.4f}$ ($p < 10^{{-15}}$)\n"
+        f"Pearson $r = {lm['r']:+.4f}$ ({p_str})\n"
         f"Mean Baseline: {mean_r:.2f} stars @ {mean_a:.1f}% ABV"
     )
     ax2.text(
@@ -483,7 +499,7 @@ def plot_abv_adjusted_dynamics(
     )
     ax4.set_xticks(x_pos)
     ax4.set_xticklabels(years)
-    ax4.set_ylim(3.0, 3.6)
+    ax4.margins(y=0.1)
 
     ax4_twin = ax4.twinx()
     ax4_twin.grid(False)
@@ -503,7 +519,7 @@ def plot_abv_adjusted_dynamics(
         fontweight="bold",
     )
     ax4_twin.tick_params(axis="y", labelcolor=color_abv)
-    ax4_twin.set_ylim(4.5, 7.5)
+    ax4_twin.margins(y=0.1)
 
     lines4_1, labels4_1 = ax4.get_legend_handles_labels()
     lines4_2, labels4_2 = ax4_twin.get_legend_handles_labels()
@@ -516,7 +532,7 @@ def plot_abv_adjusted_dynamics(
     )
 
     plt.suptitle(
-        f"Decoupling ABV Correlation from Rating Satisfaction Dynamics (W={window_size} Check-ins)",
+        f"Decoupling ABV Correlation from Rating Satisfaction Dynamics (W={dynamics['window_size']} Check-ins)",
         fontsize=16,
         fontweight="bold",
         y=0.995,
