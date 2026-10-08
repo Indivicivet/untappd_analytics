@@ -490,7 +490,7 @@ def plot_abv_adjusted_dynamics(
         alpha=0.85,
     )
 
-    ax4.set_ylabel("Annual Mean Rating (0–5)", fontsize=12, fontweight="bold")
+    ax4.set_ylabel("Annual Mean Rating", fontsize=12, fontweight="bold")
     ax4.set_title(
         "D. Annual Raw vs. ABV-Adjusted Satisfaction",
         fontsize=13,
@@ -499,7 +499,11 @@ def plot_abv_adjusted_dynamics(
     )
     ax4.set_xticks(x_pos)
     ax4.set_xticklabels(years)
-    ax4.margins(y=0.1)
+    if yr_raw and yr_adj:
+        min_r = min(min(yr_raw), min(yr_adj))
+        max_r = max(max(yr_raw), max(yr_adj))
+        pad_r = (max_r - min_r) * 0.25 if max_r > min_r else 0.1
+        ax4.set_ylim(max(0.0, min_r - pad_r), min(5.0, max_r + pad_r))
 
     ax4_twin = ax4.twinx()
     ax4_twin.grid(False)
@@ -519,14 +523,14 @@ def plot_abv_adjusted_dynamics(
         fontweight="bold",
     )
     ax4_twin.tick_params(axis="y", labelcolor=color_abv)
-    ax4_twin.margins(y=0.1)
+    ax4_twin.margins(y=0.15)
 
     lines4_1, labels4_1 = ax4.get_legend_handles_labels()
     lines4_2, labels4_2 = ax4_twin.get_legend_handles_labels()
     ax4.legend(
         lines4_1 + lines4_2,
         labels4_1 + labels4_2,
-        loc="upper left",
+        loc="lower right",
         frameon=True,
         framealpha=0.9,
     )
