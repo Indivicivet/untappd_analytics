@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 import sys
 from typing import Optional, Sequence
@@ -30,17 +30,23 @@ def natural_cubic_spline_basis(
     Guarantees linearity beyond boundary knots (knots[0] and knots[-1]).
     Returns basis matrix of shape (len(x), len(knots) - 1).
     """
-    knots = np.asarray(knots, dtype=float)
+    knots = np.unique(np.asarray(knots, dtype=float))
     x = np.asarray(x, dtype=float)
+    if len(knots) < 3:
+        return x.reshape(-1, 1)
+
     k_K = knots[-1]
     k_Km1 = knots[-2]
 
     basis = [x]
 
     def d_k(k):
+        denom = k_K - k
+        if abs(denom) < 1e-9:
+            return np.zeros_like(x)
         term1 = np.maximum(0.0, x - k) ** 3
         term2 = np.maximum(0.0, x - k_K) ** 3
-        return (term1 - term2) / (k_K - k)
+        return (term1 - term2) / denom
 
     d_Km1 = d_k(k_Km1)
     for k in knots[:-2]:
@@ -137,8 +143,12 @@ def fit_multivariate_model(
     global_mean = float(np.mean(global_ratings))
     x_global = (global_ratings - global_mean).reshape(-1, 1)
 
-    # 2. ABV Natural Cubic Spline (knots at 5th, 25th, 50th, 75th, 95th percentiles)
-    abv_knots = np.percentile(abvs, [5, 25, 50, 75, 95])
+    # 2. ABV Natural Cubic Spline (knots at percentiles)
+    abv_knots = np.unique(np.percentile(abvs, [5, 25, 50, 75, 95]))
+    if len(abv_knots) < 3:
+        abv_knots = np.array(
+            [float(np.min(abvs)), float(np.mean(abvs)), float(np.max(abvs))]
+        )
     abv_basis = natural_cubic_spline_basis(abvs, abv_knots)
     abv_basis_mean = np.mean(abv_basis, axis=0)
     x_abv = abv_basis - abv_basis_mean
@@ -149,8 +159,16 @@ def fit_multivariate_model(
     for i, s in enumerate(styles):
         x_styles[i, style_categories.index(s)] = 1.0
 
-    # 4. Longitudinal Time Drift Natural Cubic Spline (5 percentile knots)
-    time_knots = np.percentile(time_days, [5, 25, 50, 75, 95])
+    # 4. Longitudinal Time Drift Natural Cubic Spline (percentile knots)
+    time_knots = np.unique(np.percentile(time_days, [5, 25, 50, 75, 95]))
+    if len(time_knots) < 3:
+        time_knots = np.array(
+            [
+                float(np.min(time_days)),
+                float(np.mean(time_days)),
+                float(np.max(time_days)),
+            ]
+        )
     time_basis = natural_cubic_spline_basis(time_days, time_knots)
     time_basis_mean = np.mean(time_basis, axis=0)
     x_time = time_basis - time_basis_mean
@@ -236,7 +254,7 @@ def plot_multivariate_decomposition(
     # -------------------------------------------------------------
     ax1 = axes[0, 0]
     abvs = np.array([c.beer.abv for c in checkins])
-    max_abv_plot = min(18.0, float(np.percentile(abvs, 99.8)))
+    max_abv_plot = max(8.0, float(np.percentile(abvs, 99.8)))
     grid_abv = np.linspace(0.0, max_abv_plot, 300)
     partial_abv = model.predict_abv_partial_effect(grid_abv)
 
@@ -300,9 +318,11 @@ def plot_multivariate_decomposition(
     )
     ax2.invert_yaxis()
 
-    min_val = min(adj_vals)
-    max_val = max(adj_vals)
+    min_val = min(adj_vals) if adj_vals else 0.0
+    max_val = max(adj_vals) if adj_vals else 0.0
     span = max_val - min_val
+    if span < 0.2:
+        span = 0.5
     ax2.set_xlim(min_val - 0.25 * span, max_val + 0.25 * span)
 
     # Add numerical labels
@@ -334,12 +354,10 @@ def plot_multivariate_decomposition(
     ax3 = axes[1, 0]
     min_dt = min(c.datetime for c in checkins)
     max_dt = max(c.datetime for c in checkins)
-    total_days = (max_dt - min_dt).total_seconds() / 86400.0
+    total_days = max(1.0, (max_dt - min_dt).total_seconds() / 86400.0)
 
     grid_days = np.linspace(0, total_days, 400)
-    grid_dts = [
-        min_dt + np.timedelta64(int(d * 86400), "s").astype(datetime) for d in grid_days
-    ]
+    grid_dts = [min_dt + timedelta(seconds=int(d * 86400)) for d in grid_days]
     partial_time = model.predict_time_partial_effect(grid_days)
 
     ax3.plot(
