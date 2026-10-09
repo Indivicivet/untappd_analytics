@@ -29,15 +29,17 @@ def evaluate_over_time_periods(
     return (
         day_starts,
         [
-            combine_func([
-                result
-                for ci in CHECKINS
-                if (
-                    start <= ci.datetime < start + timespan
-                    and (result := map_func(ci)) is not None
-                )
-                # todo :: don't do this loop every time :P
-            ])
+            combine_func(
+                [
+                    result
+                    for ci in CHECKINS
+                    if (
+                        start <= ci.datetime < start + timespan
+                        and (result := map_func(ci)) is not None
+                    )
+                    # todo :: don't do this loop every time :P
+                ]
+            )
             for start in day_starts
         ],
     )

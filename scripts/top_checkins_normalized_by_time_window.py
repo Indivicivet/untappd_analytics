@@ -13,9 +13,8 @@ all_mean, all_std = untappd_utils.mean_and_std(CHECKINS)
 
 # calculate statistics to normalize against
 checkins_this_block = CHECKINS[:CHECKIN_COUNT_WINDOW]
-per_block_stats = (
-    [untappd_utils.mean_and_std(checkins_this_block)]
-    * (CHECKIN_COUNT_WINDOW // 2)
+per_block_stats = [untappd_utils.mean_and_std(checkins_this_block)] * (
+    CHECKIN_COUNT_WINDOW // 2
 )
 for ci_new in CHECKINS[CHECKIN_COUNT_WINDOW:]:
     checkins_this_block.pop(0)
@@ -26,9 +25,7 @@ per_block_stats += [per_block_stats[-1]] * (CHECKIN_COUNT_WINDOW // 2)
 assert len(per_block_stats) == len(CHECKINS)
 
 for ci, (block_mean, block_std) in zip(CHECKINS, per_block_stats):
-    ci._normalized_rating = (
-        all_mean + all_std * (ci.rating - block_mean) / block_std
-    )
+    ci._normalized_rating = all_mean + all_std * (ci.rating - block_mean) / block_std
 
 print(f"beers normalized by ratings from the nearest {CHECKIN_COUNT_WINDOW} checkins")
 print("i.e. 4.5 ratings at the times I was least likely to... :)")

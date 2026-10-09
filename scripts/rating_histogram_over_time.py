@@ -20,27 +20,20 @@ NUM_ONION_SKINS = 10
 
 frames = []
 slices = (
-    [
-        slice(0, pos)
-        for pos in range(STEP, len(CHECKINS) - STEP, STEP)
-    ]
-    if CUMULATIVE else
-    [
-        slice(start, start + SPREAD)
-        for start in range(0, len(CHECKINS) - SPREAD, STEP)
+    [slice(0, pos) for pos in range(STEP, len(CHECKINS) - STEP, STEP)]
+    if CUMULATIVE
+    else [
+        slice(start, start + SPREAD) for start in range(0, len(CHECKINS) - SPREAD, STEP)
     ]
 )
-    
-    
+
+
 for i, ci_slice in enumerate(slices):
     checkins = CHECKINS[ci_slice]
     frames.append(
         {
             "num_ratings": len(checkins),
-            "ratings": Counter(
-                round(float(ci.rating or 0) * 4)
-                for ci in checkins
-            ),
+            "ratings": Counter(round(float(ci.rating or 0) * 4) for ci in checkins),
             "start_date": checkins[0].datetime.date(),  # date only
             "end_date": checkins[-1].datetime.date(),
         }
@@ -53,13 +46,10 @@ fig, ax = plt.subplots(figsize=(12.8, 7.2))
 x_data = [i / 4 for i in range(1, 21)]
 y_first_frame = [0 for i in range(1, 21)]
 
-data_queue = [
-    (x_data, y_first_frame)
-    for _ in range(NUM_ONION_SKINS + 1)
-]
+data_queue = [(x_data, y_first_frame) for _ in range(NUM_ONION_SKINS + 1)]
 plot_lines = [
     plt.plot(*data, c=(c0, c0, c0))[0]
-    for data, c0 in zip(data_queue, [*np.linspace(0.9, 0.5, len(data_queue)-1), 0])
+    for data, c0 in zip(data_queue, [*np.linspace(0.9, 0.5, len(data_queue) - 1), 0])
 ]
 plt.ylabel("number of checkins")
 plt.xlabel("rating")
@@ -91,7 +81,7 @@ ani = animation.FuncAnimation(
     func=update,
     frames=frames,
     init_func=init,
-    #blit=True,  # incompatible with ax.set_title()
+    # blit=True,  # incompatible with ax.set_title()
     interval=100,
 )
 plt.show()

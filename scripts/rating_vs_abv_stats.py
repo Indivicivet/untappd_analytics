@@ -20,20 +20,21 @@ def plot_rating_vs_abv(checkins, tag="", unify_color=False):
         )
         ratings_by_bucket[upper_bound].append(ci)
 
-    present_upper_bounds, *things_to_plot = list(zip(*[
-        (bound, *untappd_utils.mean_plus_minus_std(cis))
-        for bound, cis in ratings_by_bucket.items()
-        if len(cis) >= 2
-    ]))
+    present_upper_bounds, *things_to_plot = list(
+        zip(
+            *[
+                (bound, *untappd_utils.mean_plus_minus_std(cis))
+                for bound, cis in ratings_by_bucket.items()
+                if len(cis) >= 2
+            ]
+        )
+    )
 
     slope, offset = np.polyfit(
         present_upper_bounds,
         things_to_plot[1],
         1,
-        w=[
-            1 if 4 <= x <= 12 else 0.5
-            for x in present_upper_bounds
-        ],
+        w=[1 if 4 <= x <= 12 else 0.5 for x in present_upper_bounds],
     )
     best_fit_means = [x * slope + offset for x in UPPER_BOUNDS]
 
@@ -61,21 +62,22 @@ def plot_rating_vs_abv(checkins, tag="", unify_color=False):
     )
 
 
-if __name__ == "__main__":
-    CHECKINS = untappd.load_latest_checkins()
-    # STYLES = None
-    STYLES = ["stout", "sour", "ipa"]
-
+@untappd_utils.show_or_save_to_out_file
+def plot_all_rating_vs_abv(checkins, styles=("stout", "sour", "ipa")):
     seaborn.set()
     plt.figure(figsize=(12.8, 7.2))
-    if STYLES is None:
-        plot_rating_vs_abv(CHECKINS)
+    if styles is None:
+        plot_rating_vs_abv(checkins)
     else:
-        for style in STYLES:
+        for style in styles:
             plot_rating_vs_abv(
-                [c for c in CHECKINS if c.beer.get_style_category() == style],
+                [c for c in checkins if c.beer.get_style_category() == style],
                 tag=f"[{style}] ",
                 unify_color=True,
             )
     plt.legend()
-    plt.show()
+
+
+if __name__ == "__main__":
+    CHECKINS = untappd.load_latest_checkins()
+    plot_all_rating_vs_abv(CHECKINS)

@@ -54,10 +54,8 @@ def show_histogram(
         plt.plot(
             *untappd_utils.smooth_ratings(CHECKIN_VALUES, y_data),
             label=(
-                f"{label} {_checkins_extra_str(counts)}"
-                if show_n_checkins
-                else label
-            )
+                f"{label} {_checkins_extra_str(counts)}" if show_n_checkins else label
+            ),
         )
     plt.legend()
     plt.title(title)
@@ -165,33 +163,37 @@ def save_various_plots(
         "taster_or_not": lambda checkin: checkin.serving_type == "Taster",
         "weak_strong_main_categories": untappd_categorise.weak_strong_main_categories,
         "checkin_comment_length": untappd_categorise.checkin_comment_length,
-        "fruit": untappd_categorise.by_keyword([
-            "cherry",
-            "blueberry",
-            "mango",
-            # " apple",  # meh
-            "pineapple",
-            "banana",
-            "passion",
-            # "guava",
-        ]),
-        "hop": untappd_categorise.by_keyword([
-            # "chinook",
-            "mosaic",
-            "simcoe",
-            "cascade",
-            "citra",
-            "centennial",
-            "motueka",
-            "galaxy",  # beware: other beers may sneak in...
-        ]),
+        "fruit": untappd_categorise.by_keyword(
+            [
+                "cherry",
+                "blueberry",
+                "mango",
+                # " apple",  # meh
+                "pineapple",
+                "banana",
+                "passion",
+                # "guava",
+            ]
+        ),
+        "hop": untappd_categorise.by_keyword(
+            [
+                # "chinook",
+                "mosaic",
+                "simcoe",
+                "cascade",
+                "citra",
+                "centennial",
+                "motueka",
+                "galaxy",  # beware: other beers may sneak in...
+            ]
+        ),
     }.items():
         if violin:
             show_violin(
                 checkins,
                 func=func,
                 title=f"ratings by {tag}",
-                out_file=out_dir / f"violin_by_{tag}.png"
+                out_file=out_dir / f"violin_by_{tag}.png",
             )
         else:
             show_histogram(

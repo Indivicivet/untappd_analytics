@@ -7,6 +7,7 @@ import numpy as np
 from scipy import stats
 
 import untappd
+import untappd_utils
 
 FIT_MOST_RECENT = datetime.timedelta(days=50)
 EXTRAPOLATE_TIME = datetime.timedelta(days=90)
@@ -16,9 +17,7 @@ CHECKINS = untappd.load_latest_checkins()
 
 times = [checkin.datetime for checkin in CHECKINS]
 times_non_taster = [
-    checkin.datetime
-    for checkin in CHECKINS
-    if checkin.serving_type != "Taster"
+    checkin.datetime for checkin in CHECKINS if checkin.serving_type != "Taster"
 ]
 times_unique = []
 times_repeat = []
@@ -78,10 +77,9 @@ def get_checkin_rate_curve(use_times, num_points=400):
         numeric_time_for_plot[:, np.newaxis] - numeric_time_days[np.newaxis, :]
     ) / bandwidth_days
     kernel_values = stats.norm.pdf(scaled_offsets) / bandwidth_days
-    normalization = (
-        stats.norm.cdf((observed_end - numeric_time_for_plot) / bandwidth_days)
-        - stats.norm.cdf((observed_start - numeric_time_for_plot) / bandwidth_days)
-    )
+    normalization = stats.norm.cdf(
+        (observed_end - numeric_time_for_plot) / bandwidth_days
+    ) - stats.norm.cdf((observed_start - numeric_time_for_plot) / bandwidth_days)
     normalization = np.clip(normalization, 1e-12, None)
 
     # The corrected KDE still integrates to 1 over the observed window, so
@@ -120,6 +118,7 @@ def plot_rate_extrapolated(use_times, color):
     )
 
 
+@untappd_utils.show_or_save_to_out_file
 def plot_cumulative_checkins():
     seaborn.set()
     palette = seaborn.color_palette()
@@ -158,9 +157,9 @@ def plot_cumulative_checkins():
     plt.xlabel("date")
     plt.ylabel("checkins")
     plt.legend()
-    plt.show()
 
 
+@untappd_utils.show_or_save_to_out_file
 def plot_checkin_rate():
     seaborn.set()
     palette = seaborn.color_palette()
@@ -208,7 +207,6 @@ def plot_checkin_rate():
     plt.xlabel("date")
     plt.ylabel("checkins / day")
     plt.legend()
-    plt.show()
 
 
 if __name__ == "__main__":

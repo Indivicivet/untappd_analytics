@@ -1,6 +1,7 @@
 """
 initially a copy-paste of top_checkins_normalized_by_time_window.py
 """
+
 # todo :: consolidate with top_checkins_normalized_by_time_window.py
 # (although need to think about that being checkins, and this being beers...)
 # todo :: also (optionally) mod out by ABV
@@ -37,9 +38,7 @@ for beer, rating in ratings_by_beer.items():
         beer._normalized_rating = -1
         continue
     style_mean, style_std = stats_by_cats[cat]
-    beer._normalized_rating = (
-        all_mean + all_std * (rating - style_mean) / style_std
-    )
+    beer._normalized_rating = all_mean + all_std * (rating - style_mean) / style_std
 
 print(f"beers normalized by style category")
 print()

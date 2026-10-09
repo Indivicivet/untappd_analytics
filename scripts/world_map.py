@@ -20,11 +20,7 @@ MAGIC_RATING = True and (not USE_VENUE)  # forbid being silly :)))
 rating_type_str = "magic" if MAGIC_RATING else "average"
 
 for ci in CHECKINS:
-    place_ratings[
-        ci.venue
-        if USE_VENUE
-        else ci.beer.brewery.country
-    ].append(ci)
+    place_ratings[ci.venue if USE_VENUE else ci.beer.brewery.country].append(ci)
 
 place_rating_and_count = sorted(
     (
@@ -72,11 +68,7 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
     )
     print(place_rank_str)
     rating_colour_range = (
-        (2, 4.1)
-        if MAGIC_RATING
-        else (2.5, 3.75)
-        if USE_VENUE
-        else (2.5, 4)
+        (2, 4.1) if MAGIC_RATING else (2.5, 3.75) if USE_VENUE else (2.5, 4)
     )
     hue = np.interp(rating, rating_colour_range, (0, 0.3))
     folium.Circle(
@@ -85,7 +77,7 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
             20 * min(n_ratings, 20) ** 0.4  # * 4
             # ^make this 4x bigger if you haven't had a lot of beers somewhere!
             if USE_VENUE
-            else 20_000 * n_ratings ** 0.4
+            else 20_000 * n_ratings**0.4
         ),  # meters
         # stroke=False,
         color=colour.Color(hsl=(hue, 1, 0.3)).hex_l,
@@ -97,8 +89,7 @@ for i, (rating, n_ratings, place) in enumerate(place_rating_and_count):
 world.render()
 place_tag = "venues" if USE_VENUE else "countries"
 MAP_OUT_FILE = (
-        Path(__file__).parent / "out"
-        / f"world_map_{place_tag}_{rating_type_str}.html"
+    Path(__file__).parent / "out" / f"world_map_{place_tag}_{rating_type_str}.html"
 )
 world.save(MAP_OUT_FILE)
 print(f"saved map to {MAP_OUT_FILE}")

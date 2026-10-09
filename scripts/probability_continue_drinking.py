@@ -15,6 +15,7 @@ from typing import Sequence
 import matplotlib.pyplot as plt
 
 import untappd
+import untappd_utils
 
 MAX_GAP_HOURS = 6  # hours separating sessions / defining "shortly after"
 RATING_BIN_WIDTH = 0.25  # width of rating bins for smoothing
@@ -115,21 +116,23 @@ def probability_further_in_session(
     return xs, ys
 
 
-if __name__ == "__main__":  # pragma: no cover
-    checkins = untappd.load_latest_checkins()
+@untappd_utils.show_or_save_to_out_file
+def plot_drinking_probabilities(checkins):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     xs1, ys1 = probability_next_within_six_hours(checkins)
-    plt.figure()
-    plt.scatter(xs1, ys1)
-    plt.xlabel("Rating bin centre")
-    plt.ylabel("P(next drink within 6h)")
-    plt.title("Probability of next drink within 6h vs rating")
+    ax1.scatter(xs1, ys1)
+    ax1.set_xlabel("Rating bin centre")
+    ax1.set_ylabel("P(next drink within 6h)")
+    ax1.set_title("Probability of next drink within 6h vs rating")
 
     xs2, ys2 = probability_further_in_session(checkins)
-    plt.figure()
-    plt.scatter(xs2, ys2)
-    plt.xlabel("Session average rating bin centre")
-    plt.ylabel("P(further drink in session)")
-    plt.title("Probability of further drink vs session average rating")
+    ax2.scatter(xs2, ys2)
+    ax2.set_xlabel("Session average rating bin centre")
+    ax2.set_ylabel("P(further drink in session)")
+    ax2.set_title("Probability of further drink vs session average rating")
 
-    plt.show()
+
+if __name__ == "__main__":  # pragma: no cover
+    checkins = untappd.load_latest_checkins()
+    plot_drinking_probabilities(checkins)

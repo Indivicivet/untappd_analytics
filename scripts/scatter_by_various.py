@@ -62,4 +62,3 @@ def save_various_scatters(checkins, out_dir=None):
 if __name__ == "__main__":
     CHECKINS = untappd.load_latest_checkins()
     save_various_scatters(CHECKINS)
-

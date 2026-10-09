@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from matplotlib import pyplot as plt
 
 import untappd
+import untappd_utils
 
 
 def _short_country(country_name):
@@ -30,6 +31,7 @@ def _get_colour(country_name):
     return "gray"
 
 
+@untappd_utils.show_or_save_to_out_file
 def country_pie_and_ratings(cis, plt_title=None):
     ratings_by_country = defaultdict(list)
     for ci in cis:
@@ -75,7 +77,6 @@ def country_pie_and_ratings(cis, plt_title=None):
     )
     if plt_title is not None:
         plt.suptitle(plt_title)
-    plt.show()
 
 
 if __name__ == "__main__":
@@ -83,16 +84,16 @@ if __name__ == "__main__":
     FEST_TAG = "beer celebration"
     ALL_CIS = untappd.load_latest_checkins()
     FEST_CIS = [
-        ci
-        for ci in ALL_CIS
-        if FEST_TAG in ((ci.venue and ci.venue.name) or "").lower()
+        ci for ci in ALL_CIS if FEST_TAG in ((ci.venue and ci.venue.name) or "").lower()
     ]
     country_pie_and_ratings(FEST_CIS, plt_title=FEST_TAG)
     country_pie_and_ratings(
         [
             ci
             for ci in ALL_CIS
-            if datetime.datetime(2025, 10, 23) < ci.datetime < datetime.datetime(2025, 11, 9, 23)
+            if datetime.datetime(2025, 10, 23)
+            < ci.datetime
+            < datetime.datetime(2025, 11, 9, 23)
         ],
         plt_title="Time region",
     )

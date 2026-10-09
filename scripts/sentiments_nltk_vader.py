@@ -6,22 +6,27 @@ import matplotlib.pyplot as plt
 from nltk.sentiment import vader
 
 import untappd
-
-CIS = untappd.load_latest_checkins()
-
-analyzer = vader.SentimentIntensityAnalyzer()
-for c in CIS:
-    c._compound_score = analyzer.polarity_scores(c.comment)["compound"]
+import untappd_utils
 
 
-for c in sorted(CIS, key=lambda x: x._compound_score, reverse=True)[:25]:
-    print(f"{c._compound_score} ({c.rating}) | {c.beer} | {c.comment}")
+@untappd_utils.show_or_save_to_out_file
+def plot_vader_sentiments(checkins):
+    analyzer = vader.SentimentIntensityAnalyzer()
+    for c in checkins:
+        c._compound_score = analyzer.polarity_scores(c.comment)["compound"]
 
-plt.figure(figsize=(12.8, 7.2))
-plt.scatter(
-    [c.rating for c in CIS],
-    [c._compound_score for c in CIS],
-    alpha=0.05,
-    s=100,
-)
-plt.show()
+    for c in sorted(checkins, key=lambda x: x._compound_score, reverse=True)[:25]:
+        print(f"{c._compound_score} ({c.rating}) | {c.beer} | {c.comment}")
+
+    plt.figure(figsize=(12.8, 7.2))
+    plt.scatter(
+        [c.rating for c in checkins],
+        [c._compound_score for c in checkins],
+        alpha=0.05,
+        s=100,
+    )
+
+
+if __name__ == "__main__":
+    CIS = untappd.load_latest_checkins()
+    plot_vader_sentiments(CIS)

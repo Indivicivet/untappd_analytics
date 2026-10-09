@@ -27,6 +27,7 @@ The `scripts/` directory contains tools to plot and analyse Untappd check-in exp
 - `rating_vs_abv_by_category_wip.py` - Scatter plot of mean rating versus mean ABV grouped by festival and year.
 - `rating_vs_abv_stats.py` - Plots mean and standard deviation of ratings across ABV bins, overall and broken down by style.
 - `ratings_by_country.py` - Pie chart and violin plot of check-in counts and rating distributions by brewery country.
+- `run_all.py` - Runs plotting scripts in batch and saves output figures to `scripts/out/`.
 - `scatter_by_various.py` - Generates pairwise scatter plots for attributes including rating, global rating, ABV, sentiment score, comment length, and date.
 - `scatter_plots_by_category.py` - Scatter plots comparing personal rating against global rating and ABV across top venues.
 - `sentiments_bert.py` - Evaluates comment text using a RoBERTa GoEmotions transformer model and plots predicted emotion logits against check-in ratings.
