@@ -159,15 +159,14 @@ def analyze_and_plot_contrast_decay(
     pairs_e0 = np.array(pairs_e0)
     pairs_e1 = np.array(pairs_e1)
 
-    # Standard intervals
+    # Standard intervals (capped at 12h to exclude multi-day noise)
     intervals = [
         ("< 30m", 0.0, 0.5),
         ("30-60m", 0.5, 1.0),
         ("1-2h", 1.0, 2.0),
         ("2-4h", 2.0, 4.0),
         ("4-8h", 4.0, 8.0),
-        ("8-24h", 8.0, 24.0),
-        ("> 24h", 24.0, float("inf")),
+        ("8-12h", 8.0, 12.0),
     ]
 
     print("=" * 80)
@@ -446,12 +445,12 @@ def analyze_and_plot_contrast_decay(
             bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.7),
         )
 
-    ax2.set_xlim(-1, 42)
+    ax2.set_xlim(-0.5, 12.5)
     ax2.set_ylim(-0.12, 0.32)
     ax2.set_xlabel(r"Elapsed Time $\Delta t$ (hours)", fontsize=11)
     ax2.set_ylabel(r"Autocorrelation $r$", fontsize=11)
     ax2.set_title(
-        r"Raw vs Residual Autocorrelation Across All $\Delta t$",
+        r"Raw vs Residual Autocorrelation ($\Delta t \leq 12\mathrm{h}$)",
         fontsize=12,
         fontweight="bold",
     )
