@@ -53,8 +53,3 @@ The `scripts/` directory contains tools to plot and analyse Untappd check-in exp
 - `world_map.py` - Geocodes brewery check-in locations and renders an interactive Folium map coloured by rating metrics.
 
 The `scripts/slop/` directory contains experimental and scratch scripts.
-
-# todos
-
-- make it easy to run all scripts in batch and have them all save out their results
-
