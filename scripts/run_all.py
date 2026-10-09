@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import matplotlib
 from tqdm import tqdm
 import untappd
@@ -16,7 +17,11 @@ import probability_continue_drinking
 import rating_histogram_by_various
 import rating_vs_abv_stats
 import ratings_by_country
-import scatter_by_various
+
+try:
+    import scatter_by_various
+except ImportError:
+    scatter_by_various = None
 import statistics_over_time_periods
 import style_frequency_over_time_periods
 import style_ratings_by_year
@@ -24,14 +29,29 @@ import taproom_brewery_vs_thirdparty
 import time_of_day_kdes
 import time_of_day_mean
 import top_beers_normalized_by_abv
-import top_breweries
 import top_rated_checkins
 import unique_ratio_by_date
 import venues_by_time
 import venues_by_time_inverse
 
+from slop import (
+    abv_adjusted_rating_dynamics,
+    consecutive_rating_contrast_decay,
+    friend_ratings,
+    honeymoon_period,
+    markov_abv,
+    markov_abv_dynamics,
+    markov_style_transitions,
+    palate_diversity_entropy,
+    rating_decomposition_pca,
+    session_termination_hazard,
+    top_beers_normalized_multivariate,
+)
 
-def run_all(out_dir: Path = None):
+RUN_SLOP = True
+
+
+def run_all(out_dir: Path = None, run_slop: bool = RUN_SLOP):
     if out_dir is None:
         out_dir = Path(__file__).resolve().parent / "out"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -188,12 +208,121 @@ def run_all(out_dir: Path = None):
         ),
         (
             "Scatter plots by various",
-            lambda: scatter_by_various.save_various_scatters(
-                checkins,
-                out_dir=out_dir,
+            lambda: (
+                scatter_by_various.save_various_scatters(
+                    checkins,
+                    out_dir=out_dir,
+                )
+                if scatter_by_various is not None
+                else None
             ),
         ),
     ]
+
+    if run_slop:
+        slop_out_dir = out_dir / "slop"
+        slop_out_dir.mkdir(parents=True, exist_ok=True)
+
+        def _run_top_beers_multivariate():
+            valid_cis = [
+                c
+                for c in checkins
+                if c.rating is not None
+                and c.beer.global_rating is not None
+                and c.beer.global_rating > 0
+                and c.beer.abv is not None
+                and c.datetime is not None
+            ]
+            model, _, _, z_res = (
+                top_beers_normalized_multivariate.fit_multivariate_model(valid_cis)
+            )
+            top_beers_normalized_multivariate.plot_multivariate_decomposition(
+                valid_cis,
+                model,
+                z_res,
+                out_file=slop_out_dir / "top_beers_normalized_multivariate.png",
+            )
+
+        def _run_session_termination_hazard():
+            sessions = session_termination_hazard.compute_sessions(checkins)
+            h_data = session_termination_hazard.build_hazard_dataset(sessions)
+            results = session_termination_hazard.fit_logistic_hazard(h_data)
+            session_termination_hazard.plot_session_termination_hazard(
+                sessions,
+                h_data,
+                results,
+                out_file=slop_out_dir / "session_termination_hazard.png",
+            )
+
+        slop_tasks = [
+            (
+                "[slop] ABV adjusted rating dynamics",
+                lambda: abv_adjusted_rating_dynamics.plot_abv_adjusted_dynamics(
+                    checkins,
+                    out_file=slop_out_dir / "abv_adjusted_rating_dynamics.png",
+                ),
+            ),
+            (
+                "[slop] Consecutive rating contrast decay",
+                lambda: consecutive_rating_contrast_decay.analyze_and_plot_contrast_decay(
+                    checkins,
+                    out_file=slop_out_dir / "consecutive_rating_contrast_decay.png",
+                ),
+            ),
+            (
+                "[slop] Friend ratings",
+                lambda: friend_ratings.plot_friend_analytics(
+                    checkins,
+                    out_file=slop_out_dir / "friend_ratings.png",
+                ),
+            ),
+            (
+                "[slop] Honeymoon period",
+                lambda: honeymoon_period.plot_honeymoon_investigation(
+                    honeymoon_period.prepare_brewery_checkin_map(checkins),
+                    out_file=slop_out_dir / "honeymoon_period.png",
+                ),
+            ),
+            (
+                "[slop] Markov ABV",
+                lambda: markov_abv.main(out_dir=slop_out_dir),
+            ),
+            (
+                "[slop] Markov ABV dynamics",
+                lambda: markov_abv_dynamics.main(
+                    out_file=slop_out_dir / "markov_abv_dynamics.png"
+                ),
+            ),
+            (
+                "[slop] Markov style transitions",
+                lambda: markov_style_transitions.main(
+                    out_file=slop_out_dir / "markov_style_transitions.png"
+                ),
+            ),
+            (
+                "[slop] Palate diversity entropy",
+                lambda: palate_diversity_entropy.plot_palate_diversity(
+                    checkins,
+                    out_file=slop_out_dir / "palate_diversity_entropy.png",
+                ),
+            ),
+            (
+                "[slop] Rating decomposition PCA",
+                lambda: rating_decomposition_pca.generate_plots(
+                    *rating_decomposition_pca.get_analysis(),
+                    out_dir=slop_out_dir,
+                ),
+            ),
+            (
+                "[slop] Session termination hazard",
+                _run_session_termination_hazard,
+            ),
+            (
+                "[slop] Top beers multivariate",
+                _run_top_beers_multivariate,
+            ),
+        ]
+        tasks.extend(slop_tasks)
 
     for name, fn in tqdm(tasks, desc="Generating plots"):
         try:
