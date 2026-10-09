@@ -67,9 +67,7 @@ class ByFuncSpecificValuesOnly:
         )
 
     @classmethod
-    def top_magic_n(
-        cls, func, all_checkins, n=5, allow_other=False, **magic_kwargs
-    ):
+    def top_magic_n(cls, func, all_checkins, n=5, allow_other=False, **magic_kwargs):
         by_func_value = defaultdict(list)
         for checkin in all_checkins:
             by_func_value[func(checkin)].append(checkin)
@@ -151,9 +149,7 @@ def weak_strong_main_categories(checkin, threshold=7):
     style = checkin.beer.get_style_category()
     if style in ["stout", "sour", "ipa"]:
         strength = (
-            f"{threshold}%+"
-            if checkin.beer.abv >= threshold
-            else f"<{threshold}%"
+            f"{threshold}%+" if checkin.beer.abv >= threshold else f"<{threshold}%"
         )
         return f"{style}, {strength}"
     return None
@@ -177,11 +173,7 @@ def festival_with_year(checkin, include_non_festival=True):
 
 
 def by_keyword(keywords):
-    return lambda ci: [
-        kw
-        for kw in keywords
-        if kw.lower() in str(ci).lower()
-    ]
+    return lambda ci: [kw for kw in keywords if kw.lower() in str(ci).lower()]
 
 
 def checkin_comment_length(
@@ -190,7 +182,7 @@ def checkin_comment_length(
 ):
     if len(checkin.comment) == 0:
         return "0"
-    for prev, thresh in zip((0, ) + char_thresholds, char_thresholds):
+    for prev, thresh in zip((0,) + char_thresholds, char_thresholds):
         if len(checkin.comment) <= thresh:
             return f"{prev+1} ~ {thresh}"
     return f"{max(char_thresholds) + 1}+"

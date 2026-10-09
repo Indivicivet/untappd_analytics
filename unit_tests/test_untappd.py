@@ -3,7 +3,8 @@ import json
 import untappd
 
 
-BASIC_JSON_SINGLE_BEER_EXAMPLE_1 = json.loads('''
+BASIC_JSON_SINGLE_BEER_EXAMPLE_1 = json.loads(
+    """
 {
 "beer_name":"Beer Nameee",
 "brewery_name":"Brewery Nameee",
@@ -38,7 +39,8 @@ BASIC_JSON_SINGLE_BEER_EXAMPLE_1 = json.loads('''
 "total_toasts":"0",
 "total_comments":"0"
 }
-''')
+"""
+)
 
 
 def test_from_dict_runs():

@@ -37,11 +37,12 @@ def show_or_save_to_out_file(func):
             plt.savefig(out_file, bbox_inches="tight")
             plt.close()
         return result  # probably None, if it's just plotting things.
+
     return wrapped
 
 
 def mean_and_std(
-    checkins_or_values: list[Union[untappd.Checkin, float]]
+    checkins_or_values: list[Union[untappd.Checkin, float]],
 ) -> tuple[float, float]:
     all_ratings = (
         [ci.rating for ci in checkins_or_values]
@@ -52,7 +53,7 @@ def mean_and_std(
 
 
 def mean_plus_minus_std(
-    checkins_or_values: list[Union[untappd.Checkin, float]]
+    checkins_or_values: list[Union[untappd.Checkin, float]],
 ) -> tuple[float, float, float]:
     mean, std = mean_and_std(checkins_or_values)
     return mean - std, mean, mean + std
