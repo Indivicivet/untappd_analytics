@@ -267,15 +267,22 @@ class Checkin:
             if d.get("venue_name") is not None
             else {}
         )
+        created_at_dt = None
+        if created_at_str := d.get("created_at"):
+            # Untappd exports switched to ISO-8601 (e.g. 2016-12-26T12:00:00+00:00)
+            # from legacy space-separated timestamps (2016-12-26 12:00:00).
+            try:
+                created_at_dt = datetime.strptime(created_at_str, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                created_at_dt = datetime.fromisoformat(created_at_str).replace(
+                    tzinfo=None
+                )
+
         return cls(
             beer=Beer.from_checkin_dict(d),
             comment=d["comment"],
             rating=(float(d["rating_score"]) if d["rating_score"] else None),
-            datetime=(
-                datetime.strptime(d["created_at"], "%Y-%m-%d %H:%M:%S")
-                if d.get("created_at")
-                else None
-            ),
+            datetime=created_at_dt,
             url=d["checkin_url"],
             flavour_profiles=[],  # todo :)
             purchase_venue=d["purchase_venue"] or None,  # todo :: make actual Venue?
