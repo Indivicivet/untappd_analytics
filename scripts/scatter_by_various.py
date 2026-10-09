@@ -1,7 +1,13 @@
 from pathlib import Path
+import warnings
 
 import matplotlib.pyplot as plt
 import seaborn
+
+try:
+    from nltk.sentiment import vader
+except ImportError:
+    vader = None
 
 import untappd
 import untappd_utils
@@ -44,9 +50,7 @@ def save_various_scatters(checkins, out_dir=None):
         ["time_of_day", "comment_length", {}],
     ]
 
-    try:
-        from nltk.sentiment import vader
-
+    if vader is not None:
         analyzer = vader.SentimentIntensityAnalyzer()
         sentiments = [analyzer.polarity_scores(c.comment) for c in checkins]
         dict_of_things["sentiment_compound"] = [s["compound"] for s in sentiments]
@@ -59,9 +63,7 @@ def save_various_scatters(checkins, out_dir=None):
                 ["sentiment_neg", "rating", {}],
             ]
         )
-    except ImportError:
-        import warnings
-
+    else:
         warnings.warn(
             "nltk is not installed; skipping sentiment scatter plots. "
             "To enable them, install nltk: pip install nltk (and run nltk.download('vader_lexicon'))"
