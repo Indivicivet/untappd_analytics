@@ -1,4 +1,3 @@
-
 import collections
 from pathlib import Path
 
@@ -39,45 +38,38 @@ def plot_comment_lengths(
 ):
     seaborn.set()
     plt.figure(figsize=(12, 8))
-    
+
     # Sort keys to make legend logical
     # Custom sort order
     order = ["< 3", "3", "3.25", "3.5", "3.75", "4+", "other"]
     sorted_keys = sorted(
-        checkins_by_group.keys(),
-        key=lambda k: order.index(k) if k in order else 999
+        checkins_by_group.keys(), key=lambda k: order.index(k) if k in order else 999
     )
 
     for label in sorted_keys:
         checkins = checkins_by_group[label]
         if not checkins:
             continue
-            
+
         lengths = [len(c.comment) for c in checkins]
-        
+
         # Calculate frequencies for 0 to 140
         # We can go up to max length found, or fixed 140
         max_len = 140
         counts = collections.Counter(lengths)
         x_vals = np.arange(max_len + 1)
         y_vals = np.array([counts[x] for x in x_vals])
-        
+
         # Normalize
         total = len(lengths)
         if total == 0:
             continue
         y_density = y_vals / total
-        
+
         # Smooth the data
         y_smooth = gaussian_filter1d(y_density, sigma=5)
-        
-        plt.plot(
-            x_vals, 
-            y_smooth, 
-            label=f"{label} (n={total})",
-            linewidth=2,
-            alpha=0.8
-        )
+
+        plt.plot(x_vals, y_smooth, label=f"{label} (n={total})", linewidth=2, alpha=0.8)
 
     plt.yscale("log")
     plt.title(title)
@@ -85,7 +77,7 @@ def plot_comment_lengths(
     plt.ylabel("Density (Log Scale)")
     plt.legend()
     plt.xlim(-1, 141)
-    
+
     # Add some minor gridlines for log scale readability if needed
     plt.grid(True, which="both", ls="-", alpha=0.2)
 
@@ -94,6 +86,6 @@ if __name__ == "__main__":
     checkins = untappd.load_latest_checkins()
     grouped = get_checkins_by_rating(checkins)
     plot_comment_lengths(
-        grouped, 
+        grouped,
         # out_file=Path(__file__).parent / "out" / "comment_lengths_by_rating.png"
     )
