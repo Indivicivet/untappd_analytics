@@ -1,5 +1,6 @@
 from pathlib import Path
 import matplotlib
+from tqdm import tqdm
 import untappd
 
 # Use non-interactive backend for batch generation
@@ -194,12 +195,11 @@ def run_all(out_dir: Path = None):
         ),
     ]
 
-    for name, fn in tasks:
-        print(f"Running: {name}...")
+    for name, fn in tqdm(tasks, desc="Generating plots"):
         try:
             fn()
         except Exception as e:
-            print(f"  Warning: {name} encountered an error: {e}")
+            tqdm.write(f"Warning: {name} encountered an error: {e}")
 
     print("\nBatch processing complete.")
 
