@@ -17,11 +17,7 @@ import probability_continue_drinking
 import rating_histogram_by_various
 import rating_vs_abv_stats
 import ratings_by_country
-
-try:
-    import scatter_by_various
-except ImportError:
-    scatter_by_various = None
+import scatter_by_various
 import statistics_over_time_periods
 import style_frequency_over_time_periods
 import style_ratings_by_year
@@ -208,13 +204,9 @@ def run_all(out_dir: Path = None, run_slop: bool = RUN_SLOP):
         ),
         (
             "Scatter plots by various",
-            lambda: (
-                scatter_by_various.save_various_scatters(
-                    checkins,
-                    out_dir=out_dir,
-                )
-                if scatter_by_various is not None
-                else None
+            lambda: scatter_by_various.save_various_scatters(
+                checkins,
+                out_dir=out_dir,
             ),
         ),
     ]
