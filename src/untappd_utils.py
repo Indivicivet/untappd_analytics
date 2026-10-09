@@ -35,6 +35,7 @@ def show_or_save_to_out_file(func):
             out_file.parent.mkdir(exist_ok=True, parents=True)
             print(f"saved to {out_file}")
             plt.savefig(out_file, bbox_inches="tight")
+            plt.close()
         return result  # probably None, if it's just plotting things.
     return wrapped
 
