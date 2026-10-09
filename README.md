@@ -55,10 +55,5 @@ The `scripts/slop/` directory contains experimental and scratch scripts.
 
 # todos
 
-- ~~generate fake untappd data so can run examples without being a subscriber~~
--- you can do this by running generate_sample_data_source.py; it doesn't generate all fields, so may not work for some scripts that want things other than datetime and ratings
-- cache beers/venues/breweries
-- ~~support CSV files~~ this is done I think, although haven't tested properly
-- ~~structure as actual package+examples rather than random collection of scripts~~ scripts/ :)
 - make it easy to run all scripts in batch and have them all save out their results
 
