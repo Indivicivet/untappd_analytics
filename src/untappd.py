@@ -382,11 +382,21 @@ def magic_rating(
 
     returns (magic score, list of (beer, average rating) pairs, highest first)
     """
-    top_ratings = sorted(
+    return magic_rating_from_beer_ratings(
         average_rating_by_beer(checkins, use_global=use_global).items(),
-        reverse=True,
-        key=lambda t: t[1],
+        dropoff_ratio,
+        average_score_weight,
+        neutral_rating,
     )
+
+
+def magic_rating_from_beer_ratings(
+    beer_ratings,
+    dropoff_ratio=0.8,
+    average_score_weight=0.35,
+    neutral_rating=3.25,
+):
+    top_ratings = sorted(beer_ratings, reverse=True, key=lambda t: t[1])
     if not top_ratings:
         return 0, []
     return (
