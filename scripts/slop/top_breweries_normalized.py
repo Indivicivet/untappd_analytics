@@ -34,30 +34,6 @@ class NormalizationResult:
     metadata: dict[str, object]
 
 
-def compute_magic_rating(
-    beer_ratings: Sequence[tuple[untappd.Beer, float]],
-    dropoff_ratio: float = 0.8,
-    average_score_weight: float = 0.35,
-    neutral_rating: float = 3.25,
-) -> tuple[float, list[tuple[untappd.Beer, float]]]:
-    """
-    Computes magic rating score and sorted beer list from (beer, rating) pairs,
-    matching the exact mathematical formulation of untappd.magic_rating.
-    """
-    if not beer_ratings:
-        return 0.0, []
-    top_ratings = sorted(beer_ratings, key=lambda t: t[1], reverse=True)
-    ratings = [r for _, r in top_ratings]
-    avg_rating = sum(ratings) / len(ratings)
-    geometric_sum = neutral_rating + (1.0 - dropoff_ratio) * sum(
-        (r - neutral_rating) * (dropoff_ratio**i) for i, r in enumerate(ratings)
-    )
-    score = (
-        average_score_weight * avg_rating + (1.0 - average_score_weight) * geometric_sum
-    )
-    return score, top_ratings
-
-
 def normalize_by_style(
     ratings_by_beer: dict[untappd.Beer, float],
     all_mean: float,
@@ -72,12 +48,12 @@ def normalize_by_style(
         cat_mean = float(np.mean(rs))
         cat_std = float(np.std(rs, ddof=1)) if len(rs) > 1 else all_std
         # Guard against zero variance in tiny categories
-        stats_by_cat[cat] = (cat_mean, cat_std if cat_std > 1e-4 else all_std)
+        stats_by_cat[cat] = (cat_mean, cat_std if cat_std > 1e-4 else all_std, len(rs))
 
     normalized = {}
     for beer, r in ratings_by_beer.items():
         cat = beer.get_style_category()
-        c_mean, c_std = stats_by_cat.get(cat, (all_mean, all_std))
+        c_mean, c_std, _ = stats_by_cat[cat]
         normalized[beer] = all_mean + all_std * (r - c_mean) / c_std
 
     return NormalizationResult(
@@ -250,14 +226,13 @@ def rank_breweries(
 
     scored_breweries = []
     for brewery, b_checkins in brewery_checkins.items():
-        distinct_beers = set(c.beer for c in b_checkins)
+        distinct_beers = {c.beer for c in b_checkins if c.beer in ratings_by_beer}
+        if not distinct_beers:
+            continue
 
         # Normalized magic rating
-        norm_beers = [
-            (b, norm_result.normalized_ratings.get(b, norm_result.all_mean))
-            for b in distinct_beers
-        ]
-        norm_score, norm_top_beers = compute_magic_rating(
+        norm_beers = [(b, norm_result.normalized_ratings[b]) for b in distinct_beers]
+        norm_score, norm_top_beers = untappd.magic_rating_from_beer_ratings(
             norm_beers,
             dropoff_ratio=dropoff_ratio,
             average_score_weight=average_score_weight,
@@ -265,10 +240,8 @@ def rank_breweries(
         )
 
         # Raw magic rating
-        raw_beers = [
-            (b, ratings_by_beer.get(b, norm_result.all_mean)) for b in distinct_beers
-        ]
-        raw_score, raw_top_beers = compute_magic_rating(
+        raw_beers = [(b, ratings_by_beer[b]) for b in distinct_beers]
+        raw_score, raw_top_beers = untappd.magic_rating_from_beer_ratings(
             raw_beers,
             dropoff_ratio=dropoff_ratio,
             average_score_weight=average_score_weight,
@@ -344,8 +317,8 @@ def format_ranking_report(
         lines.append(
             "Style Category Baselines: "
             + ", ".join(
-                f"{k.capitalize()} μ={m:.2f} (σ={s:.2f})"
-                for k, (m, s) in norm_result.metadata["stats_by_cat"].items()
+                f"{k.capitalize()} μ={m:.2f} (σ={s:.2f}, {n} beers)"
+                for k, (m, s, n) in norm_result.metadata["stats_by_cat"].items()
             )
         )
     elif norm_result.mode == "abv":
@@ -364,7 +337,7 @@ def format_ranking_report(
         lines.append(
             f"#{rank:<3} {brewery} (magic rating: {item['norm_score']:.2f}, "
             f"raw: {item['raw_score']:.2f} [{item['score_delta']:+.2f}, {rank_delta_str}] "
-            f"over {item['n_checkins']} checkins, {item['n_beers']} unique beers)"
+            f"over {item['n_checkins']} checkins, {item['n_beers']} rated beers)"
         )
 
         lines.append(
@@ -377,21 +350,28 @@ def format_ranking_report(
 
         if top_n_beers > 0:
             for beer, norm_r in item["norm_top_beers"][:top_n_beers]:
-                raw_r = ratings_by_beer.get(beer, norm_r)
+                raw_r = ratings_by_beer[beer]
                 beer_delta = norm_r - raw_r
                 lines.append(
                     f"{norm_r:.2f} [raw {raw_r:.2f}, {beer_delta:+.2f}]  {beer}"
                 )
             lines.append("")
 
+    lines.append("TOP BREWERIES BY MINIMUM NUMBER OF RATED BEERS")
+    for minimum in (1, 3, 5, 10):
+        eligible = [item for item in norm_sorted if item["n_beers"] >= minimum]
+        leaders = ", ".join(
+            f"{item['brewery']} ({item['norm_score']:.2f}; {item['n_beers']} beers)"
+            for item in eligible[:5]
+        )
+        lines.append(f"At least {minimum}: {leaders or 'none'}")
+    lines.append("")
+
     # Global benchmark scores
-    all_beers = [
-        (b, norm_result.normalized_ratings.get(b, norm_result.all_mean))
-        for b in ratings_by_beer
-    ]
-    all_norm_score, _ = compute_magic_rating(all_beers)
+    all_beers = [(b, norm_result.normalized_ratings[b]) for b in ratings_by_beer]
+    all_norm_score, _ = untappd.magic_rating_from_beer_ratings(all_beers)
     all_raw_beers = list(ratings_by_beer.items())
-    all_raw_score, _ = compute_magic_rating(all_raw_beers)
+    all_raw_score, _ = untappd.magic_rating_from_beer_ratings(all_raw_beers)
     lines.append(
         f"(magic rating across all beers: normalized {all_norm_score:.2f}, "
         f"raw {all_raw_score:.2f})"
