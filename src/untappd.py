@@ -364,7 +364,7 @@ def magic_rating(
     average_score_weight: float = 0.35,
     neutral_rating: float = 3.25,
     use_global: bool = False,
-) -> Tuple[float, list[Beer]]:
+) -> Tuple[float, list[tuple[Beer, float]]]:
     """
     dropoff_ratio indicates how much to scale weighting for subsequent beers
 
@@ -380,7 +380,7 @@ def magic_rating(
     if both `average_score_weight` and `neutral_rating` are zero,
     the score can only increase as beers are added.
 
-    returns (magic score, list of beers by average rating)
+    returns (magic score, list of (beer, average rating) pairs, highest first)
     """
     top_ratings = sorted(
         average_rating_by_beer(checkins, use_global=use_global).items(),
@@ -401,6 +401,6 @@ def magic_rating(
                 for i, (_, r) in enumerate(top_ratings)
             )
         ),
-        # list of beers by top rating
+        # beers and their average ratings, highest first
         top_ratings,
     )
