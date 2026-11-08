@@ -262,11 +262,6 @@ class Checkin:
 
     @classmethod
     def from_dict(cls, d: dict):
-        maybe_venue = (
-            {"venue": Venue.from_checkin_dict(d)}
-            if d.get("venue_name") is not None
-            else {}
-        )
         created_at_dt = None
         if created_at_str := d.get("created_at"):
             # Untappd exports switched to ISO-8601 (e.g. 2016-12-26T12:00:00+00:00)
@@ -292,7 +287,9 @@ class Checkin:
             tagged_friends=d["tagged_friends"],
             total_toasts=int(d.get("total_toasts", 0) or 0),
             total_comments=int(d.get("total_comments", 0) or 0),
-            **maybe_venue,
+            venue=(
+                Venue.from_checkin_dict(d) if d.get("venue_name") is not None else None
+            ),
         )
 
     def to_dict(self) -> dict:
