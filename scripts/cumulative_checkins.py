@@ -155,6 +155,8 @@ def plot_cumulative_checkins():
         color=palette[3],
     )
     plt.xlabel("date")
+    plt.gca().xaxis.set_major_locator(mpl_dates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mpl_dates.DateFormatter("%Y"))
     plt.ylabel("checkins")
     plt.legend()
 
@@ -205,6 +207,8 @@ def plot_checkin_rate():
     )
 
     plt.xlabel("date")
+    plt.gca().xaxis.set_major_locator(mpl_dates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mpl_dates.DateFormatter("%Y"))
     plt.ylabel("checkins / day")
     plt.legend()
 
