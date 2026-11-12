@@ -298,6 +298,7 @@ def plot_abv_adjusted_dynamics(
         fontweight="bold",
         loc="left",
     )
+    ax1.xaxis.set_major_locator(mdates.YearLocator())
     ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
     ax1_twin = ax1.twinx()
@@ -443,6 +444,7 @@ def plot_abv_adjusted_dynamics(
         fontweight="bold",
         loc="left",
     )
+    ax3.xaxis.set_major_locator(mdates.YearLocator())
     ax3.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax3.legend(loc="lower right", frameon=True, framealpha=0.9)
 

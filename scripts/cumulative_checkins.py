@@ -33,7 +33,7 @@ for checkin in CHECKINS:
 # extrapolation
 def plot_extrapolated(use_times, color):
     numeric_time_days = mpl_dates.date2num(use_times)
-    cumulative_counts = np.arange(len(use_times))
+    cumulative_counts = np.arange(1, len(use_times) + 1)
     fit_window_start_time = use_times[-1] - FIT_MOST_RECENT
     fit_window_mask = np.array(use_times) >= fit_window_start_time
     fitted_polynomial = np.poly1d(
@@ -126,7 +126,7 @@ def plot_cumulative_checkins():
     plot_extrapolated(times_non_taster, color=palette[0])
     plt.plot(
         times_non_taster,
-        range(len(times_non_taster)),
+        range(1, len(times_non_taster) + 1),
         label="non-taster",
         color=palette[0],
         alpha=0.7,
@@ -134,7 +134,7 @@ def plot_cumulative_checkins():
     plot_extrapolated(times, color=palette[1])
     plt.plot(
         times,
-        range(len(times)),
+        range(1, len(times) + 1),
         label="total checkins",
         color=palette[1],
         alpha=0.7,
@@ -142,7 +142,7 @@ def plot_cumulative_checkins():
     plot_extrapolated(times_unique, color=palette[2])
     plt.plot(
         times_unique,
-        range(len(times_unique)),
+        range(1, len(times_unique) + 1),
         label="unique",
         color=palette[2],
         alpha=0.7,
@@ -150,7 +150,7 @@ def plot_cumulative_checkins():
     plot_extrapolated(times_repeat, color=palette[3])
     plt.plot(
         times_repeat,
-        range(len(times_repeat)),
+        range(1, len(times_repeat) + 1),
         label="repeat",
         color=palette[3],
     )

@@ -1,6 +1,7 @@
 import datetime
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn
 
@@ -47,6 +48,8 @@ def plot_style_frequency_over_time_periods(checkins):
         )
     plt.title(f"checkins by style ({GROUP_TIMESPAN.days} days following date)")
     plt.xlabel("date")
+    plt.gca().xaxis.set_major_locator(mdates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     plt.ylabel("checkin %" if PERCENTAGES else "checkins")
     plt.legend()
 

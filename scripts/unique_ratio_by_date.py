@@ -1,3 +1,4 @@
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn
 
@@ -40,6 +41,8 @@ def plot_unique_ratio_by_date(checkins):
     )
     plt.ylim(0, 1)
     plt.xlabel("date")
+    plt.gca().xaxis.set_major_locator(mdates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     plt.ylabel("unique ratio")
     plt.legend()
 

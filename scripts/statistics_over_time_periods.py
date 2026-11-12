@@ -2,6 +2,7 @@ import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn
 
@@ -84,6 +85,8 @@ def plot_statistics_over_time_periods(
     plt.legend()
     plt.title(f"statistics of {y_label} over time periods")
     plt.xlabel("start date")
+    plt.gca().xaxis.set_major_locator(mdates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     if y_label is not None:
         plt.ylabel(y_label)
 

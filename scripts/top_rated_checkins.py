@@ -1,3 +1,4 @@
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn
 
@@ -28,7 +29,9 @@ def plot_top_rated_checkins(checkins):
     seaborn.set()
     plt.figure(figsize=(12.8, 7.2))
     for rating, datetimes in datetimes_by_rating.items():
-        plt.plot(datetimes, range(len(datetimes)), label=f"{rating} ratings")
+        plt.plot(datetimes, range(1, len(datetimes) + 1), label=f"{rating} ratings")
+    plt.gca().xaxis.set_major_locator(mdates.YearLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     plt.legend()
 
 

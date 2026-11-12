@@ -304,6 +304,7 @@ def plot_palate_diversity(
         frameon=True,
         framealpha=0.9,
     )
+    ax1.xaxis.set_major_locator(mdates.YearLocator())
     ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
     # Panel 2 (Top-Right): Rating & Specialization Dynamics over Time
@@ -368,6 +369,7 @@ def plot_palate_diversity(
         frameon=True,
         framealpha=0.9,
     )
+    ax2.xaxis.set_major_locator(mdates.YearLocator())
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
     # Panel 3 (Bottom-Left): Dual Trajectory (Inverse Rating vs Entropy)
@@ -421,6 +423,7 @@ def plot_palate_diversity(
         frameon=True,
         framealpha=0.9,
     )
+    ax3.xaxis.set_major_locator(mdates.YearLocator())
     ax3.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
     # Panel 4 (Bottom-Right): Scatter & Linear Regression (Rating vs Entropy)
